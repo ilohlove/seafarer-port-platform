@@ -23,6 +23,7 @@ describe("Application shell and demo routing", () => {
       await screen.findByRole("heading", { name: "Busan New Port", level: 1 }),
     ).toBeVisible();
     expect(window.location.pathname).toBe("/ports/busan");
+    expect(screen.getByTestId("app-version")).toHaveTextContent("v0.1.0");
     expect(
       screen.getByRole("heading", { name: "Best Internet / eSIM Deal" }),
     ).toBeVisible();

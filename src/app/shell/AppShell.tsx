@@ -23,6 +23,8 @@ const bandwidthKeys = {
   ultraLite: "bandwidth.ultraLite",
 } as const;
 
+const appVersion = __APP_VERSION__;
+
 export function AppShell({ children }: { readonly children: ReactNode }) {
   const location = useLocation();
   const { status: i18nStatus, t } = useI18n();
@@ -68,6 +70,9 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
             <div>
               <strong>{t("app.name")}</strong>
               <span>{t("app.foundationLabel")}</span>
+              <small className={styles.version} data-testid="app-version">
+                v{appVersion}
+              </small>
             </div>
           </div>
 

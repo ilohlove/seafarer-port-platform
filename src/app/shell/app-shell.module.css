@@ -34,6 +34,12 @@
   font-size: var(--font-size-sm);
 }
 
+.version {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
 .mark {
   display: grid;
   inline-size: var(--tap-target);

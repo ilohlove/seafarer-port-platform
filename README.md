@@ -13,6 +13,21 @@ npm.cmd run dev
 
 Mở URL Vite in ra terminal, mặc định là `http://localhost:5173`.
 
+## Versioning
+
+Version hiện tại là `0.1.0`, được lưu trong `package.json`, tự chèn vào production build và hiển thị trên AppShell dưới dạng `v0.1.0`. Mỗi lần phát hành cập nhật version theo SemVer, chạy toàn bộ checks, commit và tạo annotated Git tag tương ứng (`v0.1.1`, `v0.2.0`...). Ubuntu deploy từ cùng branch sẽ pull tag/commit mới rồi build lại `dist`.
+
+Quy trình release patch:
+
+```powershell
+npm.cmd version patch --no-git-tag-version
+npm.cmd run check
+git add package.json package-lock.json src README.md vite.config.ts vitest.config.ts
+git commit -m "chore: release vX.Y.Z"
+git tag -a vX.Y.Z -m "Release vX.Y.Z"
+git push origin agent/seafarer-port-notes-pivot --follow-tags
+```
+
 Các lệnh kiểm tra:
 
 ```powershell
