@@ -1,11 +1,16 @@
 import type {
   ConnectivityProduct,
   Country,
+  EmergencyContact,
   EntityId,
   Place,
   Review,
+  TerminalPlaceAccess,
+  WelfareProvider,
+  WelfareService,
 } from "./entities";
 import type {
+  DataStatusTag,
   KnowledgeMeta,
   MoneyObservation,
   TrustEvidence,
@@ -78,9 +83,17 @@ export interface PortInternetReadModel {
   readonly wifi: readonly KnowledgeBlock[];
 }
 
+export type ServiceScopeWarning =
+  | "port-scoped-only"
+  | "needs-terminal-confirmation"
+  | "remote-service-no-physical-place";
+
 export interface PlaceRecommendation {
   readonly place: Place;
   readonly reasonCodes: readonly string[];
+  readonly access?: TerminalPlaceAccess;
+  readonly scopeWarning?: ServiceScopeWarning;
+  readonly statusTags: readonly DataStatusTag[];
   readonly estimatedCost?: readonly MoneyObservation[];
 }
 
@@ -119,6 +132,9 @@ export interface PortHubReadModel {
   readonly access: PortAccessReadModel;
   readonly internet: PortInternetReadModel;
   readonly services: PortServicesReadModel;
+  readonly emergencyContacts: readonly EmergencyContact[];
+  readonly welfareProviders: readonly WelfareProvider[];
+  readonly welfareServices: readonly WelfareService[];
   readonly community: PortCommunityReadModel;
   readonly dataHealth: DataHealthReadModel;
 }
