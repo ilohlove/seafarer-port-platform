@@ -1,6 +1,6 @@
 # Seafarer Port Knowledge Platform — Frontend Prototype
 
-Milestone hiện tại: **F1 — Foundation**. Repository có một prototype chạy được để review kiến trúc, design tokens, typed mock services, VI/EN và các chế độ bandwidth. Home/Search và các màn hình sản phẩm từ F2 trở đi chưa được triển khai.
+Milestone hiện tại: **F1.5 — Domain Alignment before F2**. Repository có prototype Foundation chạy được và đã căn chỉnh domain/read-model theo terminal/gate access, emergency contacts và welfare provider/service để chuẩn bị cho Home/Search F2 và Port Hub F3.
 
 ## Chạy local
 
@@ -51,9 +51,19 @@ App shell / providers / declarative router
 - Preferences đi qua browser-storage adapter; Offline Pack dùng empty-state adapter, chưa có persistence, Service Worker hoặc PWA.
 - VI và lightweight search index nằm trong entry; EN chỉ tải khi chuyển ngôn ngữ. Mỗi mock port detail được code-split và chỉ tải khi người review chủ động mở preview chi tiết.
 
+## F1.5 domain alignment
+
+F1.5 chưa triển khai UI sản phẩm mới. Mục tiêu là khóa đúng nền dữ liệu trước khi xây F2/F3:
+
+- `TerminalPlaceAccess` tách cách đi, thời gian, taxi fare, walking safety và terminal/gate context khỏi `Place`.
+- `EmergencyContact` là thực thể riêng, không bị mô hình hóa như `Place` hoặc service card y tế.
+- `WelfareProvider` và `WelfareService` hỗ trợ cả physical centre, ship visit và remote support.
+- `DataStatusTag` lưu các facet như `foreign-card-confirmed`, `pickup-confirmed`, `emergency-contact-official`, tách khỏi nhãn trust ngắn dùng trong UI.
+- Mock scenarios hiện có cả trusted/full, needs confirmation/gap và terminal-specific conflict để review các trạng thái khó.
+
 ## Foundation preview
 
-Route `/` là trang kiểm chứng F1, không phải Home của F2. Trang thể hiện:
+Route `/` là trang kiểm chứng F1/F1.5, không phải Home của F2. Trang thể hiện:
 
 - Responsive shell, skip link, language switch và ba mode Standard/Data Saver/Ultra Lite.
 - Search gọi `PortRepository` với Singapore, Busan và Port Klang; UI không đọc fixture trực tiếp.
@@ -69,15 +79,15 @@ Responsive behavior được định nghĩa mobile-first: header/control xếp d
 |---|---|---|
 | Trusted | Singapore | Dữ liệu đầy đủ, nguồn chính thức/cộng đồng xác nhận |
 | Needs confirmation | Busan | Thiếu dữ liệu và cần thêm xác nhận |
-| Conflict | Port Klang | Báo cáo mâu thuẫn và cảnh báo |
+| Conflict | Port Klang | Báo cáo mâu thuẫn và cảnh báo theo terminal |
 
 Tên cảng vẫn là sample của prototype; Decision D-506 chưa chuyển sang `LOCKED`.
 
-Ngưỡng `MIN_COMMUNITY_CONFIRMATIONS = 2` chỉ là giả định hiển thị có tên, có reason code và có test trong prototype; nó không khóa policy trust của sản phẩm. Terminal IDs/scope đã có trong schema F1, nhưng fixture chi tiết hiện vẫn port-scoped và chưa lọc nội dung theo terminal; hành vi terminal-specific thuộc review gate F3.
+Ngưỡng `MIN_COMMUNITY_CONFIRMATIONS = 2` chỉ là giả định hiển thị có tên, có reason code và có test trong prototype; nó không khóa policy trust của sản phẩm. Terminal/gate access hiện đã có trong mock read model bằng `TerminalPlaceAccess`; lọc nội dung đầy đủ theo terminal vẫn thuộc review gate F3.
 
 ## Performance budget
 
-Production build F1 hiện tại:
+Production build F1 gần nhất trước F1.5:
 
 - First-screen initial: `88,138 B gzip`, gồm HTML + CSS + JS + lightweight port search index trong 3 request.
 - First-screen JavaScript: `83,108 B gzip`.
@@ -88,4 +98,4 @@ Production build F1 hiện tại:
 
 ## Phạm vi chưa triển khai
 
-F1 không triển khai Home/Search Results F2, Port Hub F3, Shore Planner UI F4, eSIM Compare UI F5, account/contribution F6 hoặc quality gate F7. Các route tương lai hiện đi vào trạng thái “milestone sau” để không giả vờ chức năng đã tồn tại.
+F1.5 không triển khai Home/Search Results F2, Port Hub F3, Shore Planner UI F4, eSIM Compare UI F5, account/contribution F6 hoặc quality gate F7. Các route tương lai hiện đi vào trạng thái “milestone sau” để không giả vờ chức năng đã tồn tại.
