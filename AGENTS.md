@@ -52,3 +52,36 @@ Trước khi thêm log mới, hãy tự kiểm tra:
 Nếu nội dung không phản ánh một mốc tiến độ đáng báo cáo thì không được ghi log.
 
 <!-- CODEX_PROJECT_LOG_END -->
+
+<!-- SEAFARER_PROJECT_OS_START -->
+
+## Seafarer Port Platform project operating system
+
+Trước khi phân tích, sửa code, tạo tài liệu hoặc review trong dự án này, phải đọc theo thứ tự:
+
+1. `AGENTS.md`
+2. `docs/00_MASTER_SPEC.md`
+3. `docs/01_DECISION_REGISTER.md`
+4. `docs/project-os/README.md`
+
+Sau đó đọc file phù hợp với nhiệm vụ:
+
+- Tạo/sửa tài liệu: `docs/project-os/SKILL_DOCUMENT_AUTHORING.md`
+- Review, QA, test plan, release gate: `docs/project-os/SKILL_REVIEW_AND_QA.md`
+- Chọn chuyên gia phối hợp: `docs/project-os/EXPERT_COUNCIL.md`
+- Giao việc cho Codex: `docs/project-os/CODEX_EXECUTION_PROMPT.md`
+
+Quy tắc bắt buộc:
+
+- Không tạo file `.md` mới ngoài path được phép trong `SKILL_DOCUMENT_AUTHORING.md`.
+- Không tạo file tên chung chung như `notes.md`, `plan.md`, `review.md`, `final.md`, `spec2.md`.
+- Không sửa trực tiếp `main` trừ khi được yêu cầu rõ.
+- Không nhảy milestone; F2 không được tự làm F3, F3 không được tự làm F4/F5.
+- Không thêm dependency nặng, map SDK, image gallery, custom font hoặc UI framework nếu chưa có phân tích bundle impact.
+- Luôn giữ Search First, Decision First, Trust First, Bandwidth First.
+- Port Hub là read model, không phải một database entity.
+- Dữ liệu có rủi ro phải thể hiện trust/source/moderation status.
+- EmergencyContact và WelfareProvider không được ép thành Place.
+- MVP không thu thập bệnh án, đơn thuốc, hộ chiếu, bảo hiểm, tranh chấp lao động hoặc tài liệu nhạy cảm.
+
+<!-- SEAFARER_PROJECT_OS_END -->
