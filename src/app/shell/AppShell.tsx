@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import { useLocation } from "react-router";
 
 import { OfflineBanner } from "../../components";
 import { useI18n } from "../../i18n";
@@ -23,6 +24,7 @@ const bandwidthKeys = {
 } as const;
 
 export function AppShell({ children }: { readonly children: ReactNode }) {
+  const location = useLocation();
   const { status: i18nStatus, t } = useI18n();
   const { locale, setLocale } = usePersistedLocale();
   const { mode, setMode, saveDataSuggested } = useBandwidthMode();
@@ -30,6 +32,9 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
   const [isSavingPreference, setIsSavingPreference] = useState(false);
   const [preferenceError, setPreferenceError] = useState(false);
   const isPreferenceBusy = isSavingPreference || i18nStatus === "loading";
+  const containerClass = location.pathname.startsWith("/ports/")
+    ? "wide-container"
+    : "content-container";
 
   async function applyPreference(update: () => Promise<void>) {
     setPreferenceError(false);
@@ -50,7 +55,7 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
       </a>
 
       <header className={styles.header}>
-        <div className={`content-container ${styles.headerInner}`}>
+        <div className={`${containerClass} ${styles.headerInner}`}>
           <div className={styles.identity}>
             <span className={styles.mark} aria-hidden="true">
               SP
@@ -117,7 +122,7 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
       </header>
 
       {!isOnline ? (
-        <div className={`content-container ${styles.networkBanner}`}>
+        <div className={`${containerClass} ${styles.networkBanner}`}>
           <OfflineBanner
             mode="offline"
             title={t("offline.title")}
@@ -126,7 +131,7 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
         </div>
       ) : null}
 
-      <main className={`content-container ${styles.main}`} id="main-content">
+      <main className={`${containerClass} ${styles.main}`} id="main-content">
         {children}
       </main>
     </div>

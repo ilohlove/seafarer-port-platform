@@ -55,12 +55,12 @@
 
 .workspace {
   display: grid;
-  gap: var(--space-5);
+  gap: var(--space-6);
 }
 
 .heroGrid {
   display: grid;
-  gap: var(--space-4);
+  gap: var(--space-5);
   min-inline-size: 0;
 }
 
@@ -525,19 +525,19 @@
   background: rgb(255 255 255 / 16%);
 }
 
-.actionTileblue {
+.actionTile[data-tone="blue"] {
   border-block-start-color: var(--color-accent);
 }
 
-.actionTilegreen {
+.actionTile[data-tone="green"] {
   border-block-start-color: var(--color-status-community-border);
 }
 
-.actionTileorange {
+.actionTile[data-tone="orange"] {
   border-block-start-color: var(--color-status-needs-border);
 }
 
-.actionTileteal {
+.actionTile[data-tone="teal"] {
   border-block-start-color: var(--color-status-official-border);
 }
 
@@ -885,14 +885,14 @@
   .page {
     grid-template-columns: 13.75rem minmax(0, 1fr);
     align-items: start;
-    gap: var(--space-5);
+    gap: var(--space-6);
   }
 
   .sidebar {
     position: sticky;
-    inset-block-start: var(--space-4);
+    inset-block-start: var(--space-5);
     display: block;
-    padding: var(--space-3);
+    padding: var(--space-4);
     border: var(--border-width) solid var(--color-border);
     border-radius: var(--radius-lg);
     background: var(--color-surface);
@@ -919,6 +919,17 @@
 
   .snapshotMedia {
     min-block-size: 100%;
+  }
+
+  .searchPanel,
+  .snapshotBody,
+  .quickNotesBody {
+    padding: var(--space-5);
+  }
+
+  .quickNotes {
+    align-self: start;
+    border-color: var(--color-status-official-border);
   }
 
   .actionGrid {

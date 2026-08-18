@@ -330,7 +330,7 @@ export function buildPortNotesViewModel(
 
   return {
     snapshot: {
-      name: hub.port.name,
+      name: selectedTerminal?.name ?? hub.port.name,
       location: [hub.port.city, hub.port.country.name].filter(Boolean).join(", "),
       terminal: terminalName,
       gate,

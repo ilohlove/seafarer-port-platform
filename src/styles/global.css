@@ -51,6 +51,11 @@
     margin-inline: auto;
   }
 
+  .wide-container {
+    inline-size: min(100% - (2 * var(--space-4)), 120rem);
+    margin-inline: auto;
+  }
+
   .reading-container {
     inline-size: min(100%, var(--reading-width));
   }
@@ -89,6 +94,10 @@
   @layer utilities {
     .content-container {
       inline-size: min(100% - (2 * var(--space-6)), var(--content-width));
+    }
+
+    .wide-container {
+      inline-size: min(100% - (2 * var(--space-6)), 120rem);
     }
   }
 }

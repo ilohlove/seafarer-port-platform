@@ -20,10 +20,11 @@ describe("Seafarer Port Notes route", () => {
     render(<App />);
 
     expect(
-      await screen.findByRole("heading", { name: "Port of Busan", level: 1 }),
+      await screen.findByRole("heading", { name: "Busan New Port", level: 1 }),
     ).toBeVisible();
+    expect(document.getElementById("main-content")).toHaveClass("wide-container");
     expect(
-      screen.getByRole("heading", { name: "Port of Busan" }).closest("section"),
+      screen.getByRole("heading", { name: "Busan New Port" }).closest("section"),
     ).toHaveAttribute("data-media", "visible");
     expect(screen.getAllByText("Busan New Port").length).toBeGreaterThan(0);
     expect(
@@ -36,7 +37,7 @@ describe("Seafarer Port Notes route", () => {
 
   test("shows all need-based action tiles and an obvious Write a Note action", async () => {
     render(<App />);
-    await screen.findByRole("heading", { name: "Port of Busan" });
+    await screen.findByRole("heading", { name: "Busan New Port" });
     const actionsHeading = screen.getByRole("heading", {
       name: "Bạn cần gì ở cảng?",
     });
@@ -85,7 +86,7 @@ describe("Seafarer Port Notes route", () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await screen.findByRole("heading", { name: "Port of Busan" });
+    await screen.findByRole("heading", { name: "Busan New Port" });
     expect(screen.getByTestId("port-notes-media")).toBeVisible();
 
     await user.click(screen.getByRole("button", { name: "Tiết kiệm dữ liệu" }));
@@ -93,7 +94,7 @@ describe("Seafarer Port Notes route", () => {
       expect(document.documentElement.dataset.bandwidthMode).toBe("dataSaver");
     });
     expect(
-      screen.getByRole("heading", { name: "Port of Busan" }).closest("section"),
+      screen.getByRole("heading", { name: "Busan New Port" }).closest("section"),
     ).toHaveAttribute("data-media", "omitted");
     expect(screen.queryByTestId("port-notes-media")).toBeNull();
     expect(screen.getByRole("button", { name: /Viết ghi chú/ })).toBeVisible();
@@ -104,7 +105,7 @@ describe("Seafarer Port Notes route", () => {
       expect(document.documentElement.dataset.bandwidthMode).toBe("ultraLite");
     });
     expect(
-      screen.getByRole("heading", { name: "Port of Busan" }).closest("section"),
+      screen.getByRole("heading", { name: "Busan New Port" }).closest("section"),
     ).toHaveAttribute("data-media", "omitted");
     expect(screen.queryByTestId("port-notes-media")).toBeNull();
     expect(screen.getByRole("heading", { name: "Ghi chú nổi bật từ thuyền viên" })).toBeVisible();
@@ -116,7 +117,7 @@ describe("Seafarer Port Notes route", () => {
     render(<App />);
 
     expect(
-      await screen.findByRole("heading", { name: "Port Klang", level: 1 }),
+      await screen.findByRole("heading", { name: "Westports", level: 1 }),
     ).toBeVisible();
     expect(screen.getAllByText("Báo cáo mâu thuẫn").length).toBeGreaterThan(0);
     expect(screen.getByText(/không chẩn đoán hoặc tư vấn thuốc/)).toBeVisible();

@@ -28,9 +28,10 @@ export function MainActionTiles({
       <div className={styles.actionGrid}>
         {actions.map((action) => (
           <button
-            className={`${styles.actionTile} ${styles[`actionTile${action.tone}`]}`}
+            className={styles.actionTile}
             type="button"
             key={action.id}
+            data-tone={action.tone}
             data-primary={action.id === "write-note" ? "true" : undefined}
             onClick={() => onPlaceholder(action.label)}
           >
