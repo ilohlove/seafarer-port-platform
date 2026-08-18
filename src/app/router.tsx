@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { BrowserRouter, Route, Routes } from "react-router";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 
 import { EmptyState, Skeleton } from "../components";
 import { FoundationRoute } from "../features/foundation";
@@ -24,7 +24,7 @@ function NotImplementedRoute() {
       description="Foundation đã giữ chỗ cho route, nhưng UI sản phẩm chưa được triển khai trong F1."
       action={{
         label: "Quay lại foundation",
-        href: "/",
+        href: "/foundation",
       }}
     />
   );
@@ -36,7 +36,8 @@ export function AppRouter() {
       <AppShell>
         <Suspense fallback={<RouteFallback />}>
           <Routes>
-            <Route path="/" element={<FoundationRoute />} />
+            <Route path="/" element={<Navigate to="/ports/busan" replace />} />
+            <Route path="/foundation" element={<FoundationRoute />} />
             <Route path="/ports/:portSlug" element={<PortNotesRoute />} />
             <Route path="*" element={<NotImplementedRoute />} />
           </Routes>

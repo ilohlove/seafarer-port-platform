@@ -5,5 +5,6 @@ export { PortNotesNavigation } from "./PortNotesNavigation";
 export { PortNotesSafetyShortcuts } from "./PortNotesSafetyShortcuts";
 export { PortSnapshot } from "./PortSnapshot";
 export { QuickNotesPanel } from "./QuickNotesPanel";
+export { RecentCommunityNotes } from "./RecentCommunityNotes";
 export { TopSeafarerNotes } from "./TopSeafarerNotes";
 export { TopicPreviewSections } from "./TopicPreviewSections";

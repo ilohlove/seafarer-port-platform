@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import { App } from "./App";
 
-describe("F1 application foundation", () => {
+describe("Application shell and demo routing", () => {
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
@@ -16,33 +16,16 @@ describe("F1 application foundation", () => {
     delete document.documentElement.dataset.bandwidthMode;
   });
 
-  test("loads typed mock data through the repository boundary", async () => {
-    const user = userEvent.setup();
+  test("redirects root to the Busan Port Notes demo", async () => {
     render(<App />);
 
     expect(
-      await screen.findByRole("heading", {
-        name: "Nền tảng giao diện đã sẵn sàng để review",
-      }),
-    ).toBeInTheDocument();
-
-    const portDisclosure = await screen.findByRole("button", {
-      name: /Port of Singapore/,
-    });
-    expect(portDisclosure).toHaveAttribute("aria-expanded", "false");
-    expect(screen.queryByRole("heading", { name: "Quick brief mẫu" })).toBeNull();
-
-    await user.click(portDisclosure);
+      await screen.findByRole("heading", { name: "Busan New Port", level: 1 }),
+    ).toBeVisible();
+    expect(window.location.pathname).toBe("/ports/busan");
     expect(
-      await screen.findByRole("heading", { name: "Quick brief mẫu" }),
-    ).toBeInTheDocument();
-    expect(portDisclosure).toHaveAttribute("aria-expanded", "true");
-    await waitFor(() => {
-      expect(
-        screen.getByRole("region", { name: "Preview component chi tiết" }),
-      ).toHaveFocus();
-    });
-    expect(document.querySelector("img")).toBeNull();
+      screen.getByRole("heading", { name: "Best Internet / eSIM Deal" }),
+    ).toBeVisible();
   });
 
   test("switches locale and persists bandwidth mode", async () => {
@@ -55,9 +38,7 @@ describe("F1 application foundation", () => {
     );
 
     expect(
-      await screen.findByRole("heading", {
-        name: "The interface foundation is ready for review",
-      }),
+      await screen.findByRole("heading", { name: "Best Internet / eSIM Deal" }),
     ).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute("lang", "en");
 

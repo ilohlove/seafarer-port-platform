@@ -31,11 +31,7 @@ export function TopicPreviewSections({
               </span>
               <h3>{topic.title}</h3>
             </div>
-            <ul>
-              {topic.bullets.map((bullet) => (
-                <li key={bullet}>{bullet}</li>
-              ))}
-            </ul>
+            <p className={styles.topicSummary}>{topic.bullets[0]}</p>
             <button
               className={styles.textButton}
               type="button"

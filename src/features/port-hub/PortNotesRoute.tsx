@@ -19,6 +19,7 @@ import {
   PortNotesSafetyShortcuts,
   PortSnapshot,
   QuickNotesPanel,
+  RecentCommunityNotes,
   TopSeafarerNotes,
   TopicPreviewSections,
 } from "./components";
@@ -140,7 +141,7 @@ export function PortNotesRoute() {
           <EmptyState
             heading={t("portNotes.notFound.heading")}
             description={t("portNotes.notFound.description", { port: portSlug })}
-            action={{ label: t("portNotes.backFoundation"), href: "/" }}
+            action={{ label: t("portNotes.backFoundation"), href: "/foundation" }}
             announce
           />
         ) : null}
@@ -183,10 +184,6 @@ export function PortNotesRoute() {
               </CriticalInfoStrip>
             ))}
 
-            <BestInternetDeal
-              model={viewModel.internetDeal}
-              onPlaceholder={showPlaceholder}
-            />
             <MainActionTiles
               actions={viewModel.actions}
               onPlaceholder={showPlaceholder}
@@ -197,6 +194,14 @@ export function PortNotesRoute() {
             />
             <TopicPreviewSections
               topics={viewModel.topics}
+              onPlaceholder={showPlaceholder}
+            />
+            <RecentCommunityNotes
+              notes={viewModel.recentNotes}
+              onPlaceholder={showPlaceholder}
+            />
+            <BestInternetDeal
+              model={viewModel.internetDeal}
               onPlaceholder={showPlaceholder}
             />
             <DataTrustBanner model={viewModel.dataTrust} />

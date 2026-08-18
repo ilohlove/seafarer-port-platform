@@ -13,6 +13,7 @@ export function TopSeafarerNotes({
   onPlaceholder,
 }: TopSeafarerNotesProps) {
   const { t } = useI18n();
+  const highlightedNotes = notes.slice(0, 3);
 
   return (
     <section aria-labelledby="top-notes-heading">
@@ -29,9 +30,9 @@ export function TopSeafarerNotes({
           {t("portNotes.notes.viewAll")}
         </button>
       </div>
-      {notes.length > 0 ? (
+      {highlightedNotes.length > 0 ? (
         <div className={styles.notesList}>
-          {notes.map((note) => (
+          {highlightedNotes.map((note) => (
             <article className={styles.noteCard} key={note.id}>
               <div className={styles.noteMeta}>
                 <span className={styles.topicTag}>{note.topic}</span>
@@ -39,6 +40,7 @@ export function TopSeafarerNotes({
               </div>
               <h3>{note.title}</h3>
               <p>{note.summary}</p>
+              <span className={styles.noteAuthor}>{note.authorLabel}</span>
               {note.context ? (
                 <span className={styles.noteContext}>{note.context}</span>
               ) : null}

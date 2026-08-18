@@ -55,16 +55,29 @@ export function PortNotesNavigation({
         </div>
       </aside>
 
-      <nav className={styles.mobileNavigation} aria-label={t("portNotes.nav.label")}>
-        <a href="/">{t("portNotes.nav.home")}</a>
+      <nav
+        className={styles.mobileBottomNavigation}
+        aria-label={t("portNotes.nav.label")}
+      >
+        <a href="/">
+          <span aria-hidden="true">⌂</span>
+          {t("portNotes.nav.home")}
+        </a>
+        <button type="button" onClick={() => onPlaceholder(t("portNotes.nav.search"))}>
+          <span aria-hidden="true">⌕</span>
+          {t("portNotes.nav.search")}
+        </button>
         <a href={`/ports/${portSlug}`} aria-current="page">
+          <span aria-hidden="true">⚓</span>
           {t("portNotes.nav.port")}
         </a>
+        <a href="#top-notes-heading">
+          <span aria-hidden="true">✎</span>
+          {t("portNotes.nav.notes")}
+        </a>
         <button type="button" onClick={() => onPlaceholder(t("portNotes.nav.saved"))}>
+          <span aria-hidden="true">♡</span>
           {t("portNotes.nav.saved")}
-        </button>
-        <button type="button" onClick={() => onPlaceholder(t("portNotes.nav.write"))}>
-          {t("portNotes.nav.write")}
         </button>
       </nav>
     </>

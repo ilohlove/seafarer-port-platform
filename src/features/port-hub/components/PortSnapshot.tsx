@@ -57,15 +57,6 @@ export function PortSnapshot({
           </button>
         </div>
 
-        <div className={styles.snapshotMeta}>
-          <span>
-            <strong>{t("portNotes.snapshot.weather")}</strong> {model.weather}
-          </span>
-          <span>
-            <strong>{t("portNotes.snapshot.localTime")}</strong> {model.localTime}
-          </span>
-        </div>
-
         <div className={styles.terminalContext}>
           <span className={styles.contextLabel}>{t("portNotes.snapshot.selectedTerminal")}</span>
           <strong>{model.terminal}</strong>
@@ -79,7 +70,10 @@ export function PortSnapshot({
           </div>
           <div>
             <span>{t("portNotes.snapshot.bestInternet")}</span>
-            <strong>{model.internet}</strong>
+            <strong>{deal.name}</strong>
+            <small>
+              {deal.plan} · {deal.price}
+            </small>
           </div>
           <div>
             <span>{t("portNotes.snapshot.transport")}</span>
@@ -87,29 +81,9 @@ export function PortSnapshot({
           </div>
           <div>
             <span>{t("portNotes.snapshot.community")}</span>
-            <strong>
-              {model.noteCount} notes · {model.pendingConfirmations} pending confirmations
-            </strong>
+            <strong>{model.noteCount} notes</strong>
+            <small>{model.pendingConfirmations} pending confirmations</small>
           </div>
-        </div>
-
-        <div className={styles.internetStrip}>
-          <div>
-            <span className={styles.contextLabel}>
-              {t("portNotes.snapshot.internetStrip")}
-            </span>
-            <strong>{deal.name}</strong>
-            <span>
-              {deal.plan} · {deal.price} · {deal.hotspot}
-            </span>
-          </div>
-          <button
-            className={styles.primaryButton}
-            type="button"
-            onClick={() => onPlaceholder(t("portNotes.deal.compare"))}
-          >
-            {t("portNotes.deal.compare")}
-          </button>
         </div>
 
         <div

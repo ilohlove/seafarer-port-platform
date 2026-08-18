@@ -1,6 +1,6 @@
 # Seafarer Port Knowledge Platform — Frontend Prototype
 
-Milestone hiện tại: **Seafarer Port Notes pivot**. Repository giữ nguyên Foundation ở `/`, dùng domain/read-model F1.5 và refactor route `/ports/:portSlug` thành giao diện ghi chú cộng đồng, đơn giản cho thuyền viên bận rộn.
+Milestone hiện tại: **Seafarer Port Notes pivot**. Repository giữ nguyên Foundation preview ở `/foundation`, dùng domain/read-model F1.5 và refactor route `/ports/:portSlug` thành giao diện ghi chú cộng đồng, đơn giản cho thuyền viên bận rộn. Root `/` redirect đến `/ports/busan` cho demo.
 
 ## Chạy local
 
@@ -64,7 +64,7 @@ F1.5 chưa triển khai UI sản phẩm mới. Mục tiêu là khóa đúng nề
 
 ## Foundation preview
 
-Route `/` là trang kiểm chứng F1/F1.5, không phải Home của F2. Trang thể hiện:
+Route `/foundation` là trang kiểm chứng F1/F1.5; root `/` redirect đến `/ports/busan` để review giao diện Port Notes. Trang Foundation thể hiện:
 
 - Responsive shell, skip link, language switch và ba mode Standard/Data Saver/Ultra Lite.
 - Search gọi `PortRepository` với Singapore, Busan và Port Klang; UI không đọc fixture trực tiếp.
@@ -84,11 +84,11 @@ Mở trực tiếp một trong các route mẫu:
 - `/ports/singapore`
 - `/ports/port-klang`
 
-Port Notes là giao diện mobile-first community-first theo thứ tự: Port Snapshot, Best Internet/eSIM Deal, need-based action tiles, Top Notes from Seafarers, topic previews và Data Trust. Snapshot hiển thị port, terminal/gate, shore leave, Internet, transport, số notes và pending confirmations. Quick Notes nằm ở right rail trên desktop và chuyển xuống sau hero trên mobile. Top notes có topic, nội dung ngắn, terminal/gate context, confirmation/usefulness và trust status; không dùng rating sao.
+Port Notes là giao diện mobile-first community-first theo thứ tự: Port Snapshot, cảnh báo an toàn, Quick Actions, ghi chú nổi bật, topic previews, ghi chú cộng đồng gần đây, Best Internet/eSIM Deal và Data Trust. Snapshot hiển thị port, terminal/gate, shore leave, Internet, transport, số notes và pending confirmations. Quick Notes nằm ở right rail trên desktop và được ẩn trên mobile để giữ first screen gọn. Ghi chú có topic, nội dung ngắn, tác giả công khai, terminal/gate context, confirmation/usefulness và trust status; không dùng rating sao.
 
 Các action tile chính là Compare eSIM, Physical SIM Notes, Taxi / Grab / Uber, Food & Supplies, Places to Visit, Seaman Club và Write a Note. Chúng là navigation intent/placeholder khi backend chưa tồn tại; prototype không mua eSIM, booking, payment, marketplace hoặc đăng public contact cá nhân chưa moderation.
 
-Desktop từ `64rem` dùng sidebar `220px`, hero Snapshot + Quick Notes right rail và nội dung linh hoạt; dưới `64rem` dùng compact navigation, action tiles hai cột và notes/topic cards một cột hoặc hai cột tùy chiều rộng. Standard có minh họa CSS nhẹ; Data Saver ẩn media trang trí, Ultra Lite giữ Snapshot/Deal/Top Notes/Write Note và bỏ shadow/ký hiệu không thiết yếu.
+Desktop từ `64rem` dùng sidebar `220px`, hero Snapshot + Quick Notes right rail và nội dung linh hoạt; dưới `64rem` dùng bottom navigation năm mục, action tiles hai cột và notes/topic cards một cột hoặc hai cột tùy chiều rộng. Standard có minh họa CSS nhẹ; Data Saver ẩn media trang trí, Ultra Lite giữ Snapshot/Deal/Top Notes/Write Note và bỏ shadow/ký hiệu không thiết yếu.
 
 Search, save port, xem note, confirm, action tiles và topic actions có phản hồi placeholder rõ ràng. Route có loading, retry/error và not-found state; Port Klang dùng để kiểm tra notes mâu thuẫn theo terminal. Emergency/Return shortcuts chỉ hiển thị logistics, liên hệ và cảnh báo xác nhận.
 

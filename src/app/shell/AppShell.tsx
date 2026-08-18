@@ -32,6 +32,7 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
   const [isSavingPreference, setIsSavingPreference] = useState(false);
   const [preferenceError, setPreferenceError] = useState(false);
   const isPreferenceBusy = isSavingPreference || i18nStatus === "loading";
+  const isPortNotesRoute = location.pathname.startsWith("/ports/");
   const containerClass = location.pathname.startsWith("/ports/")
     ? "wide-container"
     : "content-container";
@@ -49,7 +50,11 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
   }
 
   return (
-    <div className={`app-shell ${styles.shell}`}>
+    <div
+      className={`app-shell ${styles.shell} ${
+        isPortNotesRoute ? styles.portNotesShell : ""
+      }`}
+    >
       <a className="skip-link" href="#main-content">
         {t("a11y.skipToContent")}
       </a>

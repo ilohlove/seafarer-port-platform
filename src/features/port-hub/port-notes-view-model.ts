@@ -66,6 +66,7 @@ export interface PortNoteCardModel {
   readonly topicKey: NoteTopic;
   readonly title: string;
   readonly summary: string;
+  readonly authorLabel: string;
   readonly context?: string;
   readonly confirmations: string;
   readonly usefulness: string;
@@ -95,6 +96,7 @@ export interface PortNotesViewModel {
   readonly quickNotes: QuickNotesModel;
   readonly actions: readonly PortNoteActionModel[];
   readonly topNotes: readonly PortNoteCardModel[];
+  readonly recentNotes: readonly PortNoteCardModel[];
   readonly topics: readonly TopicPreviewModel[];
   readonly safety: SafetyShortcutModel;
   readonly dataTrust: {
@@ -255,6 +257,39 @@ function firstTopicNote(
     )[0];
 }
 
+function toNoteCardModel(
+  note: PortNote,
+  hub: PortHubReadModel,
+  t: Translate,
+): PortNoteCardModel {
+  const noteTerminal = hub.terminals.find(
+    (terminal) => terminal.id === note.terminalId,
+  );
+  const context = [
+    noteTerminal?.name,
+    note.gateName ? t("portNotes.note.gate", { gate: note.gateName }) : undefined,
+  ]
+    .filter((value): value is string => Boolean(value))
+    .join(" · ");
+
+  return {
+    id: note.id,
+    topic: noteTopicLabel(note.topic, t),
+    topicKey: note.topic,
+    title: note.title,
+    summary: note.summary,
+    authorLabel: note.publicAlias ?? t("portNotes.notes.defaultAuthor"),
+    context: context || undefined,
+    confirmations: t("portNotes.note.confirmations", {
+      count: note.confirmationCount,
+    }),
+    usefulness: t("portNotes.note.usefulness", {
+      count: note.usefulnessCount,
+    }),
+    trust: trustPresentation(note.trust, t),
+  };
+}
+
 export function buildPortNotesViewModel(
   hub: PortHubReadModel,
   t: Translate,
@@ -296,32 +331,11 @@ export function buildPortNotesViewModel(
           (left.usefulnessCount + left.confirmationCount),
     )
     .slice(0, 5)
-    .map<PortNoteCardModel>((note) => {
-      const noteTerminal = hub.terminals.find(
-        (terminal) => terminal.id === note.terminalId,
-      );
-      const context = [
-        noteTerminal?.name,
-        note.gateName ? t("portNotes.note.gate", { gate: note.gateName }) : undefined,
-      ]
-        .filter((value): value is string => Boolean(value))
-        .join(" · ");
-      return {
-        id: note.id,
-        topic: noteTopicLabel(note.topic, t),
-        topicKey: note.topic,
-        title: note.title,
-        summary: note.summary,
-        context: context || undefined,
-        confirmations: t("portNotes.note.confirmations", {
-          count: note.confirmationCount,
-        }),
-        usefulness: t("portNotes.note.usefulness", {
-          count: note.usefulnessCount,
-        }),
-        trust: trustPresentation(note.trust, t),
-      };
-    });
+    .map((note) => toNoteCardModel(note, hub, t));
+  const recentNotes = [...notes]
+    .sort((left, right) => right.createdAt.localeCompare(left.createdAt))
+    .slice(0, 3)
+    .map((note) => toNoteCardModel(note, hub, t));
 
   const actionCount = (topics: readonly NoteTopic[]) => {
     const count = topicCount(topics);
@@ -476,6 +490,7 @@ export function buildPortNotesViewModel(
       },
     ],
     topNotes: rankedNotes,
+    recentNotes,
     topics: [
       {
         id: "internet-sim",

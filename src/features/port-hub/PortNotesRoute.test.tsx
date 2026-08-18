@@ -52,17 +52,19 @@ describe("Seafarer Port Notes route", () => {
       "Chỗ đáng đi",
       "Seaman Club",
       "Viết ghi chú",
+      "Xem tất cả",
     ]) {
       expect(
         within(actionsSection!).getByRole("button", { name: new RegExp(label) }),
       ).toBeVisible();
     }
 
-    expect(within(actionsSection!).getAllByRole("button")).toHaveLength(7);
+    expect(within(actionsSection!).getAllByRole("button")).toHaveLength(8);
     const writeNoteAction = within(actionsSection!).getByRole("button", {
       name: /Viết ghi chú/,
     });
     expect(writeNoteAction).toHaveAttribute("data-primary", "true");
+    expect(writeNoteAction).toHaveAttribute("data-action-id", "write-note");
 
     await userEvent.setup().click(writeNoteAction);
     expect(screen.getByText(/placeholder trực quan/)).toBeVisible();
@@ -71,11 +73,14 @@ describe("Seafarer Port Notes route", () => {
   test("renders structured top notes without star ratings or premium upsell", async () => {
     render(<App />);
     const heading = await screen.findByRole("heading", {
-      name: "Ghi chú nổi bật từ thuyền viên",
+      name: "Ghi chú nổi bật",
     });
     const section = heading.closest("section");
     expect(section).not.toBeNull();
     expect(within(section!).getAllByRole("article").length).toBeGreaterThanOrEqual(3);
+    expect(
+      screen.getByRole("heading", { name: "Ghi chú cộng đồng gần đây" }),
+    ).toBeVisible();
     expect(section).toHaveTextContent("Xác nhận bởi");
     expect(section).toHaveTextContent("Hữu ích cho");
     expect(section).not.toHaveTextContent(/★|star rating|premium/i);
@@ -108,7 +113,7 @@ describe("Seafarer Port Notes route", () => {
       screen.getByRole("heading", { name: "Busan New Port" }).closest("section"),
     ).toHaveAttribute("data-media", "omitted");
     expect(screen.queryByTestId("port-notes-media")).toBeNull();
-    expect(screen.getByRole("heading", { name: "Ghi chú nổi bật từ thuyền viên" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Ghi chú nổi bật" })).toBeVisible();
     expect(document.querySelector("img")).toBeNull();
   });
 
@@ -133,7 +138,7 @@ describe("Seafarer Port Notes route", () => {
     ).toBeVisible();
     expect(screen.getByRole("link", { name: "Về Foundation" })).toHaveAttribute(
       "href",
-      "/",
+      "/foundation",
     );
   });
 });
