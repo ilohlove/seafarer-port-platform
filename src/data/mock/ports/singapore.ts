@@ -8,11 +8,13 @@ import {
   officialTrust,
 } from "../fixture-builders";
 import { singaporePortSearchEntry } from "../port-search-index";
-import { block, money, place, review } from "../scenario-builders";
+import { block, money, place, review, terminalAccess } from "../scenario-builders";
 
 const [asiaSailProduct, asiaPlusProduct, singaporeLocalProduct] =
   mockConnectivityProducts;
 const singaporePortId = singaporePortSearchEntry.port.id;
+const pasirPanjangTerminalId = "terminal-sg-pasir-panjang";
+const welfarePlaceId = "place-sg-welfare";
 
 const singaporeAccess = {
   shoreLeave: block(
@@ -76,6 +78,7 @@ const singaporeAccess = {
 export const singaporeScenario = {
   port: singaporePortSearchEntry.port,
   terminals: singaporePortSearchEntry.terminals,
+  selectedTerminalId: pasirPanjangTerminalId,
   criticalInformation: [],
   quickBrief: [
     {
@@ -190,9 +193,21 @@ export const singaporeScenario = {
               "Outside Main Gate",
               communityConfirmedTrust,
               ["international-card", "dcc-choice"],
-              8,
-              15,
             ),
+            access: terminalAccess(
+              "access-sg-atm-pasir-panjang",
+              pasirPanjangTerminalId,
+              "place-sg-atm",
+              "walk",
+              communityConfirmedTrust,
+              {
+                gateName: "Main Gate",
+                walkingDistanceM: 650,
+                walkingDurationMin: 8,
+                minimumRecommendedShoreLeaveMin: 45,
+              },
+            ),
+            statusTags: ["terminal-specific", "foreign-card-confirmed"],
             reasonCodes: ["near-gate", "international-card-supported"],
             estimatedCost: [money(5, "SGD")],
           },
@@ -212,9 +227,21 @@ export const singaporeScenario = {
               "Outside Main Gate",
               communityConfirmedTrust,
               ["essentials-basket", "open-late"],
-              10,
-              25,
             ),
+            access: terminalAccess(
+              "access-sg-shop-pasir-panjang",
+              pasirPanjangTerminalId,
+              "place-sg-shop",
+              "walk",
+              communityConfirmedTrust,
+              {
+                gateName: "Main Gate",
+                walkingDistanceM: 800,
+                walkingDurationMin: 10,
+                minimumRecommendedShoreLeaveMin: 60,
+              },
+            ),
+            statusTags: ["terminal-specific", "hours-confirmed", "payment-confirmed"],
             reasonCodes: ["essential-basket-available", "fits-short-leave"],
           },
         ],
@@ -233,9 +260,21 @@ export const singaporeScenario = {
               "Outside Main Gate",
               communityConfirmedTrust,
               ["fast-service", "halal-options"],
-              12,
-              45,
             ),
+            access: terminalAccess(
+              "access-sg-food-pasir-panjang",
+              pasirPanjangTerminalId,
+              "place-sg-food",
+              "walk",
+              communityConfirmedTrust,
+              {
+                gateName: "Main Gate",
+                walkingDistanceM: 950,
+                walkingDurationMin: 12,
+                minimumRecommendedShoreLeaveMin: 90,
+              },
+            ),
+            statusTags: ["terminal-specific", "price-observed"],
             reasonCodes: ["fast-service", "dietary-options-recorded"],
             estimatedCost: [money(12, "SGD")],
           },
@@ -255,9 +294,22 @@ export const singaporeScenario = {
               "Outside Main Gate",
               officialTrust,
               ["pharmacy", "international-card"],
-              14,
-              30,
             ),
+            access: terminalAccess(
+              "access-sg-pharmacy-pasir-panjang",
+              pasirPanjangTerminalId,
+              "place-sg-pharmacy",
+              "taxi",
+              officialTrust,
+              {
+                gateName: "Main Gate",
+                drivingDurationMin: 7,
+                taxiFareMin: money(8, "SGD"),
+                taxiFareMax: money(12, "SGD"),
+                minimumRecommendedShoreLeaveMin: 75,
+              },
+            ),
+            statusTags: ["terminal-specific", "medical-hours-confirmed"],
             reasonCodes: ["official-directory-source", "near-gate"],
           },
         ],
@@ -270,15 +322,27 @@ export const singaporeScenario = {
           {
             place: place(
               singaporePortId,
-              "place-sg-welfare",
+              welfarePlaceId,
               "Seafarers’ Centre (sample)",
               "welfare",
               "Near terminal gate",
               officialTrust,
               ["wifi", "contact", "return-transport-recorded"],
-              6,
-              40,
             ),
+            access: terminalAccess(
+              "access-sg-welfare-pasir-panjang",
+              pasirPanjangTerminalId,
+              welfarePlaceId,
+              "welfarePickup",
+              officialTrust,
+              {
+                gateName: "Main Gate",
+                drivingDurationMin: 6,
+                pickupPoint: "Main Gate crew pickup point",
+                minimumRecommendedShoreLeaveMin: 90,
+              },
+            ),
+            statusTags: ["terminal-specific", "pickup-confirmed", "return-transport-confirmed"],
             reasonCodes: ["verified-contact", "wifi-available"],
           },
         ],
@@ -286,6 +350,56 @@ export const singaporeScenario = {
       },
     ],
   },
+  emergencyContacts: [
+    {
+      id: "sg-emergency-ambulance",
+      contactType: "ambulance",
+      scope: { kind: "country", referenceId: "SG", label: "Singapore" },
+      displayName: "Singapore Ambulance / Emergency",
+      phoneShortCode: "995",
+      phoneLocalFormat: "995",
+      available24h: true,
+      languageSupport: ["en"],
+      callingInstruction: "For emergencies; also notify Master or agent.",
+      trust: officialTrust,
+    },
+  ],
+  welfareProviders: [
+    {
+      id: "welfare-sg-centre",
+      name: "Seafarers’ Centre (sample)",
+      providerType: "seafarersCenter",
+      portIds: [singaporePortId],
+      terminalIds: [pasirPanjangTerminalId],
+      placeIds: [welfarePlaceId],
+      contactChannelIds: ["contact-sg-welfare-phone"],
+      trust: officialTrust,
+    },
+  ],
+  welfareServices: [
+    {
+      id: "welfare-sg-pickup",
+      providerId: "welfare-sg-centre",
+      capability: "crewShuttle",
+      status: "confirmedAvailable",
+      terminalIds: [pasirPanjangTerminalId],
+      scheduleSummary: "On request from Main Gate pickup point.",
+      contactMethod: "phone",
+      costType: "free",
+      trust: officialTrust,
+    },
+    {
+      id: "welfare-sg-return",
+      providerId: "welfare-sg-centre",
+      capability: "returnTransport",
+      status: "confirmedAvailable",
+      terminalIds: [pasirPanjangTerminalId],
+      scheduleSummary: "Return transport must be arranged before leaving the centre.",
+      contactMethod: "centre desk",
+      costType: "free",
+      trust: officialTrust,
+    },
+  ],
   community: {
     reviews: [
       review(
