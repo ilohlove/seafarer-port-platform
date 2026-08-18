@@ -1,4 +1,5 @@
 # Project Log
+- [2026-08-18 10:37] Thiết lập project operating system cho tài liệu, chuyên gia và review.
 - [2026-08-18 10:16] Căn chỉnh domain model F1.5 theo terminal, welfare và emergency.
 - [2026-08-18 09:56] Chuyển repository frontend sang chế độ public trên GitHub.
 - [2026-08-18 09:50] Đưa phiên bản frontend Foundation lên repository GitHub private.
