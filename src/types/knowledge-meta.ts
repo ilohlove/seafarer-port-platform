@@ -7,7 +7,9 @@ export type KnowledgeScopeKind =
   | "port"
   | "terminal"
   | "gate"
-  | "place";
+  | "place"
+  | "welfareProvider"
+  | "emergencyContact";
 
 export interface KnowledgeScope {
   readonly kind: KnowledgeScopeKind;
@@ -31,6 +33,33 @@ export interface KnowledgeSourceRef {
 
 export type TrustBasis = "official" | "community" | "unverified";
 export type ConflictState = "none" | "conflicting" | "resolved";
+
+/**
+ * Domain-specific evidence tags preserve what was confirmed without leaking raw
+ * timestamps into the primary UI. They are facets behind a short TrustStatus.
+ */
+export type DataStatusTag =
+  | "terminal-specific"
+  | "port-scoped-only"
+  | "needs-terminal-confirmation"
+  | "foreign-card-confirmed"
+  | "dcc-needs-confirmation"
+  | "hours-confirmed"
+  | "payment-confirmed"
+  | "price-observed"
+  | "emergency-contact-official"
+  | "medical-hours-confirmed"
+  | "pickup-confirmed"
+  | "return-transport-confirmed"
+  | "contact-confirmed"
+  | "remote-support-available"
+  | "conflicting-terminal-reports";
+
+export interface DataStatusFacet {
+  readonly tag: DataStatusTag;
+  readonly label: string;
+  readonly evidence: TrustEvidence;
+}
 
 /**
  * Raw evidence is intentionally separate from the display label. This keeps
