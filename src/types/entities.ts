@@ -1,6 +1,7 @@
 import type {
   IsoDateTime,
   KnowledgeMeta,
+  KnowledgeScope,
   MoneyObservation,
   TrustEvidence,
 } from "./knowledge-meta";
@@ -37,6 +38,38 @@ export interface Terminal {
   readonly gateNames: readonly string[];
 }
 
+export type TransportMode =
+  | "walk"
+  | "shuttle"
+  | "taxi"
+  | "rideHailing"
+  | "publicTransport"
+  | "welfarePickup"
+  | "agentArranged"
+  | "unknown";
+
+export interface TerminalPlaceAccess {
+  readonly id: EntityId;
+  readonly terminalId: EntityId;
+  readonly gateId?: EntityId;
+  readonly gateName?: string;
+  readonly placeId: EntityId;
+  readonly walkingDistanceM?: number;
+  readonly walkingDurationMin?: number;
+  readonly drivingDistanceM?: number;
+  readonly drivingDurationMin?: number;
+  readonly estimatedTaxiFareMin?: MoneyObservation;
+  readonly estimatedTaxiFareMax?: MoneyObservation;
+  readonly walkingAllowed: boolean;
+  readonly walkingSafe: boolean;
+  readonly recommendedTransport: TransportMode;
+  readonly pickupPoint?: string;
+  readonly dropoffPoint?: string;
+  readonly routeWarning?: string;
+  readonly minimumRecommendedShoreLeaveMin?: number;
+  readonly trust: TrustEvidence;
+}
+
 export type PlaceCategory =
   | "atm"
   | "currencyExchange"
@@ -46,17 +79,106 @@ export type PlaceCategory =
   | "pharmacy"
   | "welfare";
 
+export type OperationalStatus =
+  | "open"
+  | "temporarilyClosed"
+  | "permanentlyClosed"
+  | "relocated"
+  | "seasonal"
+  | "unknown";
+
 export interface Place {
   readonly id: EntityId;
   readonly portId: EntityId;
-  readonly terminalIds: readonly EntityId[];
   readonly name: string;
   readonly category: PlaceCategory;
   readonly address: string;
-  readonly walkingMinutes?: number;
-  readonly totalVisitMinutes?: number;
+  readonly coordinates?: Coordinates;
+  readonly operationalStatus: OperationalStatus;
   readonly paymentMethods: readonly string[];
   readonly attributes: readonly string[];
+  readonly trust: TrustEvidence;
+}
+
+export type EmergencyContactType =
+  | "ambulance"
+  | "police"
+  | "fire"
+  | "coastGuard"
+  | "portSecurity"
+  | "portMedical"
+  | "shippingAgent"
+  | "hospitalEmergency"
+  | "other";
+
+export interface EmergencyContact {
+  readonly id: EntityId;
+  readonly contactType: EmergencyContactType;
+  readonly scope: KnowledgeScope;
+  readonly displayName: string;
+  readonly phoneShortCode?: string;
+  readonly phoneE164?: string;
+  readonly phoneLocalFormat?: string;
+  readonly available24h: boolean;
+  readonly languageSupport: readonly string[];
+  readonly callingInstruction?: string;
+  readonly trust: TrustEvidence;
+}
+
+export type WelfareProviderType =
+  | "seafarersCenter"
+  | "portWelfareCommittee"
+  | "nonprofitWelfareOrganization"
+  | "religiousWelfareOrganization"
+  | "unionOrWorkerSupport"
+  | "portAuthorityService"
+  | "governmentService"
+  | "shippingAgentService"
+  | "volunteerGroup"
+  | "other";
+
+export interface WelfareProvider {
+  readonly id: EntityId;
+  readonly name: string;
+  readonly providerType: WelfareProviderType;
+  readonly portIds: readonly EntityId[];
+  readonly terminalIds: readonly EntityId[];
+  readonly placeIds: readonly EntityId[];
+  readonly contactChannelIds: readonly EntityId[];
+  readonly trust: TrustEvidence;
+}
+
+export type WelfareCapability =
+  | "crewShuttle"
+  | "returnTransport"
+  | "shipVisit"
+  | "wifi"
+  | "deviceCharging"
+  | "shoppingTransport"
+  | "medicalReferral"
+  | "translation"
+  | "counseling"
+  | "spiritualSupport"
+  | "restArea"
+  | "remoteSupport"
+  | "emergencyContactSupport";
+
+export type WelfareServiceStatus =
+  | "confirmedAvailable"
+  | "reportedAvailable"
+  | "temporarilyUnavailable"
+  | "notAvailable"
+  | "unknown";
+
+export interface WelfareService {
+  readonly id: EntityId;
+  readonly providerId: EntityId;
+  readonly capability: WelfareCapability;
+  readonly status: WelfareServiceStatus;
+  readonly terminalIds: readonly EntityId[];
+  readonly scheduleSummary?: string;
+  readonly contactMethod?: string;
+  readonly costType?: "free" | "donationSuggested" | "paid" | "unknown";
   readonly trust: TrustEvidence;
 }
 
@@ -77,7 +199,13 @@ export type ReviewModerationState =
 
 export interface Review {
   readonly id: EntityId;
-  readonly subjectType: "port" | "terminal" | "place" | "connectivityProduct";
+  readonly subjectType:
+    | "port"
+    | "terminal"
+    | "place"
+    | "connectivityProduct"
+    | "welfareProvider"
+    | "emergencyContact";
   readonly subjectId: EntityId;
   readonly publicAlias: string;
   readonly tags: readonly string[];
