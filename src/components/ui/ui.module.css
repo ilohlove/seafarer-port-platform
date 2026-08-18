@@ -262,6 +262,10 @@
   font-size: var(--font-size-sm);
 }
 
+.bannerCompact {
+  padding: var(--space-2) var(--space-3);
+}
+
 .bannerOffline {
   border-color: var(--color-status-critical-border);
   background: var(--color-status-critical-bg);
@@ -332,6 +336,15 @@
 
   .searchButton {
     inline-size: 100%;
+  }
+
+  .bannerCompact .bannerContent span {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
   }
 }
 

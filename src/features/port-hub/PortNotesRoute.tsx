@@ -88,29 +88,39 @@ export function PortNotesRoute() {
     setNotice(t("portNotes.placeholder", { feature }));
   }
 
+  function renderSearchPanel(id: string, className: string) {
+    return (
+      <section
+        className={className}
+        aria-label={t("portNotes.search.region")}
+        data-search-placement={id.endsWith("mobile") ? "mobile" : "desktop"}
+      >
+        <SearchBox
+          value={searchQuery}
+          onChange={setSearchQuery}
+          onSubmit={(query) =>
+            setNotice(t("portNotes.search.placeholder", { query }))
+          }
+          label={t("portNotes.search.label")}
+          placeholder={t("portNotes.search.input")}
+          submitLabel={t("portNotes.search.submit")}
+          clearLabel={t("portNotes.search.clear")}
+          helperText={t("portNotes.search.help")}
+          id={id}
+        />
+      </section>
+    );
+  }
+
   return (
     <div className={styles.page}>
       <PortNotesNavigation portSlug={portSlug} onPlaceholder={showPlaceholder} />
 
       <div className={styles.workspace}>
-        <section
-          className={styles.searchPanel}
-          aria-label={t("portNotes.search.region")}
-        >
-          <SearchBox
-            value={searchQuery}
-            onChange={setSearchQuery}
-            onSubmit={(query) =>
-              setNotice(t("portNotes.search.placeholder", { query }))
-            }
-            label={t("portNotes.search.label")}
-            placeholder={t("portNotes.search.input")}
-            submitLabel={t("portNotes.search.submit")}
-            clearLabel={t("portNotes.search.clear")}
-            helperText={t("portNotes.search.help")}
-            id="port-notes-search"
-          />
-        </section>
+        {renderSearchPanel(
+          "port-notes-search-desktop",
+          `${styles.searchPanel} ${styles.desktopSearchPanel}`,
+        )}
 
         {notice ? (
           <output className={styles.pageNotice}>
@@ -119,15 +129,18 @@ export function PortNotesRoute() {
         ) : null}
 
         {mode !== "standard" ? (
-          <OfflineBanner
-            mode={mode}
-            title={t("portNotes.bandwidth.title")}
-            message={
-              mode === "ultraLite"
-                ? t("portNotes.bandwidth.ultraLite")
-                : t("portNotes.bandwidth.dataSaver")
-            }
-          />
+          <div className={styles.bandwidthNotice}>
+            <OfflineBanner
+              compact
+              mode={mode}
+              title={t("portNotes.bandwidth.title")}
+              message={
+                mode === "ultraLite"
+                  ? t("portNotes.bandwidth.ultraLite")
+                  : t("portNotes.bandwidth.dataSaver")
+              }
+            />
+          </div>
         ) : null}
 
         {state.status === "loading" ? (
@@ -173,6 +186,12 @@ export function PortNotesRoute() {
               />
             </div>
 
+            <QuickNotesPanel
+              compact
+              model={viewModel.quickNotes}
+              onPlaceholder={showPlaceholder}
+            />
+
             {state.data.criticalInformation.map((item) => (
               <CriticalInfoStrip
                 key={item.id}
@@ -192,6 +211,10 @@ export function PortNotesRoute() {
               notes={viewModel.topNotes}
               onPlaceholder={showPlaceholder}
             />
+            {renderSearchPanel(
+              "port-notes-search-mobile",
+              `${styles.searchPanel} ${styles.mobileSearchPanel}`,
+            )}
             <TopicPreviewSections
               topics={viewModel.topics}
               onPlaceholder={showPlaceholder}

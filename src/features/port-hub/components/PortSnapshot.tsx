@@ -51,9 +51,15 @@ export function PortSnapshot({
           <button
             className={styles.secondaryButton}
             type="button"
+            aria-label={t("portNotes.snapshot.save")}
             onClick={() => onPlaceholder(t("portNotes.snapshot.save"))}
           >
-            + {t("portNotes.snapshot.save")}
+            <span className={styles.saveLong}>
+              + {t("portNotes.snapshot.save")}
+            </span>
+            <span className={styles.saveShort}>
+              {t("portNotes.snapshot.saveShort")}
+            </span>
           </button>
         </div>
 

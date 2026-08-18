@@ -33,23 +33,37 @@ describe("Seafarer Port Notes route", () => {
     expect(screen.getByRole("heading", { name: "Korea Local 10 GB" })).toBeVisible();
     expect(screen.getAllByText(/9,00/).length).toBeGreaterThan(0);
     expect(screen.getByRole("heading", { name: "Ghi chú nhanh" })).toBeVisible();
+    const quickNotesHeading = screen.getByRole("heading", {
+      name: "Cần biết ngay",
+    });
+    expect(quickNotesHeading).toBeVisible();
+    expect(
+      within(quickNotesHeading.closest("aside")!).getAllByRole("listitem"),
+    ).toHaveLength(3);
+
+    const topNotes = screen.getByRole("heading", { name: "Ghi chú nổi bật" });
+    const mobileSearch = document.querySelector('[data-search-placement="mobile"]');
+    expect(mobileSearch).not.toBeNull();
+    expect(
+      topNotes.compareDocumentPosition(mobileSearch!),
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
   test("shows all need-based action tiles and an obvious Write a Note action", async () => {
     render(<App />);
     await screen.findByRole("heading", { name: "Busan New Port" });
     const actionsHeading = screen.getByRole("heading", {
-      name: "Bạn cần gì ở cảng?",
+      name: "Chọn nhanh",
     });
     const actionsSection = actionsHeading.closest("section");
     expect(actionsSection).not.toBeNull();
 
     for (const label of [
-      "So sánh eSIM",
+      "eSIM",
       "SIM vật lý",
-      "Taxi / Grab / Uber",
-      "Đồ ăn & nhu yếu phẩm",
-      "Chỗ đáng đi",
+      "Taxi / Grab",
+      "Đồ ăn",
+      "Chỗ đi",
       "Seaman Club",
       "Viết ghi chú",
       "Xem tất cả",

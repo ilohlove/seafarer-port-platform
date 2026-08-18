@@ -40,6 +40,10 @@
   font-size: var(--font-size-xs);
 }
 
+.mobileModeControl {
+  display: none;
+}
+
 .mark {
   display: grid;
   inline-size: var(--tap-target);
@@ -150,13 +154,13 @@
   .portNotesShell .headerInner {
     grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
-    gap: var(--space-2);
-    padding-block: var(--space-2);
+    gap: var(--space-1);
+    padding-block: var(--space-1);
   }
 
   .portNotesShell .mark {
-    inline-size: 2.25rem;
-    block-size: 2.25rem;
+    inline-size: 2rem;
+    block-size: 2rem;
   }
 
   .portNotesShell .identity {
@@ -171,10 +175,14 @@
     display: none;
   }
 
+  .portNotesShell .version {
+    display: none;
+  }
+
   .portNotesShell .preferences {
     grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
-    gap: var(--space-2);
+    gap: var(--space-1);
   }
 
   .portNotesShell .localeControl {
@@ -193,19 +201,33 @@
   }
 
   .portNotesShell .localeControl select {
-    min-block-size: 2.25rem;
-    padding-inline: var(--space-2);
+    min-block-size: 2rem;
+    padding-inline: var(--space-1);
   }
 
-  .portNotesShell .bandwidthControl legend {
-    margin-block-end: var(--space-1);
-    font-size: 0.625rem;
+  .portNotesShell .bandwidthControl {
+    display: none;
   }
 
-  .portNotesShell .modeButtons button {
-    min-block-size: 2.25rem;
-    padding: var(--space-1);
-    font-size: 0.625rem;
+  .portNotesShell .mobileModeControl {
+    display: block;
+    min-inline-size: 0;
+  }
+
+  .portNotesShell .mobileModeControl select {
+    inline-size: 100%;
+    min-block-size: 2rem;
+    padding-inline: var(--space-1);
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-accent);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .portNotesShell .main {
+    padding-block-start: var(--space-3);
   }
 }
 

@@ -63,10 +63,10 @@ export function PortNotesNavigation({
           <span aria-hidden="true">⌂</span>
           {t("portNotes.nav.home")}
         </a>
-        <button type="button" onClick={() => onPlaceholder(t("portNotes.nav.search"))}>
+        <a href="#port-notes-search-mobile">
           <span aria-hidden="true">⌕</span>
           {t("portNotes.nav.search")}
-        </button>
+        </a>
         <a href={`/ports/${portSlug}`} aria-current="page">
           <span aria-hidden="true">⚓</span>
           {t("portNotes.nav.port")}

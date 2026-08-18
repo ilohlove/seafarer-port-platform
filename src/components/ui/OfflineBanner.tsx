@@ -17,6 +17,7 @@ export type OfflineBannerAction =
     };
 
 export interface OfflineBannerProps {
+  compact?: boolean;
   mode: ConnectivityBannerMode;
   title: string;
   message: string;
@@ -37,6 +38,7 @@ const modeSymbols: Record<ConnectivityBannerMode, string> = {
 };
 
 export function OfflineBanner({
+  compact = false,
   mode,
   title,
   message,
@@ -45,7 +47,9 @@ export function OfflineBanner({
 }: OfflineBannerProps) {
   return (
     <aside
-      className={`${styles.connectivityBanner} ${modeClassNames[mode]}`}
+      className={`${styles.connectivityBanner} ${modeClassNames[mode]} ${
+        compact ? styles.bannerCompact : ""
+      }`}
       role={announce ? 'status' : 'note'}
     >
       <span className={styles.bannerSymbol} aria-hidden="true">

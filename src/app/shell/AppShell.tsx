@@ -92,6 +92,28 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
               </select>
             </label>
 
+            <label className={styles.mobileModeControl}>
+              <span className="visually-hidden">
+                {t("settings.bandwidthLabel")}
+              </span>
+              <select
+                aria-label={t("settings.bandwidthLabel")}
+                value={mode}
+                disabled={isPreferenceBusy}
+                onChange={(event) => {
+                  void applyPreference(() =>
+                    setMode(event.currentTarget.value as BandwidthMode),
+                  );
+                }}
+              >
+                {bandwidthModes.map((candidate) => (
+                  <option value={candidate} key={candidate}>
+                    {t(bandwidthKeys[candidate])}
+                  </option>
+                ))}
+              </select>
+            </label>
+
             <fieldset
               className={styles.bandwidthControl}
               disabled={isPreferenceBusy}
