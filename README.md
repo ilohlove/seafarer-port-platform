@@ -1,6 +1,6 @@
 # Seafarer Port Knowledge Platform — Frontend Prototype
 
-Milestone hiện tại: **F1.5 — Domain Alignment before F2**. Repository có prototype Foundation chạy được và đã căn chỉnh domain/read-model theo terminal/gate access, emergency contacts và welfare provider/service để chuẩn bị cho Home/Search F2 và Port Hub F3.
+Milestone hiện tại: **F3 — Port Hub Visual Prototype**. Repository giữ nguyên Foundation ở `/`, dùng domain/read-model F1.5 và bổ sung dashboard Port Hub theo terminal tại `/ports/:portSlug`. F2 Home/Search không nằm trong branch này.
 
 ## Chạy local
 
@@ -73,6 +73,20 @@ Route `/` là trang kiểm chứng F1/F1.5, không phải Home của F2. Trang t
 
 Responsive behavior được định nghĩa mobile-first: header/control xếp dọc và card một cột ở màn hình nhỏ; từ `48rem` chuyển sang header ngang và card grid. Đã kiểm tra Chromium ở `390×844` và `1280×900`, không có horizontal overflow. Ultra Lite bỏ shadow/decorative symbols, không có ảnh, custom font hay animation.
 
+## F3 Port Hub visual prototype
+
+Mở trực tiếp một trong các route mẫu:
+
+- `/ports/busan`
+- `/ports/singapore`
+- `/ports/port-klang`
+
+Port Hub là dashboard mobile-first phục vụ quyết định lên bờ, gồm port/terminal identity, Quick Brief, sáu decision strips, tám overview cards, Data Trust và Return to Ship. Trust status luôn đi cùng dữ kiện; emergency chỉ hiển thị logistics và liên hệ chính thức, không đưa ra tư vấn y tế.
+
+Desktop từ `64rem` dùng sidebar `220px`, nội dung linh hoạt và panel Return to Ship `280–304px`. Màn hình dưới `48rem` dùng compact top navigation, card một cột và đưa Return to Ship xuống sau nội dung chính. Standard có minh họa CSS nhẹ; Data Saver và Ultra Lite không tải media, còn Ultra Lite bỏ thêm shadow và ký hiệu trang trí.
+
+Các nút Search, đổi terminal, lưu cảng, tab ngoài Overview và Shore Leave Planner là placeholder có phản hồi rõ ràng. Chúng không giả lập F2, F4 hoặc backend chưa tồn tại. Route có loading, retry/error và not-found state; Port Klang dùng để kiểm tra dữ liệu mâu thuẫn theo terminal.
+
 ## Mock scenarios
 
 | Scenario | Cảng | Mục đích |
@@ -87,15 +101,15 @@ Ngưỡng `MIN_COMMUNITY_CONFIRMATIONS = 2` chỉ là giả định hiển thị
 
 ## Performance budget
 
-Production build F1 gần nhất trước F1.5:
+Production build F3 hiện tại:
 
-- First-screen initial: `88,138 B gzip`, gồm HTML + CSS + JS + lightweight port search index trong 3 request.
-- First-screen JavaScript: `83,108 B gzip`.
-- Optional chunks: EN `1,031 B`; chi tiết Singapore `2,238 B`, Busan `1,726 B`, Port Klang `1,934 B` gzip, cộng shared chunks tải theo nhu cầu.
+- Initial entry: `91,421 B gzip`, gồm HTML + CSS + JS trong 3 request.
+- Initial JavaScript: `86,379 B gzip`.
+- Lazy Port Hub: `6,214 B gzip`; mock Busan `2,115 B`, Singapore `2,930 B`, Port Klang `2,541 B`, cộng shared chunks tải theo nhu cầu.
 - Hard gate: initial `<500,000 B gzip`; mục tiêu nội bộ `<200 KB gzip`.
 
 `scripts/check-bundle.mjs` đọc Vite manifest và cộng static entry graph. Milestone sau có thể khai báo thêm dynamic entry bắt buộc trước khi first screen hữu dụng bằng `BUNDLE_FIRST_SCREEN_DYNAMIC_ENTRIES`.
 
 ## Phạm vi chưa triển khai
 
-F1.5 không triển khai Home/Search Results F2, Port Hub F3, Shore Planner UI F4, eSIM Compare UI F5, account/contribution F6 hoặc quality gate F7. Các route tương lai hiện đi vào trạng thái “milestone sau” để không giả vờ chức năng đã tồn tại.
+Branch F3 không triển khai Home/Search Results F2, Shore Planner UI F4, eSIM Compare UI F5, account/contribution F6, backend, auth, payment, map SDK hoặc image gallery. Các hành động tương lai trả trạng thái placeholder thay vì giả vờ chức năng đã tồn tại.

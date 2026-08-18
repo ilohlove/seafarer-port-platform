@@ -37,9 +37,11 @@ describe("F1 application foundation", () => {
       await screen.findByRole("heading", { name: "Quick brief mẫu" }),
     ).toBeInTheDocument();
     expect(portDisclosure).toHaveAttribute("aria-expanded", "true");
-    expect(
-      screen.getByRole("region", { name: "Preview component chi tiết" }),
-    ).toHaveFocus();
+    await waitFor(() => {
+      expect(
+        screen.getByRole("region", { name: "Preview component chi tiết" }),
+      ).toHaveFocus();
+    });
     expect(document.querySelector("img")).toBeNull();
   });
 

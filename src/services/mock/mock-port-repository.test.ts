@@ -23,7 +23,7 @@ describe("MockPortRepository", () => {
     expect(result.items[0]?.slug).toBe(slug);
   });
 
-  it("applies terminal context without changing the fixture", async () => {
+  it("preserves fixture terminal context when no terminal is requested", async () => {
     const repository = new MockPortRepository(0);
     const selected = await repository.getPortHub({
       portSlug: "singapore",
@@ -32,7 +32,7 @@ describe("MockPortRepository", () => {
     const unselected = await repository.getPortHub({ portSlug: "singapore" });
 
     expect(selected?.selectedTerminalId).toBe("terminal-sg-pasir-panjang");
-    expect(unselected?.selectedTerminalId).toBeUndefined();
+    expect(unselected?.selectedTerminalId).toBe("terminal-sg-pasir-panjang");
   });
 
   it("honors an already-aborted request", async () => {

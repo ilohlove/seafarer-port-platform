@@ -1,8 +1,21 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Route, Routes } from "react-router";
 
-import { EmptyState } from "../components";
+import { EmptyState, Skeleton } from "../components";
 import { FoundationRoute } from "../features/foundation";
+import { useI18n } from "../i18n";
 import { AppShell } from "./shell";
+
+const PortHubRoute = lazy(() =>
+  import("../features/port-hub/PortHubRoute").then((module) => ({
+    default: module.PortHubRoute,
+  })),
+);
+
+function RouteFallback() {
+  const { t } = useI18n();
+  return <Skeleton label={t("portHub.loading")} lines={6} variant="card" />;
+}
 
 function NotImplementedRoute() {
   return (
@@ -21,10 +34,13 @@ export function AppRouter() {
   return (
     <BrowserRouter>
       <AppShell>
-        <Routes>
-          <Route path="/" element={<FoundationRoute />} />
-          <Route path="*" element={<NotImplementedRoute />} />
-        </Routes>
+        <Suspense fallback={<RouteFallback />}>
+          <Routes>
+            <Route path="/" element={<FoundationRoute />} />
+            <Route path="/ports/:portSlug" element={<PortHubRoute />} />
+            <Route path="*" element={<NotImplementedRoute />} />
+          </Routes>
+        </Suspense>
       </AppShell>
     </BrowserRouter>
   );
