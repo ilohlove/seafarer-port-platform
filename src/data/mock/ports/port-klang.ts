@@ -11,15 +11,18 @@ import {
   unknownTrust,
 } from "../fixture-builders";
 import { portKlangSearchEntry } from "../port-search-index";
-import { block, place, review } from "../scenario-builders";
+import { block, money, place, review, terminalAccess } from "../scenario-builders";
 
 const [asiaSailProduct, asiaPlusProduct, , , malaysiaLocalProduct] =
   mockConnectivityProducts;
 const portKlangId = portKlangSearchEntry.port.id;
+const westportsTerminalId = "terminal-klang-westports";
+const northportTerminalId = "terminal-klang-northport";
 
 export const portKlangScenario = {
   port: portKlangSearchEntry.port,
   terminals: portKlangSearchEntry.terminals,
+  selectedTerminalId: westportsTerminalId,
   criticalInformation: [
     {
       id: "klang-shuttle-conflict",
@@ -163,9 +166,22 @@ export const portKlangScenario = {
               "Gate location differs by terminal",
               conflictingTrust,
               ["dcc-status-conflicting"],
-              10,
-              20,
             ),
+            access: terminalAccess(
+              "access-klang-atm-westports",
+              westportsTerminalId,
+              "place-klang-atm",
+              "walk",
+              conflictingTrust,
+              {
+                gateName: "Main Gate",
+                walkingDistanceM: 700,
+                walkingDurationMin: 10,
+                routeWarning: "Northport reports place this ATM at a different gate.",
+                minimumRecommendedShoreLeaveMin: 45,
+              },
+            ),
+            statusTags: ["terminal-specific", "conflicting-terminal-reports"],
             reasonCodes: ["reported-near-gate", "conflicting-fee-reports"],
           },
         ],
@@ -184,9 +200,22 @@ export const portKlangScenario = {
               "Outside terminal",
               needsConfirmationTrust,
               ["essentials-basket"],
-              22,
-              50,
             ),
+            access: terminalAccess(
+              "access-klang-shop-westports",
+              westportsTerminalId,
+              "place-klang-shop",
+              "taxi",
+              needsConfirmationTrust,
+              {
+                gateName: "Main Gate",
+                drivingDurationMin: 22,
+                taxiFareMin: money(25, "MYR"),
+                taxiFareMax: money(35, "MYR"),
+                minimumRecommendedShoreLeaveMin: 150,
+              },
+            ),
+            statusTags: ["needs-terminal-confirmation"],
             reasonCodes: ["essential-basket-reported", "needs-confirmation"],
           },
         ],
@@ -207,24 +236,61 @@ export const portKlangScenario = {
       {
         id: "klang-welfare",
         label: "Welfare",
-        recommendations: [
-          {
-            place: place(
-              portKlangId,
-              "place-klang-welfare",
-              "Mobile Welfare Contact (sample)",
-              "welfare",
-              "Remote/ship visit service",
-              needsConfirmationTrust,
-              ["contact", "ship-visit-unconfirmed"],
-            ),
-            reasonCodes: ["remote-contact-available", "schedule-unconfirmed"],
-          },
-        ],
-        totalAvailable: 1,
+        recommendations: [],
+        totalAvailable: 0,
       },
     ],
   },
+  emergencyContacts: [
+    {
+      id: "klang-emergency-999",
+      contactType: "ambulance",
+      scope: { kind: "country", referenceId: "MY", label: "Malaysia" },
+      displayName: "Emergency services",
+      phoneShortCode: "999",
+      phoneLocalFormat: "999",
+      available24h: true,
+      languageSupport: ["ms", "en"],
+      callingInstruction: "Use official emergency number; also notify Master or agent.",
+      trust: officialTrust,
+    },
+  ],
+  welfareProviders: [
+    {
+      id: "welfare-klang-mobile",
+      name: "Mobile Welfare Contact (sample)",
+      providerType: "portWelfareCommittee",
+      portIds: [portKlangId],
+      terminalIds: [westportsTerminalId, northportTerminalId],
+      placeIds: [],
+      contactChannelIds: ["contact-klang-welfare-whatsapp"],
+      trust: needsConfirmationTrust,
+    },
+  ],
+  welfareServices: [
+    {
+      id: "welfare-klang-ship-visit",
+      providerId: "welfare-klang-mobile",
+      capability: "shipVisit",
+      status: "reportedAvailable",
+      terminalIds: [westportsTerminalId, northportTerminalId],
+      scheduleSummary: "Reported by community; contact before relying on ship visit.",
+      contactMethod: "WhatsApp",
+      costType: "unknown",
+      trust: needsConfirmationTrust,
+    },
+    {
+      id: "welfare-klang-remote-support",
+      providerId: "welfare-klang-mobile",
+      capability: "remoteSupport",
+      status: "reportedAvailable",
+      terminalIds: [westportsTerminalId, northportTerminalId],
+      scheduleSummary: "Remote contact only; no physical centre in this prototype scenario.",
+      contactMethod: "WhatsApp",
+      costType: "unknown",
+      trust: needsConfirmationTrust,
+    },
+  ],
   community: {
     reviews: [
       review(
@@ -250,7 +316,7 @@ export const portKlangScenario = {
   dataHealth: {
     coverage: "limited",
     missingAreas: ["food", "medical", "wifi"],
-    conflictingAreas: ["shore-leave", "shuttle", "atm-fee"],
+    conflictingAreas: ["shore-leave", "shuttle", "atm-fee", "terminal-specific-access"],
     trust: conflictingTrust,
   },
 } as const satisfies PortHubReadModel;
