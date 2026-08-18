@@ -1,0 +1,45 @@
+name: Deploy Seafarer Port Notes
+
+on:
+  push:
+    branches:
+      - agent/seafarer-port-notes-pivot
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-seafarer-port-notes
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build and deploy to Ubuntu Nginx
+    runs-on: self-hosted
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.22.0"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run quality checks and build
+        run: npm run check
+
+      - name: Publish dist to Nginx root
+        run: |
+          rsync -a --delete dist/ /var/www/seafarer-port-platform/app/seafarer-port-platform/dist/
+
+      - name: Smoke test
+        run: |
+          curl -fsSI http://localhost/
+          curl -fsSI http://localhost/ports/busan
