@@ -5,18 +5,21 @@ import {
   communitySource,
   createKnowledgeMeta,
   needsConfirmationTrust,
+  officialTrust,
   unknownTrust,
 } from "../fixture-builders";
 import { busanPortSearchEntry } from "../port-search-index";
-import { block, money, place, review } from "../scenario-builders";
+import { block, money, place, review, terminalAccess } from "../scenario-builders";
 
 const [asiaSailProduct, asiaPlusProduct, , koreaLocalProduct] =
   mockConnectivityProducts;
 const busanPortId = busanPortSearchEntry.port.id;
+const busanNewPortTerminalId = "terminal-busan-new-port";
 
 export const busanScenario = {
   port: busanPortSearchEntry.port,
   terminals: busanPortSearchEntry.terminals,
+  selectedTerminalId: busanNewPortTerminalId,
   criticalInformation: [
     {
       id: "busan-needs-check",
@@ -149,9 +152,22 @@ export const busanScenario = {
               "Location requires confirmation",
               needsConfirmationTrust,
               ["international-card-unconfirmed"],
-              15,
-              20,
             ),
+            access: terminalAccess(
+              "access-busan-atm-new-port",
+              busanNewPortTerminalId,
+              "place-busan-atm",
+              "walk",
+              needsConfirmationTrust,
+              {
+                gateName: "Crew Gate",
+                walkingDistanceM: 1200,
+                walkingDurationMin: 15,
+                walkingSafe: true,
+                minimumRecommendedShoreLeaveMin: 60,
+              },
+            ),
+            statusTags: ["needs-terminal-confirmation", "dcc-needs-confirmation"],
             reasonCodes: ["reported-near-gate", "needs-confirmation"],
           },
         ],
@@ -176,9 +192,22 @@ export const busanScenario = {
               "Outside terminal",
               needsConfirmationTrust,
               ["fast-service"],
-              18,
-              50,
             ),
+            access: terminalAccess(
+              "access-busan-food-new-port",
+              busanNewPortTerminalId,
+              "place-busan-food",
+              "taxi",
+              needsConfirmationTrust,
+              {
+                gateName: "Crew Gate",
+                drivingDurationMin: 18,
+                taxiFareMin: money(12000, "KRW"),
+                taxiFareMax: money(18000, "KRW"),
+                minimumRecommendedShoreLeaveMin: 120,
+              },
+            ),
+            statusTags: ["needs-terminal-confirmation", "price-observed"],
             reasonCodes: ["reported-fast-service", "needs-confirmation"],
             estimatedCost: [money(12000, "KRW")],
           },
@@ -199,6 +228,22 @@ export const busanScenario = {
       },
     ],
   },
+  emergencyContacts: [
+    {
+      id: "busan-emergency-119",
+      contactType: "ambulance",
+      scope: { kind: "country", referenceId: "KR", label: "South Korea" },
+      displayName: "Emergency services",
+      phoneShortCode: "119",
+      phoneLocalFormat: "119",
+      available24h: true,
+      languageSupport: ["ko"],
+      callingInstruction: "Use for emergencies; ask agent or ship for language support.",
+      trust: officialTrust,
+    },
+  ],
+  welfareProviders: [],
+  welfareServices: [],
   community: {
     reviews: [
       review(
