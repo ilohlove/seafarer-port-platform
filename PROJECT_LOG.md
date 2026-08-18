@@ -1,0 +1,2 @@
+# Project Log
+- [2026-08-10 22:40] Hoàn thành frontend Foundation với typed architecture, mock services, bandwidth modes, component nền tảng và kiểm thử hiệu năng.

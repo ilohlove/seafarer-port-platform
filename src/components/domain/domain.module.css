@@ -1,0 +1,353 @@
+.trustStatus {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  max-inline-size: 100%;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.trustBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-block-size: 1.75rem;
+  padding: 0.15rem var(--space-2);
+  border: var(--border-width) solid;
+  border-radius: var(--radius-pill);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.trustSymbol {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 1rem;
+  block-size: 1rem;
+  border: var(--border-width) solid currentColor;
+  border-radius: 50%;
+  font-size: 0.68rem;
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+}
+
+.trustOfficial {
+  border-color: var(--color-status-official-border);
+  background: var(--color-status-official-bg);
+  color: var(--color-status-official-text);
+}
+
+.trustCommunity {
+  border-color: var(--color-status-community-border);
+  background: var(--color-status-community-bg);
+  color: var(--color-status-community-text);
+}
+
+.trustNeedsConfirmation {
+  border-color: var(--color-status-needs-border);
+  background: var(--color-status-needs-bg);
+  color: var(--color-status-needs-text);
+}
+
+.trustConflicting {
+  border-color: var(--color-status-conflict-border);
+  background: var(--color-status-conflict-bg);
+  color: var(--color-status-conflict-text);
+}
+
+.trustUnknown {
+  border-color: var(--color-status-unknown-border);
+  background: var(--color-status-unknown-bg);
+  color: var(--color-status-unknown-text);
+}
+
+.trustDetail {
+  flex: 1 1 12rem;
+}
+
+.infoStrip {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: var(--border-width) solid;
+  border-inline-start-width: 0.3rem;
+  border-radius: var(--radius-md);
+}
+
+.criticalStrip {
+  border-color: var(--color-status-critical-border);
+  background: var(--color-status-critical-bg);
+  color: var(--color-status-critical-text);
+}
+
+.warningStrip {
+  border-color: var(--color-status-warning-border);
+  background: var(--color-status-warning-bg);
+  color: var(--color-status-warning-text);
+}
+
+.informationStrip {
+  border-color: var(--color-status-info-border);
+  background: var(--color-status-info-bg);
+  color: var(--color-status-info-text);
+}
+
+.infoStripSymbol {
+  display: grid;
+  place-items: center;
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+}
+
+.infoStripContent {
+  min-inline-size: 0;
+}
+
+.infoStripTitle {
+  font-size: var(--font-size-md);
+}
+
+.infoStripMessage {
+  margin-block-start: var(--space-1);
+  font-size: var(--font-size-sm);
+}
+
+.infoStripMessage :where(p, ul, ol) + :where(p, ul, ol) {
+  margin-block-start: var(--space-2);
+}
+
+.infoStripMessage :where(ul, ol) {
+  padding-inline-start: var(--space-5);
+}
+
+.inlineAction,
+.cardButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: var(--tap-target);
+  border: var(--border-width) solid currentColor;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+  text-decoration: none;
+}
+
+.inlineAction {
+  grid-column: 2;
+  justify-self: start;
+  padding-inline: var(--space-3);
+}
+
+.quickBrief {
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-raised);
+}
+
+.sectionHeading {
+  display: grid;
+  gap: var(--space-1);
+  margin-block-end: var(--space-4);
+}
+
+.sectionHeading h2,
+.sectionHeading h3 {
+  font-size: var(--font-size-xl);
+}
+
+.sectionHeading p {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.briefGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.briefItem {
+  min-inline-size: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-subtle);
+}
+
+.briefItem dt,
+.factList dt {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.briefItem dd,
+.factList dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.briefItem dd:not(.briefDetail) {
+  margin-block-start: var(--space-1);
+  font-weight: var(--font-weight-bold);
+}
+
+.briefDetail {
+  margin-block-start: var(--space-1) !important;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.portCard,
+.serviceCard {
+  position: relative;
+  display: grid;
+  gap: var(--space-3);
+  min-inline-size: 0;
+  padding: var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-raised);
+}
+
+.portCard:focus-within {
+  border-color: var(--color-accent);
+}
+
+.portCardHeading {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.cardTitle {
+  font-size: var(--font-size-lg);
+}
+
+.cardTitle :is(a, button) {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  font: inherit;
+  text-align: start;
+  text-decoration-thickness: 0.08em;
+  text-decoration-color: transparent;
+}
+
+.cardTitle :is(a, button)::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+}
+
+.cardTitle :is(a, button):hover {
+  color: var(--color-accent);
+  text-decoration-color: currentColor;
+}
+
+.portLocation,
+.cardSummary,
+.reason {
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.portLocation,
+.terminalContext,
+.cardEyebrow,
+.reason {
+  font-size: var(--font-size-sm);
+}
+
+.locode {
+  white-space: nowrap;
+}
+
+.terminalContext {
+  padding: var(--space-2) var(--space-3);
+  border-inline-start: 0.2rem solid var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+.cardAction {
+  color: var(--color-accent);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.cardEyebrow {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.factList {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.factList > div {
+  display: grid;
+  grid-template-columns: minmax(6rem, 0.8fr) minmax(0, 1.2fr);
+  gap: var(--space-3);
+  padding-block: var(--space-2);
+  border-block-start: var(--border-width) solid var(--color-border);
+}
+
+.reason {
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-subtle);
+}
+
+.cardButton {
+  position: relative;
+  justify-self: start;
+  padding-inline: var(--space-4);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.cardButton:hover,
+.inlineAction:hover {
+  background: rgb(255 255 255 / 45%);
+}
+
+@media (min-width: 36rem) {
+  .portCardHeading {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .briefGrid {
+    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  }
+}
+
+@media (forced-colors: active) {
+  .trustBadge,
+  .infoStrip,
+  .terminalContext {
+    forced-color-adjust: auto;
+  }
+}
