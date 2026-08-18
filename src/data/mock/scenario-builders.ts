@@ -5,6 +5,8 @@ import type {
   Place,
   PlaceCategory,
   Review,
+  TerminalPlaceAccess,
+  TransportMode,
   TrustEvidence,
 } from "../../types";
 import {
@@ -39,18 +41,14 @@ export function place(
   address: string,
   trust: TrustEvidence,
   attributes: readonly string[],
-  walkingMinutes?: number,
-  totalVisitMinutes?: number,
 ): Place {
   return {
     id,
     portId,
-    terminalIds: [],
     name,
     category,
     address,
-    ...(walkingMinutes === undefined ? {} : { walkingMinutes }),
-    ...(totalVisitMinutes === undefined ? {} : { totalVisitMinutes }),
+    operationalStatus: "open",
     paymentMethods: ["cash", "international-card"],
     attributes,
     trust,
@@ -63,6 +61,58 @@ export function money(amount: number, currency: string): MoneyObservation {
     currency,
     observedAt: "2026-07-01T00:00:00Z",
     source: communitySource,
+  };
+}
+
+interface TerminalAccessOptions {
+  readonly gateName?: string;
+  readonly walkingDistanceM?: number;
+  readonly walkingDurationMin?: number;
+  readonly drivingDurationMin?: number;
+  readonly taxiFareMin?: MoneyObservation;
+  readonly taxiFareMax?: MoneyObservation;
+  readonly walkingAllowed?: boolean;
+  readonly walkingSafe?: boolean;
+  readonly pickupPoint?: string;
+  readonly dropoffPoint?: string;
+  readonly routeWarning?: string;
+  readonly minimumRecommendedShoreLeaveMin?: number;
+}
+
+export function terminalAccess(
+  id: string,
+  terminalId: string,
+  placeId: string,
+  recommendedTransport: TransportMode,
+  trust: TrustEvidence,
+  options: TerminalAccessOptions = {},
+): TerminalPlaceAccess {
+  return {
+    id,
+    terminalId,
+    placeId,
+    recommendedTransport,
+    walkingAllowed: options.walkingAllowed ?? recommendedTransport === "walk",
+    walkingSafe: options.walkingSafe ?? recommendedTransport === "walk",
+    trust,
+    ...(options.gateName ? { gateName: options.gateName } : {}),
+    ...(options.walkingDistanceM === undefined
+      ? {}
+      : { walkingDistanceM: options.walkingDistanceM }),
+    ...(options.walkingDurationMin === undefined
+      ? {}
+      : { walkingDurationMin: options.walkingDurationMin }),
+    ...(options.drivingDurationMin === undefined
+      ? {}
+      : { drivingDurationMin: options.drivingDurationMin }),
+    ...(options.taxiFareMin ? { estimatedTaxiFareMin: options.taxiFareMin } : {}),
+    ...(options.taxiFareMax ? { estimatedTaxiFareMax: options.taxiFareMax } : {}),
+    ...(options.pickupPoint ? { pickupPoint: options.pickupPoint } : {}),
+    ...(options.dropoffPoint ? { dropoffPoint: options.dropoffPoint } : {}),
+    ...(options.routeWarning ? { routeWarning: options.routeWarning } : {}),
+    ...(options.minimumRecommendedShoreLeaveMin === undefined
+      ? {}
+      : { minimumRecommendedShoreLeaveMin: options.minimumRecommendedShoreLeaveMin }),
   };
 }
 
