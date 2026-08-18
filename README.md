@@ -1,6 +1,6 @@
 # Seafarer Port Knowledge Platform — Frontend Prototype
 
-Milestone hiện tại: **F3 — Port Hub Visual Prototype**. Repository giữ nguyên Foundation ở `/`, dùng domain/read-model F1.5 và bổ sung dashboard Port Hub theo terminal tại `/ports/:portSlug`. F2 Home/Search không nằm trong branch này.
+Milestone hiện tại: **Seafarer Port Notes pivot**. Repository giữ nguyên Foundation ở `/`, dùng domain/read-model F1.5 và refactor route `/ports/:portSlug` thành giao diện ghi chú cộng đồng, đơn giản cho thuyền viên bận rộn.
 
 ## Chạy local
 
@@ -47,6 +47,7 @@ App shell / providers / declarative router
 
 - Presentation components chỉ nhận typed props; architecture tests ngăn import `services` hoặc `data/mock`.
 - `PortHubReadModel` tổng hợp knowledge items, không mô phỏng Port Hub như một entity vật lý.
+- `PortNote` là lớp note có topic, visibility, payload typed, moderation state, confirmation/usefulness và trust; Port Notes vẫn là read model, không phải bảng vật lý đơn.
 - Search và trust mapping nằm trong pure service/use-case. Planner, eSIM compare, community writes và Offline Pack mới có typed contracts; adapter F1 trả lỗi `milestone-unavailable` thay vì khóa sớm business rules F4–F6.
 - Preferences đi qua browser-storage adapter; Offline Pack dùng empty-state adapter, chưa có persistence, Service Worker hoặc PWA.
 - VI và lightweight search index nằm trong entry; EN chỉ tải khi chuyển ngôn ngữ. Mỗi mock port detail được code-split và chỉ tải khi người review chủ động mở preview chi tiết.
@@ -73,7 +74,9 @@ Route `/` là trang kiểm chứng F1/F1.5, không phải Home của F2. Trang t
 
 Responsive behavior được định nghĩa mobile-first: header/control xếp dọc và card một cột ở màn hình nhỏ; từ `48rem` chuyển sang header ngang và card grid. Đã kiểm tra Chromium ở `390×844` và `1280×900`, không có horizontal overflow. Ultra Lite bỏ shadow/decorative symbols, không có ảnh, custom font hay animation.
 
-## F3 Port Hub visual prototype
+## Seafarer Port Notes pivot
+
+Port Notes and the shared application shell use a responsive content width up to `96rem`; Ultra Lite keeps the main workspace text-first and single-column.
 
 Mở trực tiếp một trong các route mẫu:
 
@@ -81,11 +84,13 @@ Mở trực tiếp một trong các route mẫu:
 - `/ports/singapore`
 - `/ports/port-klang`
 
-Port Hub là dashboard mobile-first phục vụ quyết định lên bờ, gồm port/terminal identity, Quick Brief, sáu decision strips, tám overview cards, Data Trust và Return to Ship. Trust status luôn đi cùng dữ kiện; emergency chỉ hiển thị logistics và liên hệ chính thức, không đưa ra tư vấn y tế.
+Port Notes là giao diện mobile-first community-first theo thứ tự: Port Snapshot, Best Internet/eSIM Deal, need-based action tiles, Top Notes from Seafarers, topic previews và Data Trust. Snapshot hiển thị port, terminal/gate, shore leave, Internet, transport, số notes và pending confirmations. Quick Notes nằm ở right rail trên desktop và chuyển xuống sau hero trên mobile. Top notes có topic, nội dung ngắn, terminal/gate context, confirmation/usefulness và trust status; không dùng rating sao.
 
-Desktop từ `64rem` dùng sidebar `220px`, nội dung linh hoạt và panel Return to Ship `280–304px`. Màn hình dưới `48rem` dùng compact top navigation, card một cột và đưa Return to Ship xuống sau nội dung chính. Standard có minh họa CSS nhẹ; Data Saver và Ultra Lite không tải media, còn Ultra Lite bỏ thêm shadow và ký hiệu trang trí.
+Các action tile chính là Compare eSIM, Physical SIM Notes, Taxi / Grab / Uber, Food & Supplies, Places to Visit, Seaman Club và Write a Note. Chúng là navigation intent/placeholder khi backend chưa tồn tại; prototype không mua eSIM, booking, payment, marketplace hoặc đăng public contact cá nhân chưa moderation.
 
-Các nút Search, đổi terminal, lưu cảng, tab ngoài Overview và Shore Leave Planner là placeholder có phản hồi rõ ràng. Chúng không giả lập F2, F4 hoặc backend chưa tồn tại. Route có loading, retry/error và not-found state; Port Klang dùng để kiểm tra dữ liệu mâu thuẫn theo terminal.
+Desktop từ `64rem` dùng sidebar `220px`, hero Snapshot + Quick Notes right rail và nội dung linh hoạt; dưới `64rem` dùng compact navigation, action tiles hai cột và notes/topic cards một cột hoặc hai cột tùy chiều rộng. Standard có minh họa CSS nhẹ; Data Saver ẩn media trang trí, Ultra Lite giữ Snapshot/Deal/Top Notes/Write Note và bỏ shadow/ký hiệu không thiết yếu.
+
+Search, save port, xem note, confirm, action tiles và topic actions có phản hồi placeholder rõ ràng. Route có loading, retry/error và not-found state; Port Klang dùng để kiểm tra notes mâu thuẫn theo terminal. Emergency/Return shortcuts chỉ hiển thị logistics, liên hệ và cảnh báo xác nhận.
 
 ## Mock scenarios
 
@@ -97,19 +102,19 @@ Các nút Search, đổi terminal, lưu cảng, tab ngoài Overview và Shore Le
 
 Tên cảng vẫn là sample của prototype; Decision D-506 chưa chuyển sang `LOCKED`.
 
-Ngưỡng `MIN_COMMUNITY_CONFIRMATIONS = 2` chỉ là giả định hiển thị có tên, có reason code và có test trong prototype; nó không khóa policy trust của sản phẩm. Terminal/gate access hiện đã có trong mock read model bằng `TerminalPlaceAccess`; lọc nội dung đầy đủ theo terminal vẫn thuộc review gate F3.
+Ngưỡng `MIN_COMMUNITY_CONFIRMATIONS = 2` chỉ là giả định hiển thị có tên, có reason code và có test trong prototype; nó không khóa policy trust của sản phẩm. Notes hiện là mock public notes đã approved; write/moderation backend chưa có. Terminal/gate access vẫn dùng `TerminalPlaceAccess` thay vì nhồi vào `Place`.
 
 ## Performance budget
 
-Production build F3 hiện tại:
+Production build Port Notes hiện tại:
 
-- Initial entry: `91,421 B gzip`, gồm HTML + CSS + JS trong 3 request.
-- Initial JavaScript: `86,379 B gzip`.
-- Lazy Port Hub: `6,214 B gzip`; mock Busan `2,115 B`, Singapore `2,930 B`, Port Klang `2,541 B`, cộng shared chunks tải theo nhu cầu.
+- Initial entry: `93,659 B gzip`, gồm HTML + CSS + JS trong 3 request.
+- Initial JavaScript: `88,617 B gzip`.
+- Lazy Port Notes: `6,463 B gzip`; mock Busan `2,709 B`, Singapore `3,457 B`, Port Klang `2,956 B`, cộng shared chunks tải theo nhu cầu.
 - Hard gate: initial `<500,000 B gzip`; mục tiêu nội bộ `<200 KB gzip`.
 
 `scripts/check-bundle.mjs` đọc Vite manifest và cộng static entry graph. Milestone sau có thể khai báo thêm dynamic entry bắt buộc trước khi first screen hữu dụng bằng `BUNDLE_FIRST_SCREEN_DYNAMIC_ENTRIES`.
 
 ## Phạm vi chưa triển khai
 
-Branch F3 không triển khai Home/Search Results F2, Shore Planner UI F4, eSIM Compare UI F5, account/contribution F6, backend, auth, payment, map SDK hoặc image gallery. Các hành động tương lai trả trạng thái placeholder thay vì giả vờ chức năng đã tồn tại.
+Branch pivot không triển khai Home/Search Results F2, backend/auth, real note submission/moderation, eSIM purchase, booking, payment, marketplace, full social feed/chat, map SDK, image gallery hoặc medical advice. Các hành động tương lai trả trạng thái placeholder thay vì giả vờ chức năng đã tồn tại.

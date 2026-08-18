@@ -1,28 +1,30 @@
 import { TrustStatus } from "../../../components";
 import { useI18n } from "../../../i18n";
-import type { DataTrustModel } from "../port-hub-view-model";
-import styles from "../port-hub.module.css";
 
-export function DataTrustBanner({ model }: { readonly model: DataTrustModel }) {
+import type { PortNotesViewModel } from "../port-notes-view-model";
+import styles from "../port-notes.module.css";
+
+export interface DataTrustBannerProps {
+  readonly model: PortNotesViewModel["dataTrust"];
+}
+
+export function DataTrustBanner({ model }: DataTrustBannerProps) {
   const { t } = useI18n();
 
   return (
-    <section className={styles.trustBanner} aria-labelledby="trust-banner-heading">
-      <span className={styles.trustBannerSymbol} aria-hidden="true">
+    <aside className={styles.trustBanner} aria-labelledby="data-trust-heading">
+      <div className={styles.trustBannerSymbol} aria-hidden="true">
         ✓
-      </span>
-      <div>
-        <div className={styles.trustBannerHeading}>
-          <h2 id="trust-banner-heading">{t("portHub.trustBanner.heading")}</h2>
-          <TrustStatus {...model.trust} compact />
-        </div>
-        <p>{model.message}</p>
-        <details>
-          <summary>{t("portHub.trustBanner.how")}</summary>
-          <p>{model.detail}</p>
-          <p>{t("portHub.trustBanner.verifyOnArrival")}</p>
-        </details>
       </div>
-    </section>
+      <div>
+        <p className={styles.sectionEyebrow}>{t("portNotes.trust.eyebrow")}</p>
+        <h2 id="data-trust-heading">{model.message}</h2>
+        <p>{model.detail}</p>
+        <TrustStatus {...model.trust} />
+      </div>
+      <p className={styles.trustBannerAdvice}>
+        {t("portNotes.trust.advice")}
+      </p>
+    </aside>
   );
 }

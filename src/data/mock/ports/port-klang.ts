@@ -11,7 +11,7 @@ import {
   unknownTrust,
 } from "../fixture-builders";
 import { portKlangSearchEntry } from "../port-search-index";
-import { block, money, place, review, terminalAccess } from "../scenario-builders";
+import { block, money, note, place, review, terminalAccess } from "../scenario-builders";
 
 const [asiaSailProduct, asiaPlusProduct, , , malaysiaLocalProduct] =
   mockConnectivityProducts;
@@ -292,6 +292,68 @@ export const portKlangScenario = {
     },
   ],
   community: {
+    notes: [
+      note(
+        "note-klang-esim",
+        portKlangId,
+        "esim",
+        "eSIM khu vực thuận tiện hơn nếu cần hotspot",
+        "Gói khu vực có hotspot trong dữ liệu mẫu; kiểm tra vùng phủ theo terminal trước khi dùng.",
+        {
+          topic: "esim",
+          planName: "Asia Sail 5 GB",
+          hotspotWorked: true,
+          signalQuality: "usable",
+          videoCallQuality: "usable",
+        },
+        communityConfirmedTrust,
+        { terminalId: westportsTerminalId, confirmationCount: 5, usefulnessCount: 8 },
+      ),
+      note(
+        "note-klang-shuttle-1",
+        portKlangId,
+        "taxi",
+        "Báo cáo A: có shuttle theo giờ",
+        "Một thuyền viên ghi nhận shuttle theo giờ tại Westports; cần xác nhận chuyến cuối.",
+        {
+          topic: "taxi",
+          fromGate: "Main Gate",
+          transportType: "taxi",
+          priceAgreedBeforeRide: true,
+        },
+        conflictingTrust,
+        { terminalId: westportsTerminalId, gateName: "Main Gate", confirmationCount: 3 },
+      ),
+      note(
+        "note-klang-shuttle-2",
+        portKlangId,
+        "taxi",
+        "Báo cáo B: agent đặt xe riêng",
+        "Báo cáo khác không thấy shuttle và dùng xe do agent sắp xếp; không coi shuttle là chắc chắn.",
+        {
+          topic: "taxi",
+          fromGate: "Main Gate",
+          transportType: "taxi",
+          priceAgreedBeforeRide: false,
+        },
+        conflictingTrust,
+        { terminalId: westportsTerminalId, gateName: "Main Gate", confirmationCount: 3 },
+      ),
+      note(
+        "note-klang-places",
+        portKlangId,
+        "placesToVisit",
+        "Chưa có điểm tham quan đủ tin cậy cho chuyến ngắn",
+        "Ưu tiên chốt phương tiện và buffer quay lại trước khi chọn nơi đi.",
+        {
+          topic: "placesToVisit",
+          category: "short shore leave",
+          estimatedTimeNeeded: 150,
+        },
+        needsConfirmationTrust,
+        { terminalId: westportsTerminalId, confirmationCount: 1 },
+      ),
+    ],
     reviews: [
       review(
         "review-klang-1",

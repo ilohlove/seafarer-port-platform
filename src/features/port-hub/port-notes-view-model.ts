@@ -1,0 +1,598 @@
+import type { TrustStatusPresentation } from "../../components";
+import type { I18nContextValue, TranslationKey } from "../../i18n";
+import {
+  deriveTrustDisplayStatus,
+  type ConnectivityProduct,
+  type KnowledgeBlock,
+  type NoteTopic,
+  type PortHubReadModel,
+  type PortNote,
+  type TrustDisplayStatus,
+  type TrustEvidence,
+} from "../../types";
+
+type Translate = I18nContextValue["t"];
+type FormatMoney = I18nContextValue["formatMoney"];
+
+export interface PortSnapshotModel {
+  readonly name: string;
+  readonly location: string;
+  readonly terminal: string;
+  readonly gate: string;
+  readonly shoreLeave: string;
+  readonly internet: string;
+  readonly transport: string;
+  readonly weather: string;
+  readonly localTime: string;
+  readonly noteCount: number;
+  readonly pendingConfirmations: number;
+  readonly confidence: TrustStatusPresentation;
+}
+
+export interface QuickNoteItemModel {
+  readonly id: string;
+  readonly text: string;
+}
+
+export interface QuickNotesModel {
+  readonly bullets: readonly QuickNoteItemModel[];
+  readonly trust: TrustStatusPresentation;
+}
+
+export interface InternetDealModel {
+  readonly name: string;
+  readonly provider: string;
+  readonly price: string;
+  readonly plan: string;
+  readonly hotspot: string;
+  readonly signal: string;
+  readonly videoCall: string;
+  readonly evidence: string;
+  readonly trust: TrustStatusPresentation;
+}
+
+export interface PortNoteActionModel {
+  readonly id: string;
+  readonly symbol: string;
+  readonly label: string;
+  readonly description: string;
+  readonly count?: string;
+  readonly tone: "blue" | "green" | "orange" | "teal";
+}
+
+export interface PortNoteCardModel {
+  readonly id: string;
+  readonly topic: string;
+  readonly topicKey: NoteTopic;
+  readonly title: string;
+  readonly summary: string;
+  readonly context?: string;
+  readonly confirmations: string;
+  readonly usefulness: string;
+  readonly trust: TrustStatusPresentation;
+}
+
+export interface TopicPreviewModel {
+  readonly id: string;
+  readonly symbol: string;
+  readonly title: string;
+  readonly bullets: readonly string[];
+  readonly actionLabel: string;
+}
+
+export interface SafetyShortcutModel {
+  readonly emergencyName: string;
+  readonly emergencyPhone: string;
+  readonly emergencyTrust: TrustStatusPresentation;
+  readonly returnSummary: string;
+  readonly gate: string;
+  readonly note: string;
+}
+
+export interface PortNotesViewModel {
+  readonly snapshot: PortSnapshotModel;
+  readonly internetDeal: InternetDealModel;
+  readonly quickNotes: QuickNotesModel;
+  readonly actions: readonly PortNoteActionModel[];
+  readonly topNotes: readonly PortNoteCardModel[];
+  readonly topics: readonly TopicPreviewModel[];
+  readonly safety: SafetyShortcutModel;
+  readonly dataTrust: {
+    readonly message: string;
+    readonly detail: string;
+    readonly trust: TrustStatusPresentation;
+  };
+}
+
+const trustTranslationKeys = {
+  officialSource: "trust.officialSource",
+  communityConfirmed: "trust.communityConfirmed",
+  needsConfirmation: "trust.needsConfirmation",
+  conflictingReports: "trust.conflictingReports",
+  unknown: "trust.unknown",
+} as const;
+
+const trustPriority: Readonly<Record<TrustDisplayStatus, number>> = {
+  officialSource: 0,
+  communityConfirmed: 1,
+  needsConfirmation: 2,
+  unknown: 3,
+  conflictingReports: 4,
+};
+
+const topicTranslationKeys: Readonly<Record<NoteTopic, TranslationKey>> = {
+  esim: "portNotes.topic.esim",
+  physicalSim: "portNotes.topic.physicalSim",
+  taxi: "portNotes.topic.taxi",
+  rideHailing: "portNotes.topic.rideHailing",
+  foodOrder: "portNotes.topic.foodOrder",
+  supplies: "portNotes.topic.supplies",
+  shopping: "portNotes.topic.shopping",
+  placesToVisit: "portNotes.topic.placesToVisit",
+  seamanClub: "portNotes.topic.seamanClub",
+  shoreLeave: "portNotes.topic.shoreLeave",
+  warning: "portNotes.topic.warning",
+  generalTip: "portNotes.topic.generalTip",
+};
+
+const signalTranslationKeys = {
+  limited: "portNotes.internet.signal.limited",
+  usable: "portNotes.internet.signal.usable",
+  good: "portNotes.internet.signal.good",
+  excellent: "portNotes.internet.signal.excellent",
+} as const satisfies Record<"limited" | "usable" | "good" | "excellent", TranslationKey>;
+
+const videoTranslationKeys = {
+  limited: "portNotes.internet.video.limited",
+  usable: "portNotes.internet.video.usable",
+  good: "portNotes.internet.video.good",
+  unknown: "portNotes.internet.video.unknown",
+} as const satisfies Record<"limited" | "usable" | "good" | "unknown", TranslationKey>;
+
+function trustPresentation(
+  evidence: TrustEvidence,
+  t: Translate,
+): TrustStatusPresentation {
+  const status = deriveTrustDisplayStatus(evidence);
+  return { status, label: t(trustTranslationKeys[status]) };
+}
+
+function combinedTrust(
+  evidences: readonly TrustEvidence[],
+  t: Translate,
+): TrustStatusPresentation {
+  const status = evidences
+    .map(deriveTrustDisplayStatus)
+    .reduce<TrustDisplayStatus>(
+      (current, candidate) =>
+        trustPriority[candidate] > trustPriority[current] ? candidate : current,
+      "officialSource",
+    );
+  return { status, label: t(trustTranslationKeys[status]) };
+}
+
+function categorySummary(
+  hub: PortHubReadModel,
+  suffix: "food" | "shopping" | "welfare",
+  t: Translate,
+): string {
+  const category = hub.services.categories.find((candidate) =>
+    candidate.id.endsWith(`-${suffix}`),
+  );
+  const recommendation = category?.recommendations[0];
+  return recommendation
+    ? recommendation.place.name
+    : category && category.totalAvailable > 0
+      ? t("portNotes.topic.availableCount", { count: category.totalAvailable })
+      : t("portNotes.value.noData");
+}
+
+function productLabel(
+  product: ConnectivityProduct | undefined,
+  formatMoney: FormatMoney,
+  t: Translate,
+): string {
+  if (!product) {
+    return t("portNotes.internet.noDeal");
+  }
+  const data =
+    product.dataAllowanceGb === "unlimited"
+      ? t("portNotes.internet.unlimited")
+      : `${product.dataAllowanceGb} GB`;
+  return `${product.name} · ${formatMoney(product.price.amount, product.price.currency)} · ${data} / ${product.validityDays} ${t("portNotes.internet.days")}`;
+}
+
+function noteTopicLabel(topic: NoteTopic, t: Translate): string {
+  return t(topicTranslationKeys[topic]);
+}
+
+function notePriority(topic: NoteTopic): number {
+  const priorities: Partial<Record<NoteTopic, number>> = {
+    warning: 10,
+    shoreLeave: 9,
+    esim: 8,
+    physicalSim: 7,
+    taxi: 6,
+    rideHailing: 6,
+    foodOrder: 5,
+    supplies: 4,
+    shopping: 4,
+    placesToVisit: 3,
+    seamanClub: 2,
+    generalTip: 1,
+  };
+  return priorities[topic] ?? 0;
+}
+
+function publishedNotes(hub: PortHubReadModel): readonly PortNote[] {
+  return hub.community.notes.filter(
+    (note) =>
+      note.visibility === "public" && note.moderationState === "approved",
+  );
+}
+
+function bestProduct(
+  products: readonly ConnectivityProduct[],
+): ConnectivityProduct | undefined {
+  return products.reduce<ConnectivityProduct | undefined>((best, product) => {
+    if (!best || product.price.amount < best.price.amount) {
+      return product;
+    }
+    return best;
+  }, undefined);
+}
+
+function firstTopicNote(
+  notes: readonly PortNote[],
+  topics: readonly NoteTopic[],
+): PortNote | undefined {
+  return notes
+    .filter((note) => topics.includes(note.topic))
+    .sort(
+      (left, right) =>
+        right.usefulnessCount + right.confirmationCount -
+        (left.usefulnessCount + left.confirmationCount),
+    )[0];
+}
+
+export function buildPortNotesViewModel(
+  hub: PortHubReadModel,
+  t: Translate,
+  formatMoney: FormatMoney,
+): PortNotesViewModel {
+  const selectedTerminal =
+    hub.terminals.find((terminal) => terminal.id === hub.selectedTerminalId) ??
+    hub.terminals[0];
+  const terminalName = selectedTerminal?.name ?? t("portNotes.value.noData");
+  const gate =
+    selectedTerminal?.gateNames.join(" · ") || t("portNotes.value.noData");
+  const notes = publishedNotes(hub);
+  const product = bestProduct(hub.internet.esimProducts);
+  const esimNote = firstTopicNote(notes, ["esim"]);
+  const esimPayload =
+    esimNote?.payload.topic === "esim" ? esimNote.payload : undefined;
+  const taxiNote = firstTopicNote(notes, ["taxi", "rideHailing"]);
+  const taxiSummary =
+    hub.access.transport.find((item) =>
+      /taxi|ride|xe/i.test(`${item.label} ${item.summary}`),
+    )?.summary ??
+    taxiNote?.summary ??
+    t("portNotes.value.noData");
+  const internetSummary = product
+    ? productLabel(product, formatMoney, t)
+    : hub.internet.bestOption.summary;
+  const topicCount = (topics: readonly NoteTopic[]) =>
+    notes.filter((note) => topics.includes(note.topic)).length;
+  const confidence = combinedTrust(
+    [hub.port.trust, hub.dataHealth.trust],
+    t,
+  );
+
+  const rankedNotes = [...notes]
+    .sort(
+      (left, right) =>
+        notePriority(right.topic) - notePriority(left.topic) ||
+        right.usefulnessCount + right.confirmationCount -
+          (left.usefulnessCount + left.confirmationCount),
+    )
+    .slice(0, 5)
+    .map<PortNoteCardModel>((note) => {
+      const noteTerminal = hub.terminals.find(
+        (terminal) => terminal.id === note.terminalId,
+      );
+      const context = [
+        noteTerminal?.name,
+        note.gateName ? t("portNotes.note.gate", { gate: note.gateName }) : undefined,
+      ]
+        .filter((value): value is string => Boolean(value))
+        .join(" · ");
+      return {
+        id: note.id,
+        topic: noteTopicLabel(note.topic, t),
+        topicKey: note.topic,
+        title: note.title,
+        summary: note.summary,
+        context: context || undefined,
+        confirmations: t("portNotes.note.confirmations", {
+          count: note.confirmationCount,
+        }),
+        usefulness: t("portNotes.note.usefulness", {
+          count: note.usefulnessCount,
+        }),
+        trust: trustPresentation(note.trust, t),
+      };
+    });
+
+  const actionCount = (topics: readonly NoteTopic[]) => {
+    const count = topicCount(topics);
+    return count > 0 ? t("portNotes.action.count", { count }) : undefined;
+  };
+
+  return {
+    snapshot: {
+      name: hub.port.name,
+      location: [hub.port.city, hub.port.country.name].filter(Boolean).join(", "),
+      terminal: terminalName,
+      gate,
+      shoreLeave: hub.access.shoreLeave.summary,
+      internet: internetSummary,
+      transport: taxiSummary,
+      weather:
+        hub.overview.weatherPlaceholder ?? t("portNotes.snapshot.noWeather"),
+      localTime: t("portNotes.snapshot.noLocalTime"),
+      noteCount: notes.length,
+      pendingConfirmations: hub.community.openConfirmationCount,
+      confidence,
+    },
+    internetDeal: {
+      name: product?.name ?? t("portNotes.internet.noDeal"),
+      provider: product?.provider ?? t("portNotes.value.noData"),
+      price: product
+        ? formatMoney(product.price.amount, product.price.currency)
+        : t("portNotes.value.noData"),
+      plan: product
+        ? `${product.dataAllowanceGb === "unlimited" ? t("portNotes.internet.unlimited") : `${product.dataAllowanceGb} GB`} / ${product.validityDays} ${t("portNotes.internet.days")}`
+        : hub.internet.bestOption.summary,
+      hotspot: product
+        ? product.hotspotAllowed
+          ? t("portNotes.internet.hotspotYes")
+          : t("portNotes.internet.hotspotNo")
+        : t("portNotes.internet.hotspotUnknown"),
+      signal: esimPayload?.signalQuality
+        ? t(signalTranslationKeys[esimPayload.signalQuality])
+        : hub.internet.bestOption.summary,
+      videoCall: esimPayload?.videoCallQuality
+        ? t(videoTranslationKeys[esimPayload.videoCallQuality])
+        : t("portNotes.internet.videoUnknown"),
+      evidence: esimNote
+        ? `${esimNote.confirmationCount} ${t("portNotes.internet.seafarers")} · ${esimNote.usefulnessCount} ${t("portNotes.internet.crewUseful")}`
+        : t("portNotes.internet.prototypeEvidence"),
+      trust: combinedTrust(
+        [
+          product?.trust ?? hub.dataHealth.trust,
+          knowledgeTrust(hub.internet.bestOption),
+        ],
+        t,
+      ),
+    },
+    quickNotes: {
+      bullets: [
+        {
+          id: "terminal-access",
+          text: hub.access.terminalAccess.summary,
+        },
+        {
+          id: "shuttle",
+          text:
+            hub.access.transport[0]?.summary ??
+            t("portNotes.quickNotes.noTransport"),
+        },
+        {
+          id: "sim",
+          text:
+            hub.internet.physicalSim[0]?.summary ??
+            t("portNotes.quickNotes.noPhysicalSim"),
+        },
+        {
+          id: "food",
+          text: `${categorySummary(hub, "food", t)} · ${t("portNotes.quickNotes.foodHint")}`,
+        },
+        {
+          id: "taxi",
+          text: taxiNote?.summary ?? t("portNotes.quickNotes.noTaxi"),
+        },
+      ],
+      trust: combinedTrust(
+        [
+          knowledgeTrust(hub.access.terminalAccess),
+          ...(hub.access.transport[0]
+            ? [knowledgeTrust(hub.access.transport[0])]
+            : []),
+          knowledgeTrust(hub.internet.bestOption),
+        ],
+        t,
+      ),
+    },
+    actions: [
+      {
+        id: "compare-esim",
+        symbol: "e",
+        label: t("portNotes.action.compareEsim"),
+        description: t("portNotes.action.compareEsimDescription"),
+        count: actionCount(["esim"]),
+        tone: "blue",
+      },
+      {
+        id: "physical-sim",
+        symbol: "S",
+        label: t("portNotes.action.physicalSim"),
+        description: t("portNotes.action.physicalSimDescription"),
+        count: actionCount(["physicalSim"]),
+        tone: "teal",
+      },
+      {
+        id: "taxi",
+        symbol: "T",
+        label: t("portNotes.action.taxi"),
+        description: t("portNotes.action.taxiDescription"),
+        count: actionCount(["taxi", "rideHailing"]),
+        tone: "orange",
+      },
+      {
+        id: "food-supplies",
+        symbol: "F",
+        label: t("portNotes.action.foodSupplies"),
+        description: t("portNotes.action.foodSuppliesDescription"),
+        count: actionCount(["foodOrder", "supplies", "shopping"]),
+        tone: "orange",
+      },
+      {
+        id: "places",
+        symbol: "P",
+        label: t("portNotes.action.places"),
+        description: t("portNotes.action.placesDescription"),
+        count: actionCount(["placesToVisit"]),
+        tone: "green",
+      },
+      {
+        id: "seaman-club",
+        symbol: "C",
+        label: t("portNotes.action.seamanClub"),
+        description: t("portNotes.action.seamanClubDescription"),
+        count:
+          hub.welfareProviders.length > 0
+            ? t("portNotes.action.providerCount", {
+                count: hub.welfareProviders.length,
+              })
+            : actionCount(["seamanClub"]),
+        tone: "teal",
+      },
+      {
+        id: "write-note",
+        symbol: "+",
+        label: t("portNotes.action.writeNote"),
+        description: hub.community.contributionPrompt,
+        tone: "blue",
+      },
+    ],
+    topNotes: rankedNotes,
+    topics: [
+      {
+        id: "internet-sim",
+        symbol: "e",
+        title: t("portNotes.topicSection.internet"),
+        bullets: [
+          internetSummary,
+          hub.internet.physicalSim[0]?.summary ??
+            t("portNotes.topicSection.noPhysicalSim"),
+          hub.internet.wifi[0]?.summary ?? t("portNotes.topicSection.noWifi"),
+        ],
+        actionLabel: t("portNotes.topicSection.seeInternet"),
+      },
+      {
+        id: "shore-transport",
+        symbol: "T",
+        title: t("portNotes.topicSection.shoreLeave"),
+        bullets: [
+          hub.access.shoreLeave.summary,
+          taxiSummary,
+          hub.access.returnToShip.summary,
+        ],
+        actionLabel: t("portNotes.topicSection.seeTransport"),
+      },
+      {
+        id: "food-supplies",
+        symbol: "F",
+        title: t("portNotes.topicSection.food"),
+        bullets: [
+          categorySummary(hub, "food", t),
+          categorySummary(hub, "shopping", t),
+          ...notes
+            .filter((note) => ["foodOrder", "supplies", "shopping"].includes(note.topic))
+            .slice(0, 1)
+            .map((note) => note.summary),
+        ].slice(0, 3),
+        actionLabel: t("portNotes.topicSection.seeFood"),
+      },
+      {
+        id: "places",
+        symbol: "P",
+        title: t("portNotes.topicSection.places"),
+        bullets: notes
+          .filter((note) => note.topic === "placesToVisit")
+          .slice(0, 3)
+          .map((note) => note.summary)
+          .concat(
+            notes.some((note) => note.topic === "placesToVisit")
+              ? []
+              : [t("portNotes.topicSection.noPlaces")],
+          )
+          .slice(0, 3),
+        actionLabel: t("portNotes.topicSection.seePlaces"),
+      },
+      {
+        id: "seaman-club",
+        symbol: "C",
+        title: t("portNotes.topicSection.seamanClub"),
+        bullets: [
+          hub.welfareProviders[0]?.name ?? t("portNotes.topicSection.noClub"),
+          hub.welfareServices[0]?.scheduleSummary ??
+            t("portNotes.topicSection.noWelfareData"),
+          notes.find((note) => note.topic === "seamanClub")?.summary ??
+            t("portNotes.topicSection.confirmClub"),
+        ],
+        actionLabel: t("portNotes.topicSection.seeClub"),
+      },
+      {
+        id: "help",
+        symbol: "?",
+        title: t("portNotes.topicSection.help"),
+        bullets: [
+          t("portNotes.topicSection.pending", {
+            count: hub.community.openConfirmationCount,
+          }),
+          hub.dataHealth.missingAreas.length > 0
+            ? t("portNotes.topicSection.missing", {
+                value: hub.dataHealth.missingAreas.join(" · "),
+              })
+            : t("portNotes.topicSection.noMissing"),
+          hub.community.contributionPrompt,
+        ],
+        actionLabel: t("portNotes.topicSection.writeNote"),
+      },
+    ],
+    safety: {
+      emergencyName:
+        hub.emergencyContacts[0]?.displayName ?? t("portNotes.safety.noEmergency"),
+      emergencyPhone:
+        hub.emergencyContacts[0]?.phoneShortCode ??
+        hub.emergencyContacts[0]?.phoneLocalFormat ??
+        t("portNotes.value.noData"),
+      emergencyTrust: trustPresentation(
+        hub.emergencyContacts[0]?.trust ?? hub.dataHealth.trust,
+        t,
+      ),
+      returnSummary: hub.access.returnToShip.summary,
+      gate,
+      note: t("portNotes.safety.note"),
+    },
+    dataTrust: {
+      message: t("portNotes.trust.message"),
+      detail: t("portNotes.trust.detail", {
+        notes: notes.length,
+        pending: hub.community.openConfirmationCount,
+        missing: hub.dataHealth.missingAreas.length,
+        conflicts: hub.dataHealth.conflictingAreas.length,
+      }),
+      trust: combinedTrust([hub.dataHealth.trust], t),
+    },
+  };
+}
+
+function knowledgeTrust(block: KnowledgeBlock): TrustEvidence {
+  return {
+    basis: block.meta.trustBasis,
+    conflictState: block.meta.conflictState,
+    confirmationCount: block.meta.confirmationCount,
+  };
+}

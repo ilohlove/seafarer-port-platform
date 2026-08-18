@@ -9,7 +9,7 @@ import {
   unknownTrust,
 } from "../fixture-builders";
 import { busanPortSearchEntry } from "../port-search-index";
-import { block, money, place, review, terminalAccess } from "../scenario-builders";
+import { block, money, note, place, review, terminalAccess } from "../scenario-builders";
 
 const [asiaSailProduct, asiaPlusProduct, , koreaLocalProduct] =
   mockConnectivityProducts;
@@ -245,6 +245,87 @@ export const busanScenario = {
   welfareProviders: [],
   welfareServices: [],
   community: {
+    notes: [
+      note(
+        "note-busan-esim",
+        busanPortId,
+        "esim",
+        "Korea Local 10 GB dùng ổn cho WhatsApp",
+        "Gói cài trước; hotspot đã được ghi nhận nhưng tín hiệu có thể yếu dưới boong.",
+        {
+          topic: "esim",
+          planName: "Korea Local 10 GB",
+          hotspotWorked: true,
+          signalQuality: "good",
+          videoCallQuality: "usable",
+        },
+        communityConfirmedTrust,
+        {
+          terminalId: busanNewPortTerminalId,
+          gateName: "Crew Gate",
+          confirmationCount: 6,
+          usefulnessCount: 9,
+        },
+      ),
+      note(
+        "note-busan-physical-sim",
+        busanPortId,
+        "physicalSim",
+        "Chưa có điểm bán SIM vật lý đã xác nhận",
+        "Hỏi agent hoặc seafarer center trước khi đi tìm booth; không dùng số cá nhân chưa được kiểm duyệt.",
+        {
+          topic: "physicalSim",
+          contactIsPublicBusiness: false,
+          whereToBuy: "Chưa rõ",
+        },
+        needsConfirmationTrust,
+        { terminalId: busanNewPortTerminalId, confirmationCount: 1 },
+      ),
+      note(
+        "note-busan-taxi",
+        busanPortId,
+        "taxi",
+        "Hỏi giá trước khi rời Crew Gate",
+        "Điểm đón và shuttle có thể đổi theo terminal; xác nhận giá trước khi lên xe.",
+        {
+          topic: "taxi",
+          fromGate: "Crew Gate",
+          transportType: "taxi",
+          priceAgreedBeforeRide: true,
+        },
+        needsConfirmationTrust,
+        { terminalId: busanNewPortTerminalId, gateName: "Crew Gate" },
+      ),
+      note(
+        "note-busan-food",
+        busanPortId,
+        "foodOrder",
+        "Quick Meal Stop ở ngoài terminal",
+        "Có báo cáo phục vụ nhanh; cần tính thời gian đi và quay lại trong buffer 75 phút mẫu.",
+        {
+          topic: "foodOrder",
+          orderMethod: "Tại quầy",
+          pickupPoint: "Ngoài terminal",
+          paymentMethod: "Chưa rõ",
+        },
+        needsConfirmationTrust,
+        { terminalId: busanNewPortTerminalId, gateName: "Crew Gate" },
+      ),
+      note(
+        "note-busan-supplies",
+        busanPortId,
+        "supplies",
+        "Chưa có ghi nhận supplies đủ tin cậy",
+        "Ưu tiên hỏi crew đã ghé gần đây; dữ liệu mua sắm của terminal này còn thiếu.",
+        {
+          topic: "supplies",
+          itemsAvailable: [],
+          internationalCardWorked: false,
+        },
+        unknownTrust,
+        { terminalId: busanNewPortTerminalId, confirmationCount: 0 },
+      ),
+    ],
     reviews: [
       review(
         "review-busan-1",

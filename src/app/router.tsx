@@ -6,15 +6,15 @@ import { FoundationRoute } from "../features/foundation";
 import { useI18n } from "../i18n";
 import { AppShell } from "./shell";
 
-const PortHubRoute = lazy(() =>
-  import("../features/port-hub/PortHubRoute").then((module) => ({
-    default: module.PortHubRoute,
+const PortNotesRoute = lazy(() =>
+  import("../features/port-hub/PortNotesRoute").then((module) => ({
+    default: module.PortNotesRoute,
   })),
 );
 
 function RouteFallback() {
   const { t } = useI18n();
-  return <Skeleton label={t("portHub.loading")} lines={6} variant="card" />;
+  return <Skeleton label={t("portNotes.loading")} lines={6} variant="card" />;
 }
 
 function NotImplementedRoute() {
@@ -37,7 +37,7 @@ export function AppRouter() {
         <Suspense fallback={<RouteFallback />}>
           <Routes>
             <Route path="/" element={<FoundationRoute />} />
-            <Route path="/ports/:portSlug" element={<PortHubRoute />} />
+            <Route path="/ports/:portSlug" element={<PortNotesRoute />} />
             <Route path="*" element={<NotImplementedRoute />} />
           </Routes>
         </Suspense>

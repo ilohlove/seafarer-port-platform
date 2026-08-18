@@ -8,7 +8,7 @@ import {
   officialTrust,
 } from "../fixture-builders";
 import { singaporePortSearchEntry } from "../port-search-index";
-import { block, money, place, review, terminalAccess } from "../scenario-builders";
+import { block, money, note, place, review, terminalAccess } from "../scenario-builders";
 
 const [asiaSailProduct, asiaPlusProduct, singaporeLocalProduct] =
   mockConnectivityProducts;
@@ -401,6 +401,89 @@ export const singaporeScenario = {
     },
   ],
   community: {
+    notes: [
+      note(
+        "note-sg-esim",
+        singaporePortId,
+        "esim",
+        "Singapore Local 10 GB là lựa chọn nhanh",
+        "Cài trước khi xuống tàu để giảm thời gian tìm SIM; hotspot được ghi nhận hoạt động.",
+        {
+          topic: "esim",
+          planName: "Singapore Local 10 GB",
+          hotspotWorked: true,
+          signalQuality: "excellent",
+          videoCallQuality: "good",
+        },
+        communityConfirmedTrust,
+        {
+          terminalId: pasirPanjangTerminalId,
+          gateName: "Main Gate",
+          confirmationCount: 9,
+          usefulnessCount: 14,
+        },
+      ),
+      note(
+        "note-sg-physical-sim",
+        singaporePortId,
+        "physicalSim",
+        "SIM vật lý có tại cửa hàng tiện lợi ngoài gate",
+        "Có thể cần hộ chiếu để kích hoạt; hỏi cửa hàng về gói data trước khi trả tiền.",
+        {
+          topic: "physicalSim",
+          sellerNameOrLocation: "Cửa hàng tiện lợi ngoài Main Gate",
+          contactIsPublicBusiness: true,
+          whereToBuy: "Outside Main Gate",
+        },
+        communityConfirmedTrust,
+        { terminalId: pasirPanjangTerminalId, gateName: "Main Gate" },
+      ),
+      note(
+        "note-sg-transport",
+        singaporePortId,
+        "rideHailing",
+        "Hỏi chuyến shuttle cuối trước khi rời tàu",
+        "Crew shuttle giúp ra gate; taxi và ride-hailing đón ở khu vực ngoài gate.",
+        {
+          topic: "rideHailing",
+          fromGate: "Main Gate",
+          transportType: "rideHailing",
+          priceAgreedBeforeRide: true,
+        },
+        communityConfirmedTrust,
+        { terminalId: pasirPanjangTerminalId, gateName: "Main Gate" },
+      ),
+      note(
+        "note-sg-food",
+        singaporePortId,
+        "foodOrder",
+        "Food Court gần gate cho chuyến đi ngắn",
+        "Có lựa chọn phục vụ nhanh và một số món halal đã được ghi nhận.",
+        {
+          topic: "foodOrder",
+          orderMethod: "Tại quầy",
+          pickupPoint: "Outside Main Gate",
+          paymentMethod: "Thẻ quốc tế được ghi nhận",
+        },
+        communityConfirmedTrust,
+        { terminalId: pasirPanjangTerminalId, gateName: "Main Gate" },
+      ),
+      note(
+        "note-sg-seaman-club",
+        singaporePortId,
+        "seamanClub",
+        "Seafarers’ Centre có Wi-Fi và hỗ trợ pickup",
+        "Pickup và return transport cần được sắp xếp trước khi rời centre.",
+        {
+          topic: "seamanClub",
+          providerName: "Seafarers’ Centre (sample)",
+          pickupAvailable: true,
+          wifiQuality: "good",
+        },
+        officialTrust,
+        { terminalId: pasirPanjangTerminalId, gateName: "Main Gate" },
+      ),
+    ],
     reviews: [
       review(
         "review-sg-1",

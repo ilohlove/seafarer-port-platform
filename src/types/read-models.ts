@@ -4,6 +4,7 @@ import type {
   EmergencyContact,
   EntityId,
   Place,
+  PortNote,
   Review,
   TerminalPlaceAccess,
   WelfareProvider,
@@ -111,6 +112,7 @@ export interface PortServicesReadModel {
 
 export interface PortCommunityReadModel {
   readonly reviews: readonly Review[];
+  readonly notes: readonly PortNote[];
   readonly openConfirmationCount: number;
   readonly contributionPrompt: string;
 }

@@ -4,6 +4,9 @@ import type {
   MoneyObservation,
   Place,
   PlaceCategory,
+  PortNote,
+  PortNotePayload,
+  NoteTopic,
   Review,
   TerminalPlaceAccess,
   TransportMode,
@@ -134,5 +137,41 @@ export function review(
     createdAt: "2026-06-20T08:00:00Z",
     moderationState: "approved",
     trust,
+  };
+}
+
+export function note(
+  id: string,
+  portId: string,
+  topic: NoteTopic,
+  title: string,
+  summary: string,
+  payload: PortNotePayload,
+  trust: TrustEvidence,
+  options: {
+    readonly terminalId?: string;
+    readonly gateName?: string;
+    readonly confirmationCount?: number;
+    readonly usefulnessCount?: number;
+    readonly publicAlias?: string;
+    readonly createdAt?: string;
+  } = {},
+): PortNote {
+  return {
+    id,
+    portId,
+    topic,
+    visibility: "public",
+    title,
+    summary,
+    payload,
+    moderationState: "approved",
+    confirmationCount: options.confirmationCount ?? trust.confirmationCount,
+    usefulnessCount: options.usefulnessCount ?? trust.confirmationCount + 2,
+    createdAt: options.createdAt ?? "2026-07-01T00:00:00Z",
+    trust,
+    ...(options.terminalId ? { terminalId: options.terminalId } : {}),
+    ...(options.gateName ? { gateName: options.gateName } : {}),
+    ...(options.publicAlias ? { publicAlias: options.publicAlias } : {}),
   };
 }

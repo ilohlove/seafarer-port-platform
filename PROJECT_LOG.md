@@ -1,4 +1,7 @@
 # Project Log
+- [2026-08-18 19:39] Fixed full-width and low-bandwidth Port Notes responsive layouts.
+- [2026-08-18 19:15] Tinh chỉnh Port Notes theo reference với hero Internet strip, Quick Notes rail, sidebar cộng đồng và responsive spacing.
+- [2026-08-18 17:38] Refactor F3 dashboard thành Seafarer Port Notes với structured community notes, eSIM hook và need-based actions.
 - [2026-08-18 17:09] Thiết lập tài liệu pivot Seafarer Port Notes và prompt Codex thực thi.
 - [2026-08-18 12:14] Hoàn thành F3 Port Hub visual prototype với dashboard theo terminal, trust rõ ràng, return logistics và bandwidth modes.
 - [2026-08-18 10:37] Thiết lập project operating system cho tài liệu, chuyên gia và review.

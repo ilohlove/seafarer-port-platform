@@ -215,6 +215,90 @@ export interface Review {
   readonly trust: TrustEvidence;
 }
 
+export type NoteTopic =
+  | "esim"
+  | "physicalSim"
+  | "taxi"
+  | "rideHailing"
+  | "foodOrder"
+  | "supplies"
+  | "shopping"
+  | "placesToVisit"
+  | "seamanClub"
+  | "shoreLeave"
+  | "warning"
+  | "generalTip";
+
+export type NoteVisibility = "public" | "private";
+
+export type PortNotePayload =
+  | {
+      readonly topic: "esim";
+      readonly planName?: string;
+      readonly hotspotWorked?: boolean;
+      readonly signalQuality?: "limited" | "usable" | "good" | "excellent";
+      readonly videoCallQuality?: "limited" | "usable" | "good" | "unknown";
+    }
+  | {
+      readonly topic: "physicalSim";
+      readonly sellerNameOrLocation?: string;
+      readonly contactIsPublicBusiness: boolean;
+      readonly whereToBuy?: string;
+    }
+  | {
+      readonly topic: "taxi" | "rideHailing";
+      readonly fromGate?: string;
+      readonly toAreaOrPlace?: string;
+      readonly transportType: "taxi" | "rideHailing" | "localApp" | "bus";
+      readonly priceAgreedBeforeRide?: boolean;
+    }
+  | {
+      readonly topic: "foodOrder";
+      readonly orderMethod?: string;
+      readonly pickupPoint?: string;
+      readonly paymentMethod?: string;
+    }
+  | {
+      readonly topic: "supplies" | "shopping";
+      readonly placeName?: string;
+      readonly itemsAvailable?: readonly string[];
+      readonly internationalCardWorked?: boolean;
+    }
+  | {
+      readonly topic: "placesToVisit";
+      readonly placeName?: string;
+      readonly category?: string;
+      readonly estimatedTimeNeeded?: number;
+    }
+  | {
+      readonly topic: "seamanClub";
+      readonly providerName?: string;
+      readonly pickupAvailable?: boolean;
+      readonly wifiQuality?: "limited" | "usable" | "good" | "unknown";
+    }
+  | {
+      readonly topic: "shoreLeave" | "warning" | "generalTip";
+      readonly warning?: string;
+    };
+
+export interface PortNote {
+  readonly id: EntityId;
+  readonly portId: EntityId;
+  readonly terminalId?: EntityId;
+  readonly gateName?: string;
+  readonly topic: NoteTopic;
+  readonly visibility: NoteVisibility;
+  readonly title: string;
+  readonly summary: string;
+  readonly payload: PortNotePayload;
+  readonly publicAlias?: string;
+  readonly moderationState: ReviewModerationState;
+  readonly confirmationCount: number;
+  readonly usefulnessCount: number;
+  readonly createdAt: IsoDateTime;
+  readonly trust: TrustEvidence;
+}
+
 export interface ConnectivityCoverage {
   readonly countryCode: string;
   readonly portIds: readonly EntityId[];
