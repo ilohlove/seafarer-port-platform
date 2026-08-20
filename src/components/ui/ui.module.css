@@ -17,6 +17,7 @@
 }
 
 .searchLabel {
+  color: var(--search-label-color, var(--color-text));
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
 }
@@ -37,9 +38,10 @@
   min-block-size: var(--tap-target);
   padding: var(--space-3);
   padding-inline-end: var(--space-7);
-  border: var(--border-width) solid var(--color-border-strong);
+  border: var(--border-width) solid
+    var(--search-input-border, var(--color-border-strong));
   border-radius: var(--radius-md);
-  background: var(--color-surface);
+  background: var(--search-input-bg, var(--color-surface));
   color: var(--color-text);
 }
 
@@ -49,7 +51,7 @@
 }
 
 .searchInput:focus-visible {
-  border-color: var(--color-accent);
+  border-color: var(--search-input-focus, var(--color-accent));
 }
 
 .searchInput::-webkit-search-cancel-button {
@@ -84,10 +86,11 @@
   justify-content: center;
   min-block-size: var(--tap-target);
   padding-inline: var(--space-4);
-  border: var(--border-width) solid var(--color-accent);
+  border: var(--border-width) solid
+    var(--search-button-border, var(--color-accent));
   border-radius: var(--radius-md);
-  background: var(--color-accent);
-  color: var(--color-on-accent);
+  background: var(--search-button-bg, var(--color-accent));
+  color: var(--search-button-text, var(--color-on-accent));
   cursor: pointer;
   font-weight: var(--font-weight-bold);
   text-align: center;
@@ -96,8 +99,15 @@
 
 .searchButton:hover,
 .emptyAction:hover {
-  border-color: var(--color-accent-hover);
-  background: var(--color-accent-hover);
+  border-color: var(
+    --search-button-hover-border,
+    var(--color-accent-hover)
+  );
+  background: var(--search-button-hover-bg, var(--color-accent-hover));
+}
+
+.searchButton:disabled {
+  opacity: var(--search-button-disabled-opacity, 0.58);
 }
 
 .helperText {

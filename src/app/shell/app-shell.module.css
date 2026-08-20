@@ -141,7 +141,7 @@
 }
 
 .portNotesShell :global(.wide-container) {
-  inline-size: min(100% - (2 * var(--space-4)), 80rem);
+  inline-size: min(100% - (2 * var(--space-4)), 76rem);
 }
 
 @media (max-width: 47.99rem) {
@@ -234,7 +234,7 @@
 
 @media (min-width: 48rem) {
   .portNotesShell :global(.wide-container) {
-    inline-size: min(100% - (2 * var(--space-6)), 80rem);
+    inline-size: min(100% - (2 * var(--space-6)), 76rem);
   }
 }
 

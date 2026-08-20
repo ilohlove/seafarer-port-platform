@@ -30,7 +30,7 @@ describe("Application shell and demo routing", () => {
     expect(screen.getAllByText("CrewPort").length).toBeGreaterThan(0);
     expect(document.documentElement.dataset.theme).toBe("light");
     expect(
-      screen.getByRole("heading", { name: "Internet / eSIM phù hợp nhất" }),
+      screen.getByRole("heading", { name: "Thông tin Internet / eSIM" }),
     ).toBeVisible();
   });
 
@@ -44,7 +44,7 @@ describe("Application shell and demo routing", () => {
     );
 
     expect(
-      await screen.findByRole("heading", { name: "Best Internet / eSIM Deal" }),
+      await screen.findByRole("heading", { name: "Internet / eSIM information" }),
     ).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute("lang", "en");
 

@@ -34,7 +34,7 @@ describe("CrewPort Port Notes route", () => {
     );
     expect(screen.getByTestId("port-notes-media")).toBeVisible();
     expect(
-      screen.getByRole("heading", { name: "Internet / eSIM phù hợp nhất" }),
+      screen.getByRole("heading", { name: "Thông tin Internet / eSIM" }),
     ).toBeVisible();
     expect(screen.getByRole("heading", { name: "Korea Local 10 GB" })).toBeVisible();
     expect(screen.getAllByText(/9,00 USD/).length).toBeGreaterThan(0);
@@ -43,8 +43,15 @@ describe("CrewPort Port Notes route", () => {
       name: "Cần biết ngay",
     });
     expect(
-      within(quickNotesHeading.closest("aside")!).getAllByRole("listitem"),
+      within(quickNotesHeading.closest("section")!).getAllByRole("listitem"),
     ).toHaveLength(3);
+
+    const desktopNavigation = document.querySelector('[data-navigation="desktop"]');
+    expect(desktopNavigation).toHaveAttribute(
+      "aria-label",
+      "Điều hướng ghi chú cảng",
+    );
+    expect(desktopNavigation?.querySelectorAll("nav a, nav button")).toHaveLength(7);
 
     const mobileSearch = document.querySelector('[data-search-placement="mobile"]');
     expect(mobileSearch).not.toBeNull();
@@ -72,7 +79,7 @@ describe("CrewPort Port Notes route", () => {
       "SIM vật lý",
       "Taxi / Grab",
       "Đồ ăn",
-      "Welfare",
+      "Hỗ trợ thuyền viên",
       "Viết ghi chú",
     ]) {
       expect(
@@ -90,7 +97,7 @@ describe("CrewPort Port Notes route", () => {
     expect(writeNoteAction).toHaveAttribute("data-action-id", "write-note");
 
     await user.click(writeNoteAction);
-    expect(screen.getByText(/placeholder trực quan/)).toBeVisible();
+    expect(screen.getByText(/mô phỏng giao diện/)).toBeVisible();
   });
 
   test("switches among four Busan demo contexts without mixing facts", async () => {
@@ -154,7 +161,7 @@ describe("CrewPort Port Notes route", () => {
     render(<App />);
     await screen.findByRole("heading", { name: "Busan New Port" });
     const welfareSection = screen
-      .getByRole("heading", { name: "Welfare / Trung tâm thuyền viên" })
+      .getByRole("heading", { name: "Hỗ trợ / Trung tâm thuyền viên" })
       .closest("section")!;
     expect(
       within(welfareSection).getByRole("heading", {
@@ -164,7 +171,7 @@ describe("CrewPort Port Notes route", () => {
     const serviceBadges = within(welfareSection).getByLabelText(
       "Dịch vụ được ghi nhận",
     );
-    for (const badge of ["Wi-Fi", "Shuttle", "SIM", "KRW", "Hỗ trợ"]) {
+    for (const badge of ["Wi-Fi", "Xe đưa đón", "SIM", "KRW", "Hỗ trợ"]) {
       expect(within(serviceBadges).getByText(new RegExp(`${badge}$`))).toBeVisible();
     }
     expect(within(welfareSection).getByText("Chưa có số liên hệ đã xác nhận")).toBeVisible();
@@ -182,6 +189,33 @@ describe("CrewPort Port Notes route", () => {
     expect(section).toHaveTextContent("Hữu ích cho");
     expect(section).not.toHaveTextContent(/★|star rating|premium/i);
     expect(screen.queryByText(/Premium|Gói trả phí/i)).toBeNull();
+  });
+
+  test("uses Vietnamese Port Notes labels and keeps five mobile navigation items", async () => {
+    render(<App />);
+    await screen.findByRole("heading", { name: "Busan New Port" });
+
+    expect(screen.getByRole("heading", { name: "Chủ đề cần xem" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Cần thêm trợ giúp?" })).toBeVisible();
+
+    for (const leftover of [
+      /Topic previews/i,
+      /Need More Help\?/i,
+      /Data trust/i,
+      /Emergency shortcut/i,
+      /Return to Ship/i,
+      /Return Card/i,
+      /Choose what you need/i,
+      /Compare eSIM/i,
+    ]) {
+      expect(screen.queryByText(leftover)).toBeNull();
+    }
+
+    const mobileNavigation = screen.getByRole("navigation", {
+      name: "Điều hướng ghi chú cảng",
+    });
+    expect(mobileNavigation).toHaveAttribute("data-navigation", "mobile");
+    expect(mobileNavigation.querySelectorAll("a, button")).toHaveLength(5);
   });
 
   test("keeps notes and Write a Note usable in Data Saver and Ultra Lite", async () => {
@@ -232,7 +266,7 @@ describe("CrewPort Port Notes route", () => {
     expect(
       await screen.findByRole("heading", { name: "Không tìm thấy dữ liệu cảng" }),
     ).toBeVisible();
-    expect(screen.getByRole("link", { name: "Về Foundation" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Về trang nền tảng" })).toHaveAttribute(
       "href",
       "/foundation",
     );

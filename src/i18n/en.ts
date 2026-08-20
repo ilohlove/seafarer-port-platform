@@ -320,7 +320,7 @@ export const enDictionary = {
   "portNotes.snapshot.internetStrip": "Best Internet",
   "portNotes.snapshot.media": "Lightweight Port Notes visual",
   "portNotes.deal.eyebrow": "MVP hook",
-  "portNotes.deal.heading": "Best Internet / eSIM Deal",
+  "portNotes.deal.heading": "Internet / eSIM information",
   "portNotes.deal.choose": "Choose what you need",
   "portNotes.deal.actionsCaption": "Shortcuts to useful notes",
   "portNotes.deal.compare": "Compare eSIM",

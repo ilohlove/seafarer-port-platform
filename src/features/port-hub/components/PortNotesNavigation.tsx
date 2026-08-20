@@ -14,7 +14,11 @@ export function PortNotesNavigation({
 
   return (
     <>
-      <aside className={styles.sidebar} aria-label={t("portNotes.nav.label")}>
+      <aside
+        className={styles.sidebar}
+        aria-label={t("portNotes.nav.label")}
+        data-navigation="desktop"
+      >
         <div className={styles.sidebarIdentity}>
           <span className={styles.sidebarMark} aria-hidden="true">
             CP
@@ -58,6 +62,7 @@ export function PortNotesNavigation({
       <nav
         className={styles.mobileBottomNavigation}
         aria-label={t("portNotes.nav.label")}
+        data-navigation="mobile"
       >
         <a href="/">
           <span aria-hidden="true">⌂</span>

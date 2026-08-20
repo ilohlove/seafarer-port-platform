@@ -16,7 +16,7 @@ export function QuickNotesPanel({
   const headingId = "quick-notes-heading";
 
   return (
-    <aside
+    <section
       className={styles.quickNotes}
       aria-labelledby={headingId}
     >
@@ -43,6 +43,6 @@ export function QuickNotesPanel({
           {t("portNotes.quickNotes.viewAll")}
         </button>
       </div>
-    </aside>
+    </section>
   );
 }

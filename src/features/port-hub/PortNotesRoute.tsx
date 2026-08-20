@@ -215,32 +215,30 @@ export function PortNotesRoute() {
               }}
             />
 
-            <div className={styles.topGrid}>
-              <div
-                className={styles.topPrimary}
-                id="port-context-panel"
-                role="tabpanel"
-                aria-labelledby={
-                  viewModel.activeContextId
-                    ? `port-context-tab-${viewModel.activeContextId}`
-                    : undefined
-                }
-              >
-                <PortSnapshot
-                  model={viewModel.snapshot}
-                  deal={viewModel.internetDeal}
-                  onPlaceholder={showPlaceholder}
-                  showMedia={mode === "standard"}
-                />
-                {viewModel.alerts.map((alert) => (
-                  <PortSafetyAlert model={alert} key={alert.id} />
-                ))}
-              </div>
-              <QuickNotesPanel
-                model={viewModel.quickNotes}
+            <div
+              className={styles.topPrimary}
+              id="port-context-panel"
+              role="tabpanel"
+              aria-labelledby={
+                viewModel.activeContextId
+                  ? `port-context-tab-${viewModel.activeContextId}`
+                  : undefined
+              }
+            >
+              <PortSnapshot
+                model={viewModel.snapshot}
+                deal={viewModel.internetDeal}
                 onPlaceholder={showPlaceholder}
+                showMedia={mode === "standard"}
               />
+              {viewModel.alerts.map((alert) => (
+                <PortSafetyAlert model={alert} key={alert.id} />
+              ))}
             </div>
+            <QuickNotesPanel
+              model={viewModel.quickNotes}
+              onPlaceholder={showPlaceholder}
+            />
 
             <MainActionTiles
               actions={viewModel.actions}

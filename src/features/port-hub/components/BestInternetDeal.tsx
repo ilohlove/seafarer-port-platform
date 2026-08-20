@@ -46,21 +46,21 @@ export function BestInternetDeal({
         <button
           className={styles.primaryButton}
           type="button"
-          onClick={() => onPlaceholder("Compare eSIM")}
+          onClick={() => onPlaceholder(t("portNotes.deal.compare"))}
         >
           {t("portNotes.deal.compare")}
         </button>
         <button
           className={styles.secondaryButton}
           type="button"
-          onClick={() => onPlaceholder("Read eSIM notes")}
+          onClick={() => onPlaceholder(t("portNotes.deal.read"))}
         >
           {t("portNotes.deal.read")}
         </button>
         <button
           className={styles.textButton}
           type="button"
-          onClick={() => onPlaceholder("Add eSIM note")}
+          onClick={() => onPlaceholder(t("portNotes.deal.add"))}
         >
           {t("portNotes.deal.add")}
         </button>
