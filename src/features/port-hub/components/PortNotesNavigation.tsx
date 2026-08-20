@@ -17,7 +17,7 @@ export function PortNotesNavigation({
       <aside className={styles.sidebar} aria-label={t("portNotes.nav.label")}>
         <div className={styles.sidebarIdentity}>
           <span className={styles.sidebarMark} aria-hidden="true">
-            SN
+            CP
           </span>
           <div>
             <strong>{t("portNotes.nav.brand")}</strong>

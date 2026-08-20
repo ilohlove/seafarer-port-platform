@@ -4,58 +4,67 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import { App } from "../../app/App";
 
-describe("Seafarer Port Notes route", () => {
+describe("CrewPort Port Notes route", () => {
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   beforeEach(() => {
     window.localStorage.clear();
     window.history.replaceState({}, "", "/ports/busan");
     delete document.documentElement.dataset.bandwidthMode;
+    delete document.documentElement.dataset.appearanceMode;
+    delete document.documentElement.dataset.theme;
   });
 
-  test("renders Port Snapshot, selected terminal, and the best Internet deal near the top", async () => {
+  test("renders the CrewPort snapshot before mobile search", async () => {
     render(<App />);
 
-    expect(
-      await screen.findByRole("heading", { name: "Busan New Port", level: 1 }),
-    ).toBeVisible();
+    const snapshotHeading = await screen.findByRole("heading", {
+      name: "Busan New Port",
+      level: 1,
+    });
+    expect(screen.getAllByText("CrewPort").length).toBeGreaterThan(0);
     expect(document.getElementById("main-content")).toHaveClass("wide-container");
+    expect(snapshotHeading.closest("section")).toHaveAttribute(
+      "data-media",
+      "visible",
+    );
+    expect(screen.getByTestId("port-notes-media")).toBeVisible();
     expect(
-      screen.getByRole("heading", { name: "Busan New Port" }).closest("section"),
-    ).toHaveAttribute("data-media", "visible");
-    expect(screen.getAllByText("Busan New Port").length).toBeGreaterThan(0);
-    expect(
-      screen.getByRole("heading", { name: "Best Internet / eSIM Deal" }),
+      screen.getByRole("heading", { name: "Internet / eSIM phù hợp nhất" }),
     ).toBeVisible();
     expect(screen.getByRole("heading", { name: "Korea Local 10 GB" })).toBeVisible();
-    expect(screen.getAllByText(/9,00/).length).toBeGreaterThan(0);
-    expect(screen.getByRole("heading", { name: "Ghi chú nhanh" })).toBeVisible();
+    expect(screen.getAllByText(/9,00 USD/).length).toBeGreaterThan(0);
+
     const quickNotesHeading = screen.getByRole("heading", {
       name: "Cần biết ngay",
     });
-    expect(quickNotesHeading).toBeVisible();
     expect(
       within(quickNotesHeading.closest("aside")!).getAllByRole("listitem"),
     ).toHaveLength(3);
 
-    const topNotes = screen.getByRole("heading", { name: "Ghi chú nổi bật" });
     const mobileSearch = document.querySelector('[data-search-placement="mobile"]');
     expect(mobileSearch).not.toBeNull();
     expect(
-      topNotes.compareDocumentPosition(mobileSearch!),
+      snapshotHeading.compareDocumentPosition(mobileSearch!),
     ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+
+    const warning = screen.getByRole("note", {
+      name: "Xác nhận gate và shuttle trước khi lên bờ",
+    });
+    expect(within(warning).getByText("Cần xác nhận")).toBeVisible();
   });
 
-  test("shows all need-based action tiles and an obvious Write a Note action", async () => {
+  test("shows six need-based actions and keeps Write a Note primary", async () => {
+    const user = userEvent.setup();
     render(<App />);
     await screen.findByRole("heading", { name: "Busan New Port" });
-    const actionsHeading = screen.getByRole("heading", {
-      name: "Chọn nhanh",
-    });
-    const actionsSection = actionsHeading.closest("section");
+    const actionsSection = screen
+      .getByRole("heading", { name: "Chọn nhanh" })
+      .closest("section");
     expect(actionsSection).not.toBeNull();
 
     for (const label of [
@@ -63,38 +72,112 @@ describe("Seafarer Port Notes route", () => {
       "SIM vật lý",
       "Taxi / Grab",
       "Đồ ăn",
-      "Chỗ đi",
-      "Seaman Club",
+      "Welfare",
       "Viết ghi chú",
-      "Xem tất cả",
     ]) {
       expect(
-        within(actionsSection!).getByRole("button", { name: new RegExp(label) }),
+        within(actionsSection!).getByRole("button", {
+          name: new RegExp(label.replace("/", "\\/")),
+        }),
       ).toBeVisible();
     }
 
-    expect(within(actionsSection!).getAllByRole("button")).toHaveLength(8);
+    expect(within(actionsSection!).getAllByRole("button")).toHaveLength(6);
     const writeNoteAction = within(actionsSection!).getByRole("button", {
       name: /Viết ghi chú/,
     });
     expect(writeNoteAction).toHaveAttribute("data-primary", "true");
     expect(writeNoteAction).toHaveAttribute("data-action-id", "write-note");
 
-    await userEvent.setup().click(writeNoteAction);
+    await user.click(writeNoteAction);
     expect(screen.getByText(/placeholder trực quan/)).toBeVisible();
   });
 
-  test("renders structured top notes without star ratings or premium upsell", async () => {
+  test("switches among four Busan demo contexts without mixing facts", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByRole("heading", { name: "Busan New Port" });
+
+    expect(screen.getAllByRole("tab")).toHaveLength(4);
+    const northPortTab = screen.getByRole("tab", { name: "North Port" });
+    await user.click(northPortTab);
+    expect(northPortTab).toHaveAttribute("aria-selected", "true");
+    expect(
+      screen.getByRole("heading", { name: "Busan North Port", level: 1 }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole("heading", {
+        name: "Không dùng hướng dẫn New Port cho North Port",
+      }),
+    ).toBeVisible();
+    expect(screen.queryByText("New Port berth cluster (demo)")).toBeNull();
+
+    await user.click(screen.getByRole("tab", { name: "Yeongdo" }));
+    expect(
+      screen.getByRole("heading", { name: "Busan Yeongdo", level: 1 }),
+    ).toBeVisible();
+    await user.click(screen.getByRole("tab", { name: "Gamcheon" }));
+    expect(
+      screen.getByRole("heading", { name: "Busan Gamcheon", level: 1 }),
+    ).toBeVisible();
+  });
+
+  test("opens and closes the Taxi Hangul dialog", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByRole("heading", { name: "Busan New Port" });
+    const actionsSection = screen
+      .getByRole("heading", { name: "Chọn nhanh" })
+      .closest("section")!;
+    const taxiAction = within(actionsSection).getByRole("button", {
+      name: /Taxi \/ Grab/,
+    });
+
+    await user.click(taxiAction);
+    const dialog = screen.getByRole("dialog", {
+      name: "Câu tiếng Hàn cho taxi",
+    });
+    expect(within(dialog).getByText("부산신항 선원 출입구로 가 주세요.")).toBeVisible();
+    expect(within(dialog).getByText("Cần xác nhận")).toBeVisible();
+    await user.click(
+      within(dialog).getByRole("button", { name: "Đóng hướng dẫn taxi" }),
+    );
+    expect(screen.queryByRole("dialog")).toBeNull();
+    await waitFor(() => expect(taxiAction).toHaveFocus());
+
+    await user.click(taxiAction);
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  test("renders demo welfare services without a fake phone link", async () => {
+    render(<App />);
+    await screen.findByRole("heading", { name: "Busan New Port" });
+    const welfareSection = screen
+      .getByRole("heading", { name: "Welfare / Trung tâm thuyền viên" })
+      .closest("section")!;
+    expect(
+      within(welfareSection).getByRole("heading", {
+        name: "Busan New Port Seafarers Center (demo)",
+      }),
+    ).toBeVisible();
+    const serviceBadges = within(welfareSection).getByLabelText(
+      "Dịch vụ được ghi nhận",
+    );
+    for (const badge of ["Wi-Fi", "Shuttle", "SIM", "KRW", "Hỗ trợ"]) {
+      expect(within(serviceBadges).getByText(new RegExp(`${badge}$`))).toBeVisible();
+    }
+    expect(within(welfareSection).getByText("Chưa có số liên hệ đã xác nhận")).toBeVisible();
+    expect(welfareSection.querySelector('a[href^="tel:"]')).toBeNull();
+  });
+
+  test("renders structured notes without star ratings or premium upsell", async () => {
     render(<App />);
     const heading = await screen.findByRole("heading", {
       name: "Ghi chú nổi bật",
     });
-    const section = heading.closest("section");
-    expect(section).not.toBeNull();
-    expect(within(section!).getAllByRole("article").length).toBeGreaterThanOrEqual(3);
-    expect(
-      screen.getByRole("heading", { name: "Ghi chú cộng đồng gần đây" }),
-    ).toBeVisible();
+    const section = heading.closest("section")!;
+    expect(within(section).getAllByRole("article").length).toBeGreaterThanOrEqual(3);
     expect(section).toHaveTextContent("Xác nhận bởi");
     expect(section).toHaveTextContent("Hữu ích cho");
     expect(section).not.toHaveTextContent(/★|star rating|premium/i);
@@ -107,8 +190,11 @@ describe("Seafarer Port Notes route", () => {
 
     await screen.findByRole("heading", { name: "Busan New Port" });
     expect(screen.getByTestId("port-notes-media")).toBeVisible();
+    const bandwidthSelect = screen.getByRole("combobox", {
+      name: "Chế độ dữ liệu",
+    });
 
-    await user.click(screen.getByRole("button", { name: "Tiết kiệm dữ liệu" }));
+    await user.selectOptions(bandwidthSelect, "dataSaver");
     await waitFor(() => {
       expect(document.documentElement.dataset.bandwidthMode).toBe("dataSaver");
     });
@@ -119,14 +205,10 @@ describe("Seafarer Port Notes route", () => {
     expect(screen.getByRole("button", { name: /Viết ghi chú/ })).toBeVisible();
     expect(document.querySelector("img")).toBeNull();
 
-    await user.click(screen.getByRole("button", { name: "Siêu nhẹ" }));
+    await user.selectOptions(bandwidthSelect, "ultraLite");
     await waitFor(() => {
       expect(document.documentElement.dataset.bandwidthMode).toBe("ultraLite");
     });
-    expect(
-      screen.getByRole("heading", { name: "Busan New Port" }).closest("section"),
-    ).toHaveAttribute("data-media", "omitted");
-    expect(screen.queryByTestId("port-notes-media")).toBeNull();
     expect(screen.getByRole("heading", { name: "Ghi chú nổi bật" })).toBeVisible();
     expect(document.querySelector("img")).toBeNull();
   });

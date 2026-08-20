@@ -1,5 +1,7 @@
 export type Locale = "vi" | "en";
 export type BandwidthMode = "standard" | "dataSaver" | "ultraLite";
+export type AppearanceMode = "light" | "dark" | "system";
+export type ResolvedAppearance = Exclude<AppearanceMode, "system">;
 export type NetworkStatus = "online" | "offline" | "unstable";
 
 export interface AppError {

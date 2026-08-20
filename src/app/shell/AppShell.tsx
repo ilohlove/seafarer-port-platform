@@ -3,8 +3,9 @@ import { useLocation } from "react-router";
 
 import { OfflineBanner } from "../../components";
 import { useI18n } from "../../i18n";
-import type { BandwidthMode, Locale } from "../../types";
+import type { AppearanceMode, BandwidthMode, Locale } from "../../types";
 import {
+  useAppearanceMode,
   useBandwidthMode,
   useNetworkState,
   usePersistedLocale,
@@ -23,12 +24,22 @@ const bandwidthKeys = {
   ultraLite: "bandwidth.ultraLite",
 } as const;
 
+const appearanceModes: readonly AppearanceMode[] = ["light", "dark", "system"];
+
+const appearanceKeys = {
+  light: "appearance.light",
+  dark: "appearance.dark",
+  system: "appearance.system",
+} as const;
+
 const appVersion = __APP_VERSION__;
 
 export function AppShell({ children }: { readonly children: ReactNode }) {
   const location = useLocation();
   const { status: i18nStatus, t } = useI18n();
   const { locale, setLocale } = usePersistedLocale();
+  const { mode: appearanceMode, setMode: setAppearanceMode } =
+    useAppearanceMode();
   const { mode, setMode, saveDataSuggested } = useBandwidthMode();
   const { isOnline } = useNetworkState();
   const [isSavingPreference, setIsSavingPreference] = useState(false);
@@ -65,7 +76,7 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
         <div className={`${containerClass} ${styles.headerInner}`}>
           <div className={styles.identity}>
             <span className={styles.mark} aria-hidden="true">
-              SP
+              CP
             </span>
             <div>
               <strong>{t("app.name")}</strong>
@@ -77,7 +88,7 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
           </div>
 
           <div className={styles.preferences}>
-            <label className={styles.localeControl}>
+            <label className={`${styles.preferenceControl} ${styles.localeControl}`}>
               <span>{t("settings.languageLabel")}</span>
               <select
                 value={locale}
@@ -92,12 +103,34 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
               </select>
             </label>
 
-            <label className={styles.mobileModeControl}>
-              <span className="visually-hidden">
-                {t("settings.bandwidthLabel")}
-              </span>
+            <label
+              className={`${styles.preferenceControl} ${styles.appearanceControl}`}
+            >
+              <span>{t("settings.appearanceLabel")}</span>
               <select
-                aria-label={t("settings.bandwidthLabel")}
+                value={appearanceMode}
+                disabled={isPreferenceBusy}
+                onChange={(event) => {
+                  void applyPreference(() =>
+                    setAppearanceMode(
+                      event.currentTarget.value as AppearanceMode,
+                    ),
+                  );
+                }}
+              >
+                {appearanceModes.map((candidate) => (
+                  <option value={candidate} key={candidate}>
+                    {t(appearanceKeys[candidate])}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label
+              className={`${styles.preferenceControl} ${styles.bandwidthControl}`}
+            >
+              <span>{t("settings.bandwidthLabel")}</span>
+              <select
                 value={mode}
                 disabled={isPreferenceBusy}
                 onChange={(event) => {
@@ -112,32 +145,10 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
                   </option>
                 ))}
               </select>
-            </label>
-
-            <fieldset
-              className={styles.bandwidthControl}
-              disabled={isPreferenceBusy}
-            >
-              <legend>{t("settings.bandwidthLabel")}</legend>
-              <div className={styles.modeButtons}>
-                {bandwidthModes.map((candidate) => (
-                  <button
-                    type="button"
-                    aria-pressed={mode === candidate}
-                    data-active={mode === candidate || undefined}
-                    key={candidate}
-                    onClick={() => {
-                      void applyPreference(() => setMode(candidate));
-                    }}
-                  >
-                    {t(bandwidthKeys[candidate])}
-                  </button>
-                ))}
-              </div>
               {saveDataSuggested && mode === "standard" ? (
-                <small>Save-Data</small>
+                <small className={styles.saveDataHint}>Save-Data</small>
               ) : null}
-            </fieldset>
+            </label>
 
             {isPreferenceBusy ? (
               <output className={styles.preferenceStatus} aria-live="polite">

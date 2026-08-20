@@ -13,12 +13,14 @@ describe("browser storage adapters", () => {
 
     await services.preferences.update({
       locale: "en",
+      appearanceMode: "dark",
       bandwidthMode: "ultraLite",
       bandwidthModeWasUserSelected: true,
     });
 
     await expect(services.preferences.get()).resolves.toEqual({
       locale: "en",
+      appearanceMode: "dark",
       bandwidthMode: "ultraLite",
       bandwidthModeWasUserSelected: true,
     });

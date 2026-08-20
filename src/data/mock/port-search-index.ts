@@ -46,7 +46,12 @@ export const busanPortSearchEntry = {
       country: { code: "KR", name: "South Korea" },
       city: "Busan",
       unLocode: "KRPUS",
-      terminalNames: ["Busan New Port", "Gamman Terminal"],
+      terminalNames: [
+        "Busan New Port",
+        "Gamman Terminal",
+        "Yeongdo berth cluster",
+        "Gamcheon berth cluster",
+      ],
       aliases: ["Busan Port", "Cảng Busan", "Pusan", "KRPUS"],
       trust: needsConfirmationTrust,
     },
@@ -62,6 +67,18 @@ export const busanPortSearchEntry = {
         slug: "gamman",
         name: "Gamman Terminal",
         gateNames: [],
+      },
+      {
+        id: "terminal-busan-yeongdo-demo",
+        slug: "yeongdo",
+        name: "Yeongdo berth cluster",
+        gateNames: ["Crew pickup point (demo)"],
+      },
+      {
+        id: "terminal-busan-gamcheon-demo",
+        slug: "gamcheon",
+        name: "Gamcheon berth cluster",
+        gateNames: ["Crew Gate (demo)"],
       },
     ],
 } as const satisfies PortSearchIndexEntry;

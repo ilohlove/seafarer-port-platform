@@ -38,7 +38,7 @@ export function PortSnapshot({
           data-testid="port-notes-media"
           aria-hidden="true"
         >
-          <span>PORT NOTES</span>
+          <span>CREWPORT · PORT NOTES</span>
         </div>
       ) : null}
       <div className={styles.snapshotBody}>
@@ -87,8 +87,14 @@ export function PortSnapshot({
           </div>
           <div>
             <span>{t("portNotes.snapshot.community")}</span>
-            <strong>{model.noteCount} notes</strong>
-            <small>{model.pendingConfirmations} pending confirmations</small>
+            <strong>
+              {t("portNotes.snapshot.notesSummary", { count: model.noteCount })}
+            </strong>
+            <small>
+              {t("portNotes.snapshot.pendingSummary", {
+                count: model.pendingConfirmations,
+              })}
+            </small>
           </div>
         </div>
 

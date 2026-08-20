@@ -124,6 +124,28 @@ export interface DataHealthReadModel {
   readonly trust: TrustEvidence;
 }
 
+/**
+ * UI-oriented terminal/berth grouping assembled by the Port Notes read model.
+ * It is not a persisted domain entity and every operational claim keeps its
+ * own KnowledgeMeta/trust evidence.
+ */
+export interface PortNotesContextReadModel {
+  readonly id: string;
+  readonly slug: string;
+  readonly label: string;
+  readonly displayName: string;
+  readonly terminalLabel: string;
+  readonly gateName: string;
+  readonly terminalId?: EntityId;
+  readonly shoreLeave: KnowledgeBlock;
+  readonly taxiPickup: KnowledgeBlock;
+  readonly quickNotes: readonly KnowledgeBlock[];
+  readonly criticalInformation: readonly CriticalInformation[];
+  readonly noteIds: readonly EntityId[];
+  readonly welfareProviderIds: readonly EntityId[];
+  readonly taxiHangulPhrase: string;
+}
+
 export interface PortHubReadModel {
   readonly port: PortSummary;
   readonly terminals: readonly TerminalSummary[];
@@ -139,6 +161,8 @@ export interface PortHubReadModel {
   readonly welfareServices: readonly WelfareService[];
   readonly community: PortCommunityReadModel;
   readonly dataHealth: DataHealthReadModel;
+  readonly portNotesContexts?: readonly PortNotesContextReadModel[];
+  readonly selectedPortNotesContextId?: string;
 }
 
 export interface PlannerInput {

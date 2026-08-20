@@ -24,7 +24,11 @@ export function TopicPreviewSections({
       </div>
       <div className={styles.topicGrid}>
         {topics.map((topic) => (
-          <article className={styles.topicCard} key={topic.id}>
+          <article
+            className={styles.topicCard}
+            id={`topic-${topic.id}`}
+            key={topic.id}
+          >
             <div className={styles.topicHeading}>
               <span className={styles.topicSymbol} aria-hidden="true">
                 {topic.symbol}

@@ -153,6 +153,8 @@ export type WelfareCapability =
   | "returnTransport"
   | "shipVisit"
   | "wifi"
+  | "simAssistance"
+  | "currencyExchange"
   | "deviceCharging"
   | "shoppingTransport"
   | "medicalReferral"

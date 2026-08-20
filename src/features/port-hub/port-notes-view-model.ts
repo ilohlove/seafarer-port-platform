@@ -2,6 +2,7 @@ import type { TrustStatusPresentation } from "../../components";
 import type { I18nContextValue, TranslationKey } from "../../i18n";
 import {
   deriveTrustDisplayStatus,
+  type CriticalInformationSeverity,
   type ConnectivityProduct,
   type KnowledgeBlock,
   type NoteTopic,
@@ -9,6 +10,7 @@ import {
   type PortNote,
   type TrustDisplayStatus,
   type TrustEvidence,
+  type WelfareCapability,
 } from "../../types";
 
 type Translate = I18nContextValue["t"];
@@ -37,6 +39,45 @@ export interface QuickNoteItemModel {
 export interface QuickNotesModel {
   readonly bullets: readonly QuickNoteItemModel[];
   readonly trust: TrustStatusPresentation;
+}
+
+export interface PortContextTabModel {
+  readonly id: string;
+  readonly label: string;
+  readonly active: boolean;
+}
+
+export interface SafetyAlertModel {
+  readonly id: string;
+  readonly severity: CriticalInformationSeverity;
+  readonly title: string;
+  readonly summary: string;
+  readonly trust: TrustStatusPresentation;
+}
+
+export interface TaxiPhraseModel {
+  readonly contextLabel: string;
+  readonly gate: string;
+  readonly phrase: string;
+  readonly trust: TrustStatusPresentation;
+}
+
+export interface WelfareBadgeModel {
+  readonly id: string;
+  readonly label: string;
+  readonly status: "reported" | "unknown";
+}
+
+export interface WelfareCardModel {
+  readonly id: string;
+  readonly name: string;
+  readonly badges: readonly WelfareBadgeModel[];
+  readonly summary: string;
+  readonly trust: TrustStatusPresentation;
+  readonly call?: {
+    readonly label: string;
+    readonly href: `tel:${string}`;
+  };
 }
 
 export interface InternetDealModel {
@@ -91,7 +132,11 @@ export interface SafetyShortcutModel {
 }
 
 export interface PortNotesViewModel {
+  readonly contexts: readonly PortContextTabModel[];
+  readonly activeContextId?: string;
   readonly snapshot: PortSnapshotModel;
+  readonly alerts: readonly SafetyAlertModel[];
+  readonly taxiPhrase: TaxiPhraseModel;
   readonly internetDeal: InternetDealModel;
   readonly quickNotes: QuickNotesModel;
   readonly actions: readonly PortNoteActionModel[];
@@ -99,6 +144,7 @@ export interface PortNotesViewModel {
   readonly recentNotes: readonly PortNoteCardModel[];
   readonly topics: readonly TopicPreviewModel[];
   readonly safety: SafetyShortcutModel;
+  readonly welfareCards: readonly WelfareCardModel[];
   readonly dataTrust: {
     readonly message: string;
     readonly detail: string;
@@ -150,6 +196,16 @@ const videoTranslationKeys = {
   good: "portNotes.internet.video.good",
   unknown: "portNotes.internet.video.unknown",
 } as const satisfies Record<"limited" | "usable" | "good" | "unknown", TranslationKey>;
+
+const welfareCapabilityKeys: Partial<
+  Readonly<Record<WelfareCapability, TranslationKey>>
+> = {
+  wifi: "portNotes.welfare.badge.wifi",
+  crewShuttle: "portNotes.welfare.badge.shuttle",
+  simAssistance: "portNotes.welfare.badge.sim",
+  currencyExchange: "portNotes.welfare.badge.currency",
+  remoteSupport: "portNotes.welfare.badge.support",
+};
 
 function trustPresentation(
   evidence: TrustEvidence,
@@ -294,20 +350,45 @@ export function buildPortNotesViewModel(
   hub: PortHubReadModel,
   t: Translate,
   formatMoney: FormatMoney,
+  selectedContextId?: string,
 ): PortNotesViewModel {
+  const activeContext =
+    hub.portNotesContexts?.find(
+      (context) => context.id === selectedContextId,
+    ) ??
+    hub.portNotesContexts?.find(
+      (context) => context.id === hub.selectedPortNotesContextId,
+    ) ??
+    hub.portNotesContexts?.[0];
   const selectedTerminal =
-    hub.terminals.find((terminal) => terminal.id === hub.selectedTerminalId) ??
+    hub.terminals.find(
+      (terminal) =>
+        terminal.id === (activeContext?.terminalId ?? hub.selectedTerminalId),
+    ) ??
     hub.terminals[0];
-  const terminalName = selectedTerminal?.name ?? t("portNotes.value.noData");
+  const terminalName =
+    activeContext?.terminalLabel ??
+    selectedTerminal?.name ??
+    t("portNotes.value.noData");
   const gate =
-    selectedTerminal?.gateNames.join(" · ") || t("portNotes.value.noData");
-  const notes = publishedNotes(hub);
+    activeContext?.gateName ??
+    (selectedTerminal?.gateNames.join(" · ") ||
+      t("portNotes.value.noData"));
+  const allNotes = publishedNotes(hub);
+  const notes = activeContext
+    ? allNotes.filter((note) => activeContext.noteIds.includes(note.id))
+    : allNotes;
   const product = bestProduct(hub.internet.esimProducts);
   const esimNote = firstTopicNote(notes, ["esim"]);
+  const fallbackEsimNote = firstTopicNote(allNotes, ["esim"]);
+  const internetEvidenceNote = esimNote ?? fallbackEsimNote;
   const esimPayload =
-    esimNote?.payload.topic === "esim" ? esimNote.payload : undefined;
+    internetEvidenceNote?.payload.topic === "esim"
+      ? internetEvidenceNote.payload
+      : undefined;
   const taxiNote = firstTopicNote(notes, ["taxi", "rideHailing"]);
   const taxiSummary =
+    activeContext?.taxiPickup.summary ??
     hub.access.transport.find((item) =>
       /taxi|ride|xe/i.test(`${item.label} ${item.summary}`),
     )?.summary ??
@@ -319,8 +400,55 @@ export function buildPortNotesViewModel(
   const topicCount = (topics: readonly NoteTopic[]) =>
     notes.filter((note) => topics.includes(note.topic)).length;
   const confidence = combinedTrust(
-    [hub.port.trust, hub.dataHealth.trust],
+    [
+      hub.port.trust,
+      hub.dataHealth.trust,
+      ...(activeContext
+        ? [
+            knowledgeTrust(activeContext.shoreLeave),
+            knowledgeTrust(activeContext.taxiPickup),
+          ]
+        : []),
+    ],
     t,
+  );
+
+  const selectedWelfareProviders = activeContext
+    ? hub.welfareProviders.filter((provider) =>
+        activeContext.welfareProviderIds.includes(provider.id),
+      )
+    : hub.welfareProviders;
+  const welfareCards: readonly WelfareCardModel[] = selectedWelfareProviders.map(
+    (provider) => {
+      const services = hub.welfareServices.filter(
+        (service) => service.providerId === provider.id,
+      );
+      return {
+        id: provider.id,
+        name: provider.name,
+        badges: services
+          .map((service) => {
+            const key = welfareCapabilityKeys[service.capability];
+            return key
+              ? {
+                  id: service.id,
+                  label: t(key),
+                  status:
+                    service.status === "unknown" ? "unknown" : "reported",
+                }
+              : undefined;
+          })
+          .filter((badge): badge is WelfareBadgeModel => Boolean(badge))
+          .slice(0, 5),
+        summary:
+          services.find((service) => service.scheduleSummary)?.scheduleSummary ??
+          t("portNotes.welfare.demoSummary"),
+        trust: combinedTrust(
+          [provider.trust, ...services.map((service) => service.trust)],
+          t,
+        ),
+      };
+    },
   );
 
   const rankedNotes = [...notes]
@@ -343,12 +471,20 @@ export function buildPortNotesViewModel(
   };
 
   return {
+    contexts:
+      hub.portNotesContexts?.map((context) => ({
+        id: context.id,
+        label: context.label,
+        active: context.id === activeContext?.id,
+      })) ?? [],
+    activeContextId: activeContext?.id,
     snapshot: {
-      name: selectedTerminal?.name ?? hub.port.name,
+      name: activeContext?.displayName ?? selectedTerminal?.name ?? hub.port.name,
       location: [hub.port.city, hub.port.country.name].filter(Boolean).join(", "),
       terminal: terminalName,
       gate,
-      shoreLeave: hub.access.shoreLeave.summary,
+      shoreLeave:
+        activeContext?.shoreLeave.summary ?? hub.access.shoreLeave.summary,
       internet: internetSummary,
       transport: taxiSummary,
       weather:
@@ -357,6 +493,32 @@ export function buildPortNotesViewModel(
       noteCount: notes.length,
       pendingConfirmations: hub.community.openConfirmationCount,
       confidence,
+    },
+    alerts: (activeContext?.criticalInformation ?? hub.criticalInformation).map(
+      (item) => ({
+        id: item.id,
+        severity: item.severity,
+        title: item.title,
+        summary: item.summary,
+        trust: trustPresentation(
+          {
+            basis: item.meta.trustBasis,
+            conflictState: item.meta.conflictState,
+            confirmationCount: item.meta.confirmationCount,
+          },
+          t,
+        ),
+      }),
+    ),
+    taxiPhrase: {
+      contextLabel: activeContext?.label ?? terminalName,
+      gate,
+      phrase:
+        activeContext?.taxiHangulPhrase ??
+        t("portNotes.taxiDialog.fallbackPhrase"),
+      trust: activeContext
+        ? trustPresentation(knowledgeTrust(activeContext.taxiPickup), t)
+        : confidence,
     },
     internetDeal: {
       name: product?.name ?? t("portNotes.internet.noDeal"),
@@ -378,8 +540,8 @@ export function buildPortNotesViewModel(
       videoCall: esimPayload?.videoCallQuality
         ? t(videoTranslationKeys[esimPayload.videoCallQuality])
         : t("portNotes.internet.videoUnknown"),
-      evidence: esimNote
-        ? `${esimNote.confirmationCount} ${t("portNotes.internet.seafarers")} · ${esimNote.usefulnessCount} ${t("portNotes.internet.crewUseful")}`
+      evidence: internetEvidenceNote
+        ? `${internetEvidenceNote.confirmationCount} ${t("portNotes.internet.seafarers")} · ${internetEvidenceNote.usefulnessCount} ${t("portNotes.internet.crewUseful")}`
         : t("portNotes.internet.prototypeEvidence"),
       trust: combinedTrust(
         [
@@ -390,40 +552,36 @@ export function buildPortNotesViewModel(
       ),
     },
     quickNotes: {
-      bullets: [
-        {
-          id: "terminal-access",
-          text: hub.access.terminalAccess.summary,
-        },
-        {
-          id: "shuttle",
-          text:
-            hub.access.transport[0]?.summary ??
-            t("portNotes.quickNotes.noTransport"),
-        },
-        {
-          id: "sim",
-          text:
-            hub.internet.physicalSim[0]?.summary ??
-            t("portNotes.quickNotes.noPhysicalSim"),
-        },
-        {
-          id: "food",
-          text: `${categorySummary(hub, "food", t)} · ${t("portNotes.quickNotes.foodHint")}`,
-        },
-        {
-          id: "taxi",
-          text: taxiNote?.summary ?? t("portNotes.quickNotes.noTaxi"),
-        },
-      ],
+      bullets: activeContext
+        ? activeContext.quickNotes.map((item) => ({
+            id: item.id,
+            text: item.summary,
+          }))
+        : [
+            {
+              id: "terminal-access",
+              text: hub.access.terminalAccess.summary,
+            },
+            {
+              id: "transport",
+              text:
+                hub.access.transport[0]?.summary ??
+                t("portNotes.quickNotes.noTransport"),
+            },
+            {
+              id: "taxi",
+              text: taxiNote?.summary ?? t("portNotes.quickNotes.noTaxi"),
+            },
+          ],
       trust: combinedTrust(
-        [
-          knowledgeTrust(hub.access.terminalAccess),
-          ...(hub.access.transport[0]
-            ? [knowledgeTrust(hub.access.transport[0])]
-            : []),
-          knowledgeTrust(hub.internet.bestOption),
-        ],
+        activeContext
+          ? activeContext.quickNotes.map(knowledgeTrust)
+          : [
+              knowledgeTrust(hub.access.terminalAccess),
+              ...(hub.access.transport[0]
+                ? [knowledgeTrust(hub.access.transport[0])]
+                : []),
+            ],
         t,
       ),
     },
@@ -461,22 +619,14 @@ export function buildPortNotesViewModel(
         tone: "orange",
       },
       {
-        id: "places",
-        symbol: "P",
-        label: t("portNotes.action.places"),
-        description: t("portNotes.action.placesDescription"),
-        count: actionCount(["placesToVisit"]),
-        tone: "green",
-      },
-      {
         id: "seaman-club",
         symbol: "C",
         label: t("portNotes.action.seamanClub"),
         description: t("portNotes.action.seamanClubDescription"),
         count:
-          hub.welfareProviders.length > 0
+          selectedWelfareProviders.length > 0
             ? t("portNotes.action.providerCount", {
-                count: hub.welfareProviders.length,
+                count: selectedWelfareProviders.length,
               })
             : actionCount(["seamanClub"]),
         tone: "teal",
@@ -509,7 +659,7 @@ export function buildPortNotesViewModel(
         symbol: "T",
         title: t("portNotes.topicSection.shoreLeave"),
         bullets: [
-          hub.access.shoreLeave.summary,
+          activeContext?.shoreLeave.summary ?? hub.access.shoreLeave.summary,
           taxiSummary,
           hub.access.returnToShip.summary,
         ],
@@ -550,8 +700,13 @@ export function buildPortNotesViewModel(
         symbol: "C",
         title: t("portNotes.topicSection.seamanClub"),
         bullets: [
-          hub.welfareProviders[0]?.name ?? t("portNotes.topicSection.noClub"),
-          hub.welfareServices[0]?.scheduleSummary ??
+          selectedWelfareProviders[0]?.name ??
+            t("portNotes.topicSection.noClub"),
+          hub.welfareServices.find((service) =>
+            selectedWelfareProviders.some(
+              (provider) => provider.id === service.providerId,
+            ),
+          )?.scheduleSummary ??
             t("portNotes.topicSection.noWelfareData"),
           notes.find((note) => note.topic === "seamanClub")?.summary ??
             t("portNotes.topicSection.confirmClub"),
@@ -591,6 +746,7 @@ export function buildPortNotesViewModel(
       gate,
       note: t("portNotes.safety.note"),
     },
+    welfareCards,
     dataTrust: {
       message: t("portNotes.trust.message"),
       detail: t("portNotes.trust.detail", {

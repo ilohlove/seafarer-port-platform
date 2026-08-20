@@ -1,4 +1,4 @@
-import type { BandwidthMode, Locale } from "../../types";
+import type { AppearanceMode, BandwidthMode, Locale } from "../../types";
 import type {
   Preferences,
   PreferencesPatch,
@@ -11,11 +11,17 @@ const STORAGE_KEY = "seafarer.preferences.v1";
 
 export const DEFAULT_PREFERENCES: Preferences = {
   locale: "vi",
+  appearanceMode: "light",
   bandwidthMode: "standard",
   bandwidthModeWasUserSelected: false,
 };
 
 const validLocales = new Set<Locale>(["vi", "en"]);
+const validAppearanceModes = new Set<AppearanceMode>([
+  "light",
+  "dark",
+  "system",
+]);
 const validBandwidthModes = new Set<BandwidthMode>([
   "standard",
   "dataSaver",
@@ -34,6 +40,11 @@ function parsePreferences(serialized: string | null): Preferences {
         candidate.locale && validLocales.has(candidate.locale)
           ? candidate.locale
           : DEFAULT_PREFERENCES.locale,
+      appearanceMode:
+        candidate.appearanceMode &&
+        validAppearanceModes.has(candidate.appearanceMode)
+          ? candidate.appearanceMode
+          : DEFAULT_PREFERENCES.appearanceMode,
       bandwidthMode:
         candidate.bandwidthMode &&
         validBandwidthModes.has(candidate.bandwidthMode)

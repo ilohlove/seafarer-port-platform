@@ -9,3 +9,5 @@
 - [2026-08-18 09:56] Chuyển repository frontend sang chế độ public trên GitHub.
 - [2026-08-18 09:50] Đưa phiên bản frontend Foundation lên repository GitHub private.
 - [2026-08-10 22:40] Hoàn thành frontend Foundation với typed architecture, mock services, bandwidth modes, component nền tảng và kiểm thử hiệu năng.
+- [2026-08-20 14:30] Hoàn thiện responsive CrewPort Port Notes cho desktop, tablet và mobile, giữ rõ hierarchy, trust và bandwidth modes.
+- [2026-08-20 15:30] Hoàn thiện CrewPort ban đêm với giao diện sáng/tối, bốn cụm Busan, welfare và hướng dẫn taxi tin cậy.

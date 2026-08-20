@@ -114,10 +114,10 @@ export function I18nProvider({
       setLocale,
       t,
       formatMoney: (amount, currency) =>
-        new Intl.NumberFormat(intlLocale(locale), {
-          style: "currency",
-          currency,
-        }).format(amount),
+        `${new Intl.NumberFormat(intlLocale(locale), {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(amount)} ${currency}`,
       formatDate: (dateValue, options) =>
         new Intl.DateTimeFormat(intlLocale(locale), options).format(
           new Date(dateValue),

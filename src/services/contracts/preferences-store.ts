@@ -1,8 +1,9 @@
-import type { BandwidthMode, Locale } from "../../types";
+import type { AppearanceMode, BandwidthMode, Locale } from "../../types";
 import type { RequestOptions } from "./request-context";
 
 export interface Preferences {
   readonly locale: Locale;
+  readonly appearanceMode: AppearanceMode;
   readonly bandwidthMode: BandwidthMode;
   readonly bandwidthModeWasUserSelected: boolean;
 }

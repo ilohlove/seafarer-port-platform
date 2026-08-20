@@ -1,43 +1,57 @@
 :root {
   color-scheme: light;
 
-  /* Neutral prototype palette. Final brand values remain an open decision. */
-  --color-canvas: #f3f6f7;
-  --color-surface: #ffffff;
-  --color-surface-subtle: #eaf0f2;
-  --color-text: #122126;
-  --color-text-muted: #526268;
-  --color-border: #c9d4d7;
-  --color-border-strong: #8fa1a6;
-  --color-accent: #075f73;
-  --color-accent-hover: #064b5b;
-  --color-accent-soft: #e1f2f5;
+  --color-canvas: #f8fafc;
+  --color-surface: #fcfdff;
+  --color-surface-elevated: #ffffff;
+  --color-surface-subtle: #f1f5f9;
+  --color-text: #0f172a;
+  --color-text-muted: #64748b;
+  --color-border: #cbd5e1;
+  --color-border-strong: #94a3b8;
+
+  --color-primary: #0f172a;
+  --color-primary-hover: #1e293b;
+  --color-primary-soft: #e2e8f0;
+  --color-on-primary: #f8fafc;
+  --color-cta: #f59e0b;
+  --color-cta-hover: #d97706;
+  --color-cta-soft: #fef3c7;
+  --color-on-cta: #1e293b;
+  --color-sea: #0f766e;
+  --color-sea-hover: #115e59;
+  --color-sea-soft: #ccfbf1;
+
+  /* Compatibility aliases used by shared prototype components. */
+  --color-accent: var(--color-sea);
+  --color-accent-hover: var(--color-sea-hover);
+  --color-accent-soft: var(--color-sea-soft);
   --color-on-accent: #ffffff;
 
-  --color-status-official-bg: #e5f3fa;
-  --color-status-official-text: #124d66;
-  --color-status-official-border: #82b8cb;
-  --color-status-community-bg: #e5f5eb;
-  --color-status-community-text: #245d39;
-  --color-status-community-border: #83b897;
-  --color-status-needs-bg: #fff4d5;
-  --color-status-needs-text: #674700;
-  --color-status-needs-border: #d5aa38;
-  --color-status-conflict-bg: #fdeae6;
-  --color-status-conflict-text: #7e2a20;
-  --color-status-conflict-border: #d88b7e;
-  --color-status-unknown-bg: #edf1f2;
-  --color-status-unknown-text: #405157;
-  --color-status-unknown-border: #aebdc1;
-  --color-status-critical-bg: #fde9e8;
-  --color-status-critical-text: #811d18;
-  --color-status-critical-border: #d47770;
-  --color-status-warning-bg: #fff4d5;
-  --color-status-warning-text: #674700;
-  --color-status-warning-border: #d5aa38;
-  --color-status-info-bg: #e7f2f8;
-  --color-status-info-text: #164e68;
-  --color-status-info-border: #85b3c8;
+  --color-status-official-bg: #e0f2fe;
+  --color-status-official-text: #075985;
+  --color-status-official-border: #7dd3fc;
+  --color-status-community-bg: #dcfce7;
+  --color-status-community-text: #166534;
+  --color-status-community-border: #86efac;
+  --color-status-needs-bg: #fef3c7;
+  --color-status-needs-text: #78350f;
+  --color-status-needs-border: #f59e0b;
+  --color-status-conflict-bg: #fff1ed;
+  --color-status-conflict-text: #9a3412;
+  --color-status-conflict-border: #fb923c;
+  --color-status-unknown-bg: #e2e8f0;
+  --color-status-unknown-text: #334155;
+  --color-status-unknown-border: #94a3b8;
+  --color-status-critical-bg: #fff1f2;
+  --color-status-critical-text: #9f1239;
+  --color-status-critical-border: #fb7185;
+  --color-status-warning-bg: #fef3c7;
+  --color-status-warning-text: #78350f;
+  --color-status-warning-border: #f59e0b;
+  --color-status-info-bg: #e0f2fe;
+  --color-status-info-text: #075985;
+  --color-status-info-border: #7dd3fc;
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -48,44 +62,94 @@
   --space-7: 3rem;
   --space-8: 4rem;
 
-  --font-family-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", sans-serif;
-  --font-size-xs: 0.75rem;
-  --font-size-sm: 0.875rem;
+  --font-family-sans: Inter, "Be Vietnam Pro", system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-size-xs: 0.8125rem;
+  --font-size-sm: 0.9375rem;
   --font-size-md: 1rem;
   --font-size-lg: 1.125rem;
   --font-size-xl: 1.375rem;
-  --font-size-2xl: 1.75rem;
+  --font-size-2xl: 1.875rem;
   --line-height-tight: 1.25;
-  --line-height-normal: 1.55;
+  --line-height-normal: 1.58;
   --font-weight-regular: 400;
   --font-weight-medium: 600;
   --font-weight-bold: 700;
 
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.875rem;
   --radius-pill: 999px;
   --border-width: 1px;
-  --shadow-raised: 0 1px 2px rgb(18 33 38 / 8%);
-  --focus-ring: 0 0 0 3px rgb(7 95 115 / 28%);
+  --shadow-raised: 0 0.25rem 1rem rgb(15 23 42 / 7%);
+  --focus-ring: 0 0 0 3px rgb(245 158 11 / 35%);
 
   --tap-target: 2.75rem;
   --content-width: 96rem;
   --reading-width: 46rem;
   --z-sticky: 10;
+  --z-dialog: 30;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-canvas: #0f172a;
+  --color-surface: #1e293b;
+  --color-surface-elevated: #243247;
+  --color-surface-subtle: #26354a;
+  --color-text: #e2e8f0;
+  --color-text-muted: #94a3b8;
+  --color-border: #334155;
+  --color-border-strong: #64748b;
+  --color-primary: #334155;
+  --color-primary-hover: #475569;
+  --color-primary-soft: #1e293b;
+  --color-on-primary: #f8fafc;
+  --color-cta: #f59e0b;
+  --color-cta-hover: #fbbf24;
+  --color-cta-soft: #3a2d14;
+  --color-on-cta: #172033;
+  --color-sea: #5eead4;
+  --color-sea-hover: #99f6e4;
+  --color-sea-soft: #163c3a;
+  --color-accent: #67e8f9;
+  --color-accent-hover: #a5f3fc;
+  --color-accent-soft: #173548;
+  --color-on-accent: #0f172a;
+  --color-status-official-bg: #172d3b;
+  --color-status-official-text: #7dd3fc;
+  --color-status-official-border: #0ea5e9;
+  --color-status-community-bg: #142f27;
+  --color-status-community-text: #86efac;
+  --color-status-community-border: #22c55e;
+  --color-status-needs-bg: #3a2d14;
+  --color-status-needs-text: #fcd34d;
+  --color-status-needs-border: #f59e0b;
+  --color-status-conflict-bg: #3f251f;
+  --color-status-conflict-text: #fdba74;
+  --color-status-conflict-border: #f97316;
+  --color-status-unknown-bg: #26354a;
+  --color-status-unknown-text: #cbd5e1;
+  --color-status-unknown-border: #64748b;
+  --color-status-critical-bg: #411f2a;
+  --color-status-critical-text: #fda4af;
+  --color-status-critical-border: #fb7185;
+  --color-status-warning-bg: #3a2d14;
+  --color-status-warning-text: #fcd34d;
+  --color-status-warning-border: #f59e0b;
+  --color-status-info-bg: #172d3b;
+  --color-status-info-text: #7dd3fc;
+  --color-status-info-border: #0ea5e9;
+  --shadow-raised: 0 0.35rem 1.25rem rgb(0 0 0 / 22%);
 }
 
 @media (prefers-contrast: more) {
   :root {
-    --color-border: #78898e;
-    --color-text-muted: #344349;
-    --focus-ring: 0 0 0 4px rgb(7 95 115 / 45%);
+    --color-border: var(--color-border-strong);
+    --focus-ring: 0 0 0 4px rgb(245 158 11 / 48%);
   }
 }
 
-:root[data-bandwidth-mode='ultraLite'] {
-  --color-canvas: #ffffff;
-  --color-surface-subtle: #ffffff;
+:root[data-bandwidth-mode="ultraLite"] {
   --shadow-raised: none;
 }

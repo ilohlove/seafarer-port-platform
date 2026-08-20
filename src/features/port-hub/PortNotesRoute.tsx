@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router";
 
 import { useBandwidthMode, useServices } from "../../app/providers";
 import {
-  CriticalInfoStrip,
   EmptyState,
   OfflineBanner,
   SearchBox,
@@ -15,15 +14,22 @@ import {
   BestInternetDeal,
   DataTrustBanner,
   MainActionTiles,
+  PortContextTabs,
   PortNotesNavigation,
   PortNotesSafetyShortcuts,
+  PortSafetyAlert,
   PortSnapshot,
   QuickNotesPanel,
   RecentCommunityNotes,
   TopSeafarerNotes,
   TopicPreviewSections,
+  TaxiHangulDialog,
+  WelfareCards,
 } from "./components";
-import { buildPortNotesViewModel } from "./port-notes-view-model";
+import {
+  buildPortNotesViewModel,
+  type PortNoteActionModel,
+} from "./port-notes-view-model";
 import styles from "./port-notes.module.css";
 
 export function PortNotesRoute() {
@@ -37,6 +43,8 @@ export function PortNotesRoute() {
   const [reloadToken, setReloadToken] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [notice, setNotice] = useState<string>();
+  const [selectedContextId, setSelectedContextId] = useState<string>();
+  const [isTaxiDialogOpen, setIsTaxiDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!portSlug) {
@@ -58,6 +66,8 @@ export function PortNotesRoute() {
             ? { status: "success", data: hub }
             : { status: "empty", reason: "port-not-found" },
         );
+        setSelectedContextId(hub?.selectedPortNotesContextId);
+        setIsTaxiDialogOpen(false);
       })
       .catch((error: unknown) => {
         if (controller.signal.aborted) {
@@ -79,13 +89,41 @@ export function PortNotesRoute() {
   const viewModel = useMemo(
     () =>
       state.status === "success"
-        ? buildPortNotesViewModel(state.data, t, formatMoney)
+        ? buildPortNotesViewModel(
+            state.data,
+            t,
+            formatMoney,
+            selectedContextId,
+          )
         : undefined,
-    [formatMoney, state, t],
+    [formatMoney, selectedContextId, state, t],
   );
+
+  const closeTaxiDialog = useCallback(() => setIsTaxiDialogOpen(false), []);
 
   function showPlaceholder(feature: string) {
     setNotice(t("portNotes.placeholder", { feature }));
+  }
+
+  function handleAction(action: PortNoteActionModel) {
+    if (action.id === "taxi") {
+      setIsTaxiDialogOpen(true);
+      return;
+    }
+
+    const targetIds: Readonly<Record<string, string | undefined>> = {
+      "compare-esim": "best-internet-heading",
+      "physical-sim": "topic-internet-sim",
+      "food-supplies": "topic-food-supplies",
+      "seaman-club": "welfare-section",
+      "write-note": undefined,
+    };
+    const targetId = targetIds[action.id];
+    if (targetId) {
+      document.getElementById(targetId)?.scrollIntoView({ block: "start" });
+      return;
+    }
+    showPlaceholder(action.label);
   }
 
   function renderSearchPanel(id: string, className: string) {
@@ -117,11 +155,6 @@ export function PortNotesRoute() {
       <PortNotesNavigation portSlug={portSlug} onPlaceholder={showPlaceholder} />
 
       <div className={styles.workspace}>
-        {renderSearchPanel(
-          "port-notes-search-desktop",
-          `${styles.searchPanel} ${styles.desktopSearchPanel}`,
-        )}
-
         {notice ? (
           <output className={styles.pageNotice}>
             {notice}
@@ -173,39 +206,45 @@ export function PortNotesRoute() {
 
         {state.status === "success" && viewModel ? (
           <div className={styles.mainColumn}>
-            <div className={styles.heroGrid}>
-              <PortSnapshot
-                model={viewModel.snapshot}
-                deal={viewModel.internetDeal}
-                onPlaceholder={showPlaceholder}
-                showMedia={mode === "standard"}
-              />
+            <PortContextTabs
+              contexts={viewModel.contexts}
+              onSelect={(contextId) => {
+                setSelectedContextId(contextId);
+                setNotice(undefined);
+                setIsTaxiDialogOpen(false);
+              }}
+            />
+
+            <div className={styles.topGrid}>
+              <div
+                className={styles.topPrimary}
+                id="port-context-panel"
+                role="tabpanel"
+                aria-labelledby={
+                  viewModel.activeContextId
+                    ? `port-context-tab-${viewModel.activeContextId}`
+                    : undefined
+                }
+              >
+                <PortSnapshot
+                  model={viewModel.snapshot}
+                  deal={viewModel.internetDeal}
+                  onPlaceholder={showPlaceholder}
+                  showMedia={mode === "standard"}
+                />
+                {viewModel.alerts.map((alert) => (
+                  <PortSafetyAlert model={alert} key={alert.id} />
+                ))}
+              </div>
               <QuickNotesPanel
                 model={viewModel.quickNotes}
                 onPlaceholder={showPlaceholder}
               />
             </div>
 
-            <QuickNotesPanel
-              compact
-              model={viewModel.quickNotes}
-              onPlaceholder={showPlaceholder}
-            />
-
-            {state.data.criticalInformation.map((item) => (
-              <CriticalInfoStrip
-                key={item.id}
-                title={item.title}
-                severity={item.severity}
-                announce={item.severity === "critical"}
-              >
-                {item.summary}
-              </CriticalInfoStrip>
-            ))}
-
             <MainActionTiles
               actions={viewModel.actions}
-              onPlaceholder={showPlaceholder}
+              onAction={handleAction}
             />
             <TopSeafarerNotes
               notes={viewModel.topNotes}
@@ -213,8 +252,9 @@ export function PortNotesRoute() {
             />
             {renderSearchPanel(
               "port-notes-search-mobile",
-              `${styles.searchPanel} ${styles.mobileSearchPanel}`,
+              styles.searchPanel,
             )}
+            <WelfareCards cards={viewModel.welfareCards} />
             <TopicPreviewSections
               topics={viewModel.topics}
               onPlaceholder={showPlaceholder}
@@ -231,6 +271,11 @@ export function PortNotesRoute() {
             <PortNotesSafetyShortcuts
               model={viewModel.safety}
               onPlaceholder={showPlaceholder}
+            />
+            <TaxiHangulDialog
+              model={viewModel.taxiPhrase}
+              open={isTaxiDialogOpen}
+              onClose={closeTaxiDialog}
             />
           </div>
         ) : null}

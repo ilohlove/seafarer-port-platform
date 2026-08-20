@@ -4,12 +4,12 @@ import styles from "../port-notes.module.css";
 
 export interface MainActionTilesProps {
   readonly actions: readonly PortNoteActionModel[];
-  readonly onPlaceholder: (feature: string) => void;
+  readonly onAction: (action: PortNoteActionModel) => void;
 }
 
 export function MainActionTiles({
   actions,
-  onPlaceholder,
+  onAction,
 }: MainActionTilesProps) {
   const { t } = useI18n();
 
@@ -34,13 +34,14 @@ export function MainActionTiles({
             data-tone={action.tone}
             data-action-id={action.id}
             data-primary={action.id === "write-note" ? "true" : undefined}
-            onClick={() => onPlaceholder(action.label)}
+            onClick={() => onAction(action)}
           >
             <span className={styles.actionSymbol} aria-hidden="true">
               {action.symbol}
             </span>
             <span className={styles.actionTileBody}>
               <strong>{action.label}</strong>
+              <span>{action.description}</span>
               {action.count ? <small>{action.count}</small> : null}
             </span>
             <span className={styles.actionArrow} aria-hidden="true">
@@ -48,23 +49,6 @@ export function MainActionTiles({
             </span>
           </button>
         ))}
-        <button
-          className={styles.actionTile}
-          type="button"
-          data-tone="blue"
-          data-action-id="view-all"
-          onClick={() => onPlaceholder(t("portNotes.actions.viewAll"))}
-        >
-          <span className={styles.actionSymbol} aria-hidden="true">
-            ···
-          </span>
-          <span className={styles.actionTileBody}>
-            <strong>{t("portNotes.actions.viewAll")}</strong>
-          </span>
-          <span className={styles.actionArrow} aria-hidden="true">
-            →
-          </span>
-        </button>
       </div>
     </section>
   );
