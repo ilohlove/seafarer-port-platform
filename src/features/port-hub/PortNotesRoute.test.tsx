@@ -33,6 +33,11 @@ describe("CrewPort Port Notes route", () => {
       "visible",
     );
     expect(screen.getByTestId("port-notes-media")).toBeVisible();
+    const snapshot = snapshotHeading.closest("section")!;
+    expect(within(snapshot).getByText("Khu bến đang chọn")).toBeVisible();
+    expect(snapshot).toHaveTextContent("Crew Gate");
+    expect(within(snapshot).getByText("Internet tốt nhất")).toBeVisible();
+    expect(within(snapshot).getByText("Điểm đón taxi")).toBeVisible();
     expect(
       screen.getByRole("heading", { name: "Thông tin Internet / eSIM" }),
     ).toBeVisible();
@@ -46,12 +51,7 @@ describe("CrewPort Port Notes route", () => {
       within(quickNotesHeading.closest("section")!).getAllByRole("listitem"),
     ).toHaveLength(3);
 
-    const desktopNavigation = document.querySelector('[data-navigation="desktop"]');
-    expect(desktopNavigation).toHaveAttribute(
-      "aria-label",
-      "Điều hướng ghi chú cảng",
-    );
-    expect(desktopNavigation?.querySelectorAll("nav a, nav button")).toHaveLength(7);
+    expect(document.querySelector('[data-navigation="desktop"]')).toBeNull();
 
     const mobileSearch = document.querySelector('[data-search-placement="mobile"]');
     expect(mobileSearch).not.toBeNull();
@@ -62,10 +62,23 @@ describe("CrewPort Port Notes route", () => {
     const warning = screen.getByRole("note", {
       name: "Xác nhận gate và shuttle trước khi lên bờ",
     });
-    expect(within(warning).getByText("Cần xác nhận")).toBeVisible();
+    expect(within(warning).getByText("Chờ xác nhận")).toBeVisible();
+
+    const actionsHeading = screen.getByRole("heading", { name: "Chọn nhanh" });
+    const notesHeading = screen.getByRole("heading", { name: "Ghi chú nổi bật" });
+    expect(snapshot.parentElement?.contains(warning)).toBe(true);
+    expect(warning.compareDocumentPosition(quickNotesHeading)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+    expect(quickNotesHeading.compareDocumentPosition(actionsHeading)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+    expect(actionsHeading.compareDocumentPosition(notesHeading)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
   });
 
-  test("shows six need-based actions and keeps Write a Note primary", async () => {
+  test("shows seven need-based actions and keeps Write a Note primary", async () => {
     const user = userEvent.setup();
     render(<App />);
     await screen.findByRole("heading", { name: "Busan New Port" });
@@ -80,6 +93,7 @@ describe("CrewPort Port Notes route", () => {
       "Taxi / Grab",
       "Đồ ăn",
       "Hỗ trợ thuyền viên",
+      "Chỗ đi",
       "Viết ghi chú",
     ]) {
       expect(
@@ -89,7 +103,7 @@ describe("CrewPort Port Notes route", () => {
       ).toBeVisible();
     }
 
-    expect(within(actionsSection!).getAllByRole("button")).toHaveLength(6);
+    expect(within(actionsSection!).getAllByRole("button")).toHaveLength(7);
     const writeNoteAction = within(actionsSection!).getByRole("button", {
       name: /Viết ghi chú/,
     });
@@ -145,7 +159,7 @@ describe("CrewPort Port Notes route", () => {
       name: "Câu tiếng Hàn cho taxi",
     });
     expect(within(dialog).getByText("부산신항 선원 출입구로 가 주세요.")).toBeVisible();
-    expect(within(dialog).getByText("Cần xác nhận")).toBeVisible();
+    expect(within(dialog).getByText("Chờ xác nhận")).toBeVisible();
     await user.click(
       within(dialog).getByRole("button", { name: "Đóng hướng dẫn taxi" }),
     );
@@ -185,8 +199,16 @@ describe("CrewPort Port Notes route", () => {
     });
     const section = heading.closest("section")!;
     expect(within(section).getAllByRole("article").length).toBeGreaterThanOrEqual(3);
-    expect(section).toHaveTextContent("Xác nhận bởi");
-    expect(section).toHaveTextContent("Hữu ích cho");
+    expect(within(section).getAllByRole("article")[0]).toHaveAttribute(
+      "data-featured",
+      "true",
+    );
+    expect(section).toHaveTextContent(/\d+ xác nhận/);
+    expect(section).toHaveTextContent(/\d+ hữu ích/);
+    expect(screen.getByRole("heading", {
+      name: "Thông tin được chia sẻ bởi cộng đồng thuyền viên.",
+    })).toBeVisible();
+    expect(screen.queryByText(/243 visitors|4\.8 score|86% verified|15,000\+ seafarers/i)).toBeNull();
     expect(section).not.toHaveTextContent(/★|star rating|premium/i);
     expect(screen.queryByText(/Premium|Gói trả phí/i)).toBeNull();
   });

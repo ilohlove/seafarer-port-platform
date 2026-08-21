@@ -15,7 +15,7 @@
   --color-primary-soft: #e5f1ef;
   --color-on-primary: #f8fafc;
   --color-cta: #c97812;
-  --color-cta-hover: #a85f0d;
+  --color-cta-hover: #a85f00;
   --color-cta-soft: #f5e8d5;
   --color-on-cta: #0f172a;
   --color-sea: #0f766e;
@@ -23,9 +23,9 @@
   --color-sea-soft: #e5f1ef;
   --color-link: #0f665f;
   --color-link-hover: #0b514c;
-  --color-service-bg: #e8f1ef;
-  --color-service-text: #285d57;
-  --color-service-border: #b7ccc8;
+  --color-service-bg: #e8f3ef;
+  --color-service-text: #0f5c52;
+  --color-service-border: #b7d7cd;
 
   /* Compatibility aliases used by shared prototype components. */
   --color-accent: var(--color-sea);
@@ -36,9 +36,9 @@
   --color-status-official-bg: #e8f0f4;
   --color-status-official-text: #315b6b;
   --color-status-official-border: #9fb8c3;
-  --color-status-community-bg: #e7f2ec;
-  --color-status-community-text: #245d48;
-  --color-status-community-border: #9bc1b0;
+  --color-status-community-bg: #e8f3ef;
+  --color-status-community-text: #0f5c52;
+  --color-status-community-border: #b7d7cd;
   --color-status-needs-bg: #f6ead6;
   --color-status-needs-text: #6f400c;
   --color-status-needs-border: #c97812;
@@ -111,17 +111,17 @@
   --color-primary-soft: #183634;
   --color-on-primary: #f8fafc;
   --color-cta: #c97812;
-  --color-cta-hover: #a85f0d;
+  --color-cta-hover: #a85f00;
   --color-cta-soft: #3a2b1b;
-  --color-on-cta: #0b1220;
+  --color-on-cta: #0f172a;
   --color-sea: #6eafa7;
   --color-sea-hover: #82c2ba;
   --color-sea-soft: #193837;
   --color-link: #6eafa7;
   --color-link-hover: #82c2ba;
-  --color-service-bg: #1b3434;
-  --color-service-text: #9bc3bd;
-  --color-service-border: #3c605c;
+  --color-service-bg: #1d3331;
+  --color-service-text: #a7c8bf;
+  --color-service-border: #41625d;
   --color-accent: #6eafa7;
   --color-accent-hover: #82c2ba;
   --color-accent-soft: #193837;
@@ -129,9 +129,9 @@
   --color-status-official-bg: #182b38;
   --color-status-official-text: #a8c7d2;
   --color-status-official-border: #466878;
-  --color-status-community-bg: #18322c;
-  --color-status-community-text: #9cc8b8;
-  --color-status-community-border: #3d6a5b;
+  --color-status-community-bg: #1d3331;
+  --color-status-community-text: #a7c8bf;
+  --color-status-community-border: #41625d;
   --color-status-needs-bg: #35291a;
   --color-status-needs-text: #e8bd68;
   --color-status-needs-border: #a87325;

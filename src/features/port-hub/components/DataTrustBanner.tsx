@@ -19,8 +19,9 @@ export function DataTrustBanner({ model }: DataTrustBannerProps) {
       <div>
         <p className={styles.sectionEyebrow}>{t("portNotes.trust.eyebrow")}</p>
         <h2 id="data-trust-heading">{model.message}</h2>
-        <p>{model.detail}</p>
-        <TrustStatus {...model.trust} />
+        <p className={styles.trustBannerDetail}>{model.detail}</p>
+        <p className={styles.trustBannerEvidence}>{model.evidence}</p>
+        <TrustStatus {...model.trust} compact />
       </div>
       <p className={styles.trustBannerAdvice}>
         {t("portNotes.trust.advice")}

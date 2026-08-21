@@ -8,6 +8,22 @@
   font-size: var(--font-size-sm);
 }
 
+.trustStatus[data-compact] {
+  gap: var(--space-1);
+  font-size: var(--font-size-xs);
+}
+
+.trustStatus[data-compact] .trustBadge {
+  min-block-size: 1.5rem;
+  padding: 0.1rem var(--space-2);
+}
+
+.trustStatus[data-compact] .trustSymbol {
+  inline-size: 0.875rem;
+  block-size: 0.875rem;
+  font-size: 0.62rem;
+}
+
 .trustBadge {
   display: inline-flex;
   align-items: center;

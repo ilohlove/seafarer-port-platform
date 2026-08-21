@@ -1,4 +1,4 @@
-import { TrustStatus, type TrustStatusPresentation } from "../../../components";
+import { TrustStatus } from "../../../components";
 import { useI18n } from "../../../i18n";
 import type {
   InternetDealModel,
@@ -20,11 +20,6 @@ export function PortSnapshot({
   showMedia,
 }: PortSnapshotProps) {
   const { t } = useI18n();
-  const chips: readonly [string, TrustStatusPresentation][] = [
-    [t("portNotes.snapshot.shoreLeave"), model.confidence],
-    [`${model.noteCount} ${t("portNotes.snapshot.notesUnit")}`, model.confidence],
-    [t("portNotes.snapshot.confidence"), model.confidence],
-  ];
 
   return (
     <section
@@ -66,7 +61,10 @@ export function PortSnapshot({
         <div className={styles.terminalContext}>
           <span className={styles.contextLabel}>{t("portNotes.snapshot.selectedTerminal")}</span>
           <strong>{model.terminal}</strong>
-          <span>{model.gate}</span>
+          <span>
+            <span className={styles.gateLabel}>{t("portNotes.snapshot.gateLabel")}</span>{" "}
+            {model.gate}
+          </span>
         </div>
 
         <div className={styles.snapshotFacts}>
@@ -102,12 +100,13 @@ export function PortSnapshot({
           className={styles.trustChipRow}
           aria-label={t("portNotes.snapshot.confidence")}
         >
-          {chips.map(([label, trust]) => (
-            <span className={styles.trustChip} key={label}>
-              <span>{label}</span>
-              <TrustStatus {...trust} compact />
-            </span>
-          ))}
+          <TrustStatus {...model.confidence} compact />
+          <span className={styles.trustChip}>
+            {t("portNotes.snapshot.notesSummary", { count: model.noteCount })} · {t(
+              "portNotes.snapshot.pendingSummary",
+              { count: model.pendingConfirmations },
+            )}
+          </span>
         </div>
       </div>
     </section>

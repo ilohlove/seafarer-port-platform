@@ -116,6 +116,7 @@ export function PortNotesRoute() {
       "physical-sim": "topic-internet-sim",
       "food-supplies": "topic-food-supplies",
       "seaman-club": "welfare-section",
+      places: "topic-places",
       "write-note": undefined,
     };
     const targetId = targetIds[action.id];
@@ -248,10 +249,10 @@ export function PortNotesRoute() {
               notes={viewModel.topNotes}
               onPlaceholder={showPlaceholder}
             />
-            {renderSearchPanel(
-              "port-notes-search-mobile",
-              styles.searchPanel,
-            )}
+            <BestInternetDeal
+              model={viewModel.internetDeal}
+              onPlaceholder={showPlaceholder}
+            />
             <WelfareCards cards={viewModel.welfareCards} />
             <TopicPreviewSections
               topics={viewModel.topics}
@@ -261,10 +262,10 @@ export function PortNotesRoute() {
               notes={viewModel.recentNotes}
               onPlaceholder={showPlaceholder}
             />
-            <BestInternetDeal
-              model={viewModel.internetDeal}
-              onPlaceholder={showPlaceholder}
-            />
+            {renderSearchPanel(
+              "port-notes-search-mobile",
+              styles.searchPanel,
+            )}
             <DataTrustBanner model={viewModel.dataTrust} />
             <PortNotesSafetyShortcuts
               model={viewModel.safety}

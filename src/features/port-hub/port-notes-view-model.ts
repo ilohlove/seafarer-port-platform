@@ -148,6 +148,7 @@ export interface PortNotesViewModel {
   readonly dataTrust: {
     readonly message: string;
     readonly detail: string;
+    readonly evidence: string;
     readonly trust: TrustStatusPresentation;
   };
 }
@@ -588,7 +589,7 @@ export function buildPortNotesViewModel(
     actions: [
       {
         id: "compare-esim",
-        symbol: "e",
+        symbol: "eSIM",
         label: t("portNotes.action.compareEsim"),
         description: t("portNotes.action.compareEsimDescription"),
         count: actionCount(["esim"]),
@@ -596,7 +597,7 @@ export function buildPortNotesViewModel(
       },
       {
         id: "physical-sim",
-        symbol: "S",
+        symbol: "SIM",
         label: t("portNotes.action.physicalSim"),
         description: t("portNotes.action.physicalSimDescription"),
         count: actionCount(["physicalSim"]),
@@ -620,7 +621,7 @@ export function buildPortNotesViewModel(
       },
       {
         id: "seaman-club",
-        symbol: "C",
+        symbol: "W",
         label: t("portNotes.action.seamanClub"),
         description: t("portNotes.action.seamanClubDescription"),
         count:
@@ -628,8 +629,16 @@ export function buildPortNotesViewModel(
             ? t("portNotes.action.providerCount", {
                 count: selectedWelfareProviders.length,
               })
-            : actionCount(["seamanClub"]),
+          : actionCount(["seamanClub"]),
         tone: "teal",
+      },
+      {
+        id: "places",
+        symbol: "P",
+        label: t("portNotes.action.places"),
+        description: t("portNotes.action.placesDescription"),
+        count: actionCount(["placesToVisit"]),
+        tone: "blue",
       },
       {
         id: "write-note",
@@ -749,7 +758,8 @@ export function buildPortNotesViewModel(
     welfareCards,
     dataTrust: {
       message: t("portNotes.trust.message"),
-      detail: t("portNotes.trust.detail", {
+      detail: t("portNotes.trust.detail"),
+      evidence: t("portNotes.trust.evidence", {
         notes: notes.length,
         pending: hub.community.openConfirmationCount,
         missing: hub.dataHealth.missingAreas.length,

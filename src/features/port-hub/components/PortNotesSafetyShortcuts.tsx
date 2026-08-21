@@ -29,7 +29,7 @@ export function PortNotesSafetyShortcuts({
         <button
           className={styles.secondaryButton}
           type="button"
-          onClick={() => onPlaceholder("Emergency contacts")}
+          onClick={() => onPlaceholder(t("portNotes.safety.emergencyEyebrow"))}
         >
           {t("portNotes.safety.details")}
         </button>
@@ -47,7 +47,7 @@ export function PortNotesSafetyShortcuts({
         <button
           className={styles.secondaryButton}
           type="button"
-          onClick={() => onPlaceholder("Return Card")}
+          onClick={() => onPlaceholder(t("portNotes.safety.returnCard"))}
         >
           {t("portNotes.safety.returnCard")}
         </button>

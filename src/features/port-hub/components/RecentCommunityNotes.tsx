@@ -45,7 +45,11 @@ export function RecentCommunityNotes({
             <button
               className={styles.textButton}
               type="button"
-              onClick={() => onPlaceholder(`View note: ${note.title}`)}
+              onClick={() =>
+                onPlaceholder(
+                  t("portNotes.notes.viewPlaceholder", { title: note.title }),
+                )
+              }
             >
               {t("portNotes.notes.view")}
             </button>

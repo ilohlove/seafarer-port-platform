@@ -25,15 +25,20 @@ export function TopSeafarerNotes({
         <button
           className={styles.textButton}
           type="button"
-          onClick={() => onPlaceholder("View all notes")}
+          onClick={() => onPlaceholder(t("portNotes.notes.viewAll"))}
         >
           {t("portNotes.notes.viewAll")}
         </button>
       </div>
       {highlightedNotes.length > 0 ? (
         <div className={styles.notesList}>
-          {highlightedNotes.map((note) => (
-            <article className={styles.noteCard} key={note.id}>
+          {highlightedNotes.map((note, index) => (
+            <article
+              className={styles.noteCard}
+              data-featured={index === 0 ? "true" : undefined}
+              data-note-kind={index === 0 ? "primary" : "secondary"}
+              key={note.id}
+            >
               <div className={styles.noteMeta}>
                 <span className={styles.topicTag}>{note.topic}</span>
                 <TrustStatus {...note.trust} compact />
@@ -52,14 +57,26 @@ export function TopSeafarerNotes({
                 <button
                   className={styles.secondaryButton}
                   type="button"
-                  onClick={() => onPlaceholder(`View note: ${note.title}`)}
+                  onClick={() =>
+                    onPlaceholder(
+                      t("portNotes.notes.viewPlaceholder", {
+                        title: note.title,
+                      }),
+                    )
+                  }
                 >
                   {t("portNotes.notes.view")}
                 </button>
                 <button
                   className={styles.textButton}
                   type="button"
-                  onClick={() => onPlaceholder(`Confirm: ${note.title}`)}
+                  onClick={() =>
+                    onPlaceholder(
+                      t("portNotes.notes.confirmPlaceholder", {
+                        title: note.title,
+                      }),
+                    )
+                  }
                 >
                   {t("portNotes.notes.confirm")}
                 </button>
@@ -74,7 +91,7 @@ export function TopSeafarerNotes({
           <button
             className={styles.primaryButton}
             type="button"
-            onClick={() => onPlaceholder("Write a Note")}
+            onClick={() => onPlaceholder(t("portNotes.notes.write"))}
           >
             {t("portNotes.notes.write")}
           </button>

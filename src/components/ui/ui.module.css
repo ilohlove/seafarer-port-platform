@@ -43,10 +43,13 @@
   border-radius: var(--radius-md);
   background: var(--search-input-bg, var(--color-surface));
   color: var(--color-text);
+  font-size: var(--font-size-md);
+  font-style: normal;
 }
 
 .searchInput::placeholder {
   color: var(--color-text-muted);
+  font-style: normal;
   opacity: 1;
 }
 
