@@ -144,6 +144,15 @@
   inline-size: min(100% - (2 * var(--space-4)), 76rem);
 }
 
+.portNotesShell .mark {
+  background: linear-gradient(145deg, var(--color-primary), #0b5d68);
+  box-shadow: 0 0.2rem 0.55rem rgb(15 118 110 / 18%);
+}
+
+.portNotesShell .preferenceControl select {
+  border-radius: var(--radius-pill);
+}
+
 @media (max-width: 47.99rem) {
   .portNotesShell .headerInner {
     display: grid;
@@ -235,6 +244,12 @@
 @media (min-width: 48rem) {
   .portNotesShell :global(.wide-container) {
     inline-size: min(100% - (2 * var(--space-6)), 76rem);
+  }
+}
+
+@media (min-width: 90rem) {
+  .portNotesShell :global(.wide-container) {
+    inline-size: min(100% - (2 * var(--space-6)), 94rem);
   }
 }
 

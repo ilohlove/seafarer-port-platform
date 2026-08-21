@@ -19,16 +19,19 @@ import {
   PortNotesSafetyShortcuts,
   PortSafetyAlert,
   PortSnapshot,
+  PortUtilityStrip,
   QuickNotesPanel,
   RecentCommunityNotes,
   TopSeafarerNotes,
   TopicPreviewSections,
+  TopicShortcutPanel,
   TaxiHangulDialog,
   WelfareCards,
 } from "./components";
 import {
   buildPortNotesViewModel,
   type PortNoteActionModel,
+  type PortUtilityItemModel,
 } from "./port-notes-view-model";
 import styles from "./port-notes.module.css";
 
@@ -127,6 +130,22 @@ export function PortNotesRoute() {
     showPlaceholder(action.label);
   }
 
+  function handleUtility(item: PortUtilityItemModel) {
+    if (item.target === "taxi") {
+      setIsTaxiDialogOpen(true);
+      return;
+    }
+
+    const targetIds = {
+      internet: "best-internet-heading",
+      transport: "topic-shore-transport",
+      food: "topic-food-supplies",
+    } as const;
+    document.getElementById(targetIds[item.target])?.scrollIntoView({
+      block: "start",
+    });
+  }
+
   function renderSearchPanel(id: string, className: string) {
     return (
       <section
@@ -217,7 +236,7 @@ export function PortNotesRoute() {
             />
 
             <div
-              className={styles.topPrimary}
+              className={styles.contextPanel}
               id="port-context-panel"
               role="tabpanel"
               aria-labelledby={
@@ -228,23 +247,44 @@ export function PortNotesRoute() {
             >
               <PortSnapshot
                 model={viewModel.snapshot}
-                deal={viewModel.internetDeal}
                 onPlaceholder={showPlaceholder}
                 showMedia={mode === "standard"}
               />
-              {viewModel.alerts.map((alert) => (
-                <PortSafetyAlert model={alert} key={alert.id} />
-              ))}
-            </div>
-            <QuickNotesPanel
-              model={viewModel.quickNotes}
-              onPlaceholder={showPlaceholder}
-            />
+              <PortUtilityStrip
+                items={viewModel.utilities}
+                onSelect={handleUtility}
+              />
 
-            <MainActionTiles
-              actions={viewModel.actions}
-              onAction={handleAction}
-            />
+              <div className={styles.decisionLayout}>
+                <div className={styles.decisionMain}>
+                  {viewModel.alerts.map((alert) => (
+                    <PortSafetyAlert model={alert} key={alert.id} />
+                  ))}
+                  <QuickNotesPanel
+                    model={viewModel.quickNotes}
+                    onPlaceholder={showPlaceholder}
+                  />
+                  <MainActionTiles
+                    actions={viewModel.actions}
+                    onAction={handleAction}
+                  />
+                </div>
+
+                <div
+                  className={styles.rightRail}
+                  aria-label={t("portNotes.rail.label")}
+                >
+                  <DataTrustBanner
+                    model={viewModel.dataTrust}
+                    onContribute={() =>
+                      showPlaceholder(t("portNotes.community.contribute"))
+                    }
+                  />
+                  <TopicShortcutPanel shortcuts={viewModel.topicShortcuts} />
+                </div>
+              </div>
+            </div>
+
             <TopSeafarerNotes
               notes={viewModel.topNotes}
               onPlaceholder={showPlaceholder}
@@ -266,7 +306,6 @@ export function PortNotesRoute() {
               "port-notes-search-mobile",
               styles.searchPanel,
             )}
-            <DataTrustBanner model={viewModel.dataTrust} />
             <PortNotesSafetyShortcuts
               model={viewModel.safety}
               onPlaceholder={showPlaceholder}

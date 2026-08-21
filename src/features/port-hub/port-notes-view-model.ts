@@ -33,11 +33,23 @@ export interface PortSnapshotModel {
 
 export interface QuickNoteItemModel {
   readonly id: string;
-  readonly text: string;
+  readonly title: string;
+  readonly summary: string;
+  readonly hint?: string;
+  readonly symbol: string;
+  readonly trust: TrustStatusPresentation;
 }
 
 export interface QuickNotesModel {
-  readonly bullets: readonly QuickNoteItemModel[];
+  readonly items: readonly QuickNoteItemModel[];
+}
+
+export interface PortUtilityItemModel {
+  readonly id: string;
+  readonly target: "internet" | "transport" | "taxi" | "food";
+  readonly symbol: string;
+  readonly label: string;
+  readonly value: string;
   readonly trust: TrustStatusPresentation;
 }
 
@@ -122,6 +134,13 @@ export interface TopicPreviewModel {
   readonly actionLabel: string;
 }
 
+export interface TopicShortcutModel {
+  readonly id: string;
+  readonly title: string;
+  readonly summary: string;
+  readonly targetId: string;
+}
+
 export interface SafetyShortcutModel {
   readonly emergencyName: string;
   readonly emergencyPhone: string;
@@ -139,10 +158,12 @@ export interface PortNotesViewModel {
   readonly taxiPhrase: TaxiPhraseModel;
   readonly internetDeal: InternetDealModel;
   readonly quickNotes: QuickNotesModel;
+  readonly utilities: readonly PortUtilityItemModel[];
   readonly actions: readonly PortNoteActionModel[];
   readonly topNotes: readonly PortNoteCardModel[];
   readonly recentNotes: readonly PortNoteCardModel[];
   readonly topics: readonly TopicPreviewModel[];
+  readonly topicShortcuts: readonly TopicShortcutModel[];
   readonly safety: SafetyShortcutModel;
   readonly welfareCards: readonly WelfareCardModel[];
   readonly dataTrust: {
@@ -150,6 +171,7 @@ export interface PortNotesViewModel {
     readonly detail: string;
     readonly evidence: string;
     readonly trust: TrustStatusPresentation;
+    readonly contributionPrompt: string;
   };
 }
 
@@ -234,16 +256,51 @@ function categorySummary(
   hub: PortHubReadModel,
   suffix: "food" | "shopping" | "welfare",
   t: Translate,
+  terminalId?: string,
 ): string {
   const category = hub.services.categories.find((candidate) =>
     candidate.id.endsWith(`-${suffix}`),
   );
-  const recommendation = category?.recommendations[0];
+  const recommendation = category?.recommendations.find(
+    (candidate) => !terminalId || candidate.access?.terminalId === terminalId,
+  );
   return recommendation
     ? recommendation.place.name
-    : category && category.totalAvailable > 0
+    : category && category.totalAvailable > 0 && !terminalId
       ? t("portNotes.topic.availableCount", { count: category.totalAvailable })
       : t("portNotes.value.noData");
+}
+
+function quickInfoSymbol(block: KnowledgeBlock): string {
+  const value = `${block.id} ${block.label}`.toLowerCase();
+  if (/gate|terminal|berth/.test(value)) {
+    return "G";
+  }
+  if (/shuttle|taxi|transport|di chuyển/.test(value)) {
+    return "T";
+  }
+  if (/return|quay lại|safety|an toàn/.test(value)) {
+    return "!";
+  }
+  return "i";
+}
+
+function quickInfoTitle(
+  block: KnowledgeBlock,
+  gate: string,
+  t: Translate,
+): string {
+  const value = `${block.id} ${block.label}`.toLowerCase();
+  if (/gate|terminal|berth/.test(value)) {
+    return gate;
+  }
+  if (/shuttle/.test(value)) {
+    return t("portNotes.quickNotes.shuttleTitle");
+  }
+  if (/return|quay lại|safety|an toàn/.test(value)) {
+    return t("portNotes.quickNotes.safetyTitle");
+  }
+  return block.label;
 }
 
 function productLabel(
@@ -413,6 +470,33 @@ export function buildPortNotesViewModel(
     ],
     t,
   );
+  const foodNote = firstTopicNote(notes, ["foodOrder", "supplies", "shopping"]);
+  const foodSummary = categorySummary(hub, "food", t, selectedTerminal?.id);
+  const shuttleBlock =
+    activeContext?.quickNotes.find((item) =>
+      /shuttle|taxi|transport|di chuyển/i.test(`${item.id} ${item.label}`),
+    ) ?? hub.access.transport[0];
+  const internetTrust = combinedTrust(
+    [
+      product?.trust ?? hub.dataHealth.trust,
+      knowledgeTrust(hub.internet.bestOption),
+    ],
+    t,
+  );
+  const transportTrust = trustPresentation(
+    shuttleBlock ? knowledgeTrust(shuttleBlock) : hub.dataHealth.trust,
+    t,
+  );
+  const taxiTrust = trustPresentation(
+    activeContext
+      ? knowledgeTrust(activeContext.taxiPickup)
+      : taxiNote?.trust ?? hub.dataHealth.trust,
+    t,
+  );
+  const foodTrust = trustPresentation(
+    foodNote?.trust ?? hub.dataHealth.trust,
+    t,
+  );
 
   const selectedWelfareProviders = activeContext
     ? hub.welfareProviders.filter((provider) =>
@@ -451,6 +535,37 @@ export function buildPortNotesViewModel(
       };
     },
   );
+  const quickInfoBlocks = activeContext?.quickNotes ??
+    [
+      hub.access.terminalAccess,
+      hub.access.transport[0],
+      hub.access.returnToShip,
+    ].filter((item): item is KnowledgeBlock => Boolean(item));
+  const welfareQuickInfo = welfareCards[0];
+  const quickInfoItems: readonly QuickNoteItemModel[] = [
+    ...quickInfoBlocks.slice(0, 3).map((item) => ({
+      id: item.id,
+      title: quickInfoTitle(item, gate, t),
+      summary: item.summary,
+      ...(item.details[0] ? { hint: item.details[0] } : {}),
+      symbol: quickInfoSymbol(item),
+      trust: trustPresentation(knowledgeTrust(item), t),
+    })),
+    {
+      id: welfareQuickInfo?.id ?? "welfare-no-data",
+      title: t("portNotes.quickNotes.welfareTitle"),
+      summary:
+        welfareQuickInfo?.badges.map((badge) => badge.label).join(" · ") ||
+        t("portNotes.quickNotes.noWelfare"),
+      ...(welfareQuickInfo ? { hint: welfareQuickInfo.name } : {}),
+      symbol: "W",
+      trust:
+        welfareQuickInfo?.trust ?? {
+          status: "unknown",
+          label: t("trust.unknown"),
+        },
+    },
+  ];
 
   const rankedNotes = [...notes]
     .sort(
@@ -470,6 +585,111 @@ export function buildPortNotesViewModel(
     const count = topicCount(topics);
     return count > 0 ? t("portNotes.action.count", { count }) : undefined;
   };
+  const topics: readonly TopicPreviewModel[] = [
+    {
+      id: "internet-sim",
+      symbol: "e",
+      title: t("portNotes.topicSection.internet"),
+      bullets: [
+        internetSummary,
+        hub.internet.physicalSim[0]?.summary ??
+          t("portNotes.topicSection.noPhysicalSim"),
+        hub.internet.wifi[0]?.summary ?? t("portNotes.topicSection.noWifi"),
+      ],
+      actionLabel: t("portNotes.topicSection.seeInternet"),
+    },
+    {
+      id: "shore-transport",
+      symbol: "T",
+      title: t("portNotes.topicSection.shoreLeave"),
+      bullets: [
+        activeContext?.shoreLeave.summary ?? hub.access.shoreLeave.summary,
+        taxiSummary,
+        hub.access.returnToShip.summary,
+      ],
+      actionLabel: t("portNotes.topicSection.seeTransport"),
+    },
+    {
+      id: "food-supplies",
+      symbol: "F",
+      title: t("portNotes.topicSection.food"),
+      bullets: [
+        foodSummary,
+        categorySummary(hub, "shopping", t, selectedTerminal?.id),
+        ...notes
+          .filter((note) =>
+            ["foodOrder", "supplies", "shopping"].includes(note.topic),
+          )
+          .slice(0, 1)
+          .map((note) => note.summary),
+      ].slice(0, 3),
+      actionLabel: t("portNotes.topicSection.seeFood"),
+    },
+    {
+      id: "places",
+      symbol: "P",
+      title: t("portNotes.topicSection.places"),
+      bullets: notes
+        .filter((note) => note.topic === "placesToVisit")
+        .slice(0, 3)
+        .map((note) => note.summary)
+        .concat(
+          notes.some((note) => note.topic === "placesToVisit")
+            ? []
+            : [t("portNotes.topicSection.noPlaces")],
+        )
+        .slice(0, 3),
+      actionLabel: t("portNotes.topicSection.seePlaces"),
+    },
+    {
+      id: "seaman-club",
+      symbol: "C",
+      title: t("portNotes.topicSection.seamanClub"),
+      bullets: [
+        selectedWelfareProviders[0]?.name ??
+          t("portNotes.topicSection.noClub"),
+        hub.welfareServices.find((service) =>
+          selectedWelfareProviders.some(
+            (provider) => provider.id === service.providerId,
+          ),
+        )?.scheduleSummary ?? t("portNotes.topicSection.noWelfareData"),
+        notes.find((note) => note.topic === "seamanClub")?.summary ??
+          t("portNotes.topicSection.confirmClub"),
+      ],
+      actionLabel: t("portNotes.topicSection.seeClub"),
+    },
+    {
+      id: "help",
+      symbol: "?",
+      title: t("portNotes.topicSection.help"),
+      bullets: [
+        t("portNotes.topicSection.pending", {
+          count: hub.community.openConfirmationCount,
+        }),
+        hub.dataHealth.missingAreas.length > 0
+          ? t("portNotes.topicSection.missing", {
+              value: hub.dataHealth.missingAreas.join(" · "),
+            })
+          : t("portNotes.topicSection.noMissing"),
+        hub.community.contributionPrompt,
+      ],
+      actionLabel: t("portNotes.topicSection.writeNote"),
+    },
+  ];
+  const topicShortcutIds = new Set([
+    "internet-sim",
+    "shore-transport",
+    "food-supplies",
+    "seaman-club",
+  ]);
+  const topicShortcuts: readonly TopicShortcutModel[] = topics
+    .filter((topic) => topicShortcutIds.has(topic.id))
+    .map((topic) => ({
+      id: topic.id,
+      title: topic.title,
+      summary: topic.bullets[0] ?? t("portNotes.value.noData"),
+      targetId: `topic-${topic.id}`,
+    }));
 
   return {
     contexts:
@@ -544,48 +764,46 @@ export function buildPortNotesViewModel(
       evidence: internetEvidenceNote
         ? `${internetEvidenceNote.confirmationCount} ${t("portNotes.internet.seafarers")} · ${internetEvidenceNote.usefulnessCount} ${t("portNotes.internet.crewUseful")}`
         : t("portNotes.internet.prototypeEvidence"),
-      trust: combinedTrust(
-        [
-          product?.trust ?? hub.dataHealth.trust,
-          knowledgeTrust(hub.internet.bestOption),
-        ],
-        t,
-      ),
+      trust: internetTrust,
     },
     quickNotes: {
-      bullets: activeContext
-        ? activeContext.quickNotes.map((item) => ({
-            id: item.id,
-            text: item.summary,
-          }))
-        : [
-            {
-              id: "terminal-access",
-              text: hub.access.terminalAccess.summary,
-            },
-            {
-              id: "transport",
-              text:
-                hub.access.transport[0]?.summary ??
-                t("portNotes.quickNotes.noTransport"),
-            },
-            {
-              id: "taxi",
-              text: taxiNote?.summary ?? t("portNotes.quickNotes.noTaxi"),
-            },
-          ],
-      trust: combinedTrust(
-        activeContext
-          ? activeContext.quickNotes.map(knowledgeTrust)
-          : [
-              knowledgeTrust(hub.access.terminalAccess),
-              ...(hub.access.transport[0]
-                ? [knowledgeTrust(hub.access.transport[0])]
-                : []),
-            ],
-        t,
-      ),
+      items: quickInfoItems,
     },
+    utilities: [
+      {
+        id: "internet",
+        target: "internet",
+        symbol: "eSIM",
+        label: t("portNotes.utility.internet"),
+        value: product?.name ?? internetSummary,
+        trust: internetTrust,
+      },
+      {
+        id: "transport",
+        target: "transport",
+        symbol: "S",
+        label: t("portNotes.utility.transport"),
+        value:
+          shuttleBlock?.summary ?? t("portNotes.quickNotes.noTransport"),
+        trust: transportTrust,
+      },
+      {
+        id: "taxi",
+        target: "taxi",
+        symbol: "T",
+        label: t("portNotes.utility.taxi"),
+        value: taxiSummary,
+        trust: taxiTrust,
+      },
+      {
+        id: "food",
+        target: "food",
+        symbol: "F",
+        label: t("portNotes.utility.food"),
+        value: foodSummary,
+        trust: foodTrust,
+      },
+    ],
     actions: [
       {
         id: "compare-esim",
@@ -650,96 +868,8 @@ export function buildPortNotesViewModel(
     ],
     topNotes: rankedNotes,
     recentNotes,
-    topics: [
-      {
-        id: "internet-sim",
-        symbol: "e",
-        title: t("portNotes.topicSection.internet"),
-        bullets: [
-          internetSummary,
-          hub.internet.physicalSim[0]?.summary ??
-            t("portNotes.topicSection.noPhysicalSim"),
-          hub.internet.wifi[0]?.summary ?? t("portNotes.topicSection.noWifi"),
-        ],
-        actionLabel: t("portNotes.topicSection.seeInternet"),
-      },
-      {
-        id: "shore-transport",
-        symbol: "T",
-        title: t("portNotes.topicSection.shoreLeave"),
-        bullets: [
-          activeContext?.shoreLeave.summary ?? hub.access.shoreLeave.summary,
-          taxiSummary,
-          hub.access.returnToShip.summary,
-        ],
-        actionLabel: t("portNotes.topicSection.seeTransport"),
-      },
-      {
-        id: "food-supplies",
-        symbol: "F",
-        title: t("portNotes.topicSection.food"),
-        bullets: [
-          categorySummary(hub, "food", t),
-          categorySummary(hub, "shopping", t),
-          ...notes
-            .filter((note) => ["foodOrder", "supplies", "shopping"].includes(note.topic))
-            .slice(0, 1)
-            .map((note) => note.summary),
-        ].slice(0, 3),
-        actionLabel: t("portNotes.topicSection.seeFood"),
-      },
-      {
-        id: "places",
-        symbol: "P",
-        title: t("portNotes.topicSection.places"),
-        bullets: notes
-          .filter((note) => note.topic === "placesToVisit")
-          .slice(0, 3)
-          .map((note) => note.summary)
-          .concat(
-            notes.some((note) => note.topic === "placesToVisit")
-              ? []
-              : [t("portNotes.topicSection.noPlaces")],
-          )
-          .slice(0, 3),
-        actionLabel: t("portNotes.topicSection.seePlaces"),
-      },
-      {
-        id: "seaman-club",
-        symbol: "C",
-        title: t("portNotes.topicSection.seamanClub"),
-        bullets: [
-          selectedWelfareProviders[0]?.name ??
-            t("portNotes.topicSection.noClub"),
-          hub.welfareServices.find((service) =>
-            selectedWelfareProviders.some(
-              (provider) => provider.id === service.providerId,
-            ),
-          )?.scheduleSummary ??
-            t("portNotes.topicSection.noWelfareData"),
-          notes.find((note) => note.topic === "seamanClub")?.summary ??
-            t("portNotes.topicSection.confirmClub"),
-        ],
-        actionLabel: t("portNotes.topicSection.seeClub"),
-      },
-      {
-        id: "help",
-        symbol: "?",
-        title: t("portNotes.topicSection.help"),
-        bullets: [
-          t("portNotes.topicSection.pending", {
-            count: hub.community.openConfirmationCount,
-          }),
-          hub.dataHealth.missingAreas.length > 0
-            ? t("portNotes.topicSection.missing", {
-                value: hub.dataHealth.missingAreas.join(" · "),
-              })
-            : t("portNotes.topicSection.noMissing"),
-          hub.community.contributionPrompt,
-        ],
-        actionLabel: t("portNotes.topicSection.writeNote"),
-      },
-    ],
+    topics,
+    topicShortcuts,
     safety: {
       emergencyName:
         hub.emergencyContacts[0]?.displayName ?? t("portNotes.safety.noEmergency"),
@@ -766,6 +896,7 @@ export function buildPortNotesViewModel(
         conflicts: hub.dataHealth.conflictingAreas.length,
       }),
       trust: combinedTrust([hub.dataHealth.trust], t),
+      contributionPrompt: hub.community.contributionPrompt,
     },
   };
 }

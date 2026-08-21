@@ -13,31 +13,85 @@ export function PortNotesNavigation({
   const { t } = useI18n();
 
   return (
-    <nav
-      className={styles.mobileBottomNavigation}
-      aria-label={t("portNotes.nav.label")}
-      data-navigation="mobile"
-    >
-      <a href="/">
-        <span aria-hidden="true">⌂</span>
-        {t("portNotes.nav.home")}
-      </a>
-      <a href="#port-notes-search-mobile">
-        <span aria-hidden="true">⌕</span>
-        {t("portNotes.nav.search")}
-      </a>
-      <a href={`/ports/${portSlug}`} aria-current="page">
-        <span aria-hidden="true">⚓</span>
-        {t("portNotes.nav.port")}
-      </a>
-      <a href="#top-notes-heading">
-        <span aria-hidden="true">✎</span>
-        {t("portNotes.nav.notes")}
-      </a>
-      <button type="button" onClick={() => onPlaceholder(t("portNotes.nav.saved"))}>
-        <span aria-hidden="true">♡</span>
-        {t("portNotes.nav.saved")}
-      </button>
-    </nav>
+    <>
+      <aside
+        className={styles.sidebar}
+        aria-label={t("portNotes.nav.label")}
+        data-navigation="desktop"
+      >
+        <nav>
+          <a href="/">
+            <span aria-hidden="true">⌂</span>
+            {t("portNotes.nav.home")}
+          </a>
+          <button
+            type="button"
+            onClick={() => onPlaceholder(t("portNotes.nav.search"))}
+          >
+            <span aria-hidden="true">⌕</span>
+            {t("portNotes.nav.search")}
+          </button>
+          <a href={`/ports/${portSlug}`} aria-current="page">
+            <span aria-hidden="true">⚓</span>
+            {t("portNotes.nav.port")}
+          </a>
+          <button
+            type="button"
+            onClick={() => onPlaceholder(t("portNotes.action.compareEsim"))}
+          >
+            <span aria-hidden="true">⌁</span>
+            {t("portNotes.nav.esim")}
+          </button>
+          <button
+            type="button"
+            onClick={() => onPlaceholder(t("portNotes.action.taxi"))}
+          >
+            <span aria-hidden="true">↗</span>
+            {t("portNotes.nav.transport")}
+          </button>
+          <button
+            type="button"
+            onClick={() => onPlaceholder(t("portNotes.notes.heading"))}
+          >
+            <span aria-hidden="true">✎</span>
+            {t("portNotes.nav.notes")}
+          </button>
+          <button
+            type="button"
+            onClick={() => onPlaceholder(t("portNotes.nav.saved"))}
+          >
+            <span aria-hidden="true">♡</span>
+            {t("portNotes.nav.saved")}
+          </button>
+        </nav>
+      </aside>
+
+      <nav
+        className={styles.mobileBottomNavigation}
+        aria-label={t("portNotes.nav.label")}
+        data-navigation="mobile"
+      >
+        <a href="/">
+          <span aria-hidden="true">⌂</span>
+          {t("portNotes.nav.home")}
+        </a>
+        <a href="#port-notes-search-mobile">
+          <span aria-hidden="true">⌕</span>
+          {t("portNotes.nav.search")}
+        </a>
+        <a href={`/ports/${portSlug}`} aria-current="page">
+          <span aria-hidden="true">⚓</span>
+          {t("portNotes.nav.port")}
+        </a>
+        <a href="#top-notes-heading">
+          <span aria-hidden="true">✎</span>
+          {t("portNotes.nav.notes")}
+        </a>
+        <button type="button" onClick={() => onPlaceholder(t("portNotes.nav.saved"))}>
+          <span aria-hidden="true">♡</span>
+          {t("portNotes.nav.saved")}
+        </button>
+      </nav>
+    </>
   );
 }

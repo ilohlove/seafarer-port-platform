@@ -6,24 +6,44 @@ import styles from "../port-notes.module.css";
 
 export interface DataTrustBannerProps {
   readonly model: PortNotesViewModel["dataTrust"];
+  readonly onContribute: () => void;
 }
 
-export function DataTrustBanner({ model }: DataTrustBannerProps) {
+export function DataTrustBanner({
+  model,
+  onContribute,
+}: DataTrustBannerProps) {
   const { t } = useI18n();
 
   return (
-    <aside className={styles.trustBanner} aria-labelledby="data-trust-heading">
-      <div className={styles.trustBannerSymbol} aria-hidden="true">
-        ✓
-      </div>
-      <div>
-        <p className={styles.sectionEyebrow}>{t("portNotes.trust.eyebrow")}</p>
-        <h2 id="data-trust-heading">{model.message}</h2>
-        <p className={styles.trustBannerDetail}>{model.detail}</p>
-        <p className={styles.trustBannerEvidence}>{model.evidence}</p>
+    <aside
+      className={styles.communityPanel}
+      aria-labelledby="data-trust-heading"
+    >
+      <div className={styles.communityPanelHeader}>
+        <p className={styles.sectionEyebrow}>
+          {t("portNotes.community.eyebrow")}
+        </p>
         <TrustStatus {...model.trust} compact />
       </div>
-      <p className={styles.trustBannerAdvice}>
+      <h2 id="data-trust-heading">{t("portNotes.community.heading")}</h2>
+      <p className={styles.communityMessage}>{model.message}</p>
+      <ul className={styles.communityPrinciples}>
+        <li>{t("portNotes.community.publicNotes")}</li>
+        <li>{t("portNotes.community.pendingNotes")}</li>
+        <li>{t("portNotes.community.prototype")}</li>
+      </ul>
+      <p className={styles.communityEvidence}>{model.evidence}</p>
+      <p className={styles.communityDetail}>{model.detail}</p>
+      <p className={styles.communityPrompt}>{model.contributionPrompt}</p>
+      <button
+        className={styles.communityContributeButton}
+        type="button"
+        onClick={onContribute}
+      >
+        {t("portNotes.community.contribute")}
+      </button>
+      <p className={styles.communityAdvice}>
         {t("portNotes.trust.advice")}
       </p>
     </aside>

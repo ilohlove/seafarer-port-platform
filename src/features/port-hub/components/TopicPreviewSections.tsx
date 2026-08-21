@@ -18,7 +18,7 @@ export function TopicPreviewSections({
       <div className={styles.sectionHeader}>
         <div>
           <p className={styles.sectionEyebrow}>{t("portNotes.topics.eyebrow")}</p>
-          <h2 id="topic-previews-heading">{t("portNotes.topics.heading")}</h2>
+          <h2 id="topic-previews-heading">{t("portNotes.topics.fullHeading")}</h2>
         </div>
         <span className={styles.sectionCaption}>{t("portNotes.topics.caption")}</span>
       </div>

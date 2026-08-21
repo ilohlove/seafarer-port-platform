@@ -28,11 +28,20 @@ export function QuickNotesPanel({
               {t("portNotes.quickNotes.heading")}
             </h2>
           </div>
-          <TrustStatus {...model.trust} compact />
         </div>
         <ul className={styles.quickNotesList}>
-          {model.bullets.map((bullet) => (
-            <li key={bullet.id}>{bullet.text}</li>
+          {model.items.map((item) => (
+            <li className={styles.quickInfoCard} key={item.id}>
+              <div className={styles.quickInfoHeader}>
+                <span className={styles.quickInfoSymbol} aria-hidden="true">
+                  {item.symbol}
+                </span>
+                <h3>{item.title}</h3>
+                <TrustStatus {...item.trust} compact />
+              </div>
+              <p>{item.summary}</p>
+              {item.hint ? <small>{item.hint}</small> : null}
+            </li>
           ))}
         </ul>
         <button

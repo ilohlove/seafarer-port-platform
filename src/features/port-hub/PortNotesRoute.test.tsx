@@ -36,8 +36,17 @@ describe("CrewPort Port Notes route", () => {
     const snapshot = snapshotHeading.closest("section")!;
     expect(within(snapshot).getByText("Khu bến đang chọn")).toBeVisible();
     expect(snapshot).toHaveTextContent("Crew Gate");
-    expect(within(snapshot).getByText("Internet tốt nhất")).toBeVisible();
-    expect(within(snapshot).getByText("Điểm đón taxi")).toBeVisible();
+    expect(document.querySelector("img")).toBeNull();
+
+    const utilityStrip = screen.getByRole("region", {
+      name: "Thông tin thiết yếu",
+    });
+    expect(within(utilityStrip).getAllByRole("button")).toHaveLength(4);
+    for (const label of ["Internet / eSIM", "Shuttle / Đi lại", "Taxi", "Đồ ăn"]) {
+      expect(
+        within(utilityStrip).getByRole("button", { name: new RegExp(label) }),
+      ).toBeVisible();
+    }
     expect(
       screen.getByRole("heading", { name: "Thông tin Internet / eSIM" }),
     ).toBeVisible();
@@ -49,9 +58,14 @@ describe("CrewPort Port Notes route", () => {
     });
     expect(
       within(quickNotesHeading.closest("section")!).getAllByRole("listitem"),
-    ).toHaveLength(3);
+    ).toHaveLength(4);
 
-    expect(document.querySelector('[data-navigation="desktop"]')).toBeNull();
+    const desktopNavigation = document.querySelector('[data-navigation="desktop"]');
+    expect(desktopNavigation).toHaveAttribute(
+      "aria-label",
+      "Điều hướng ghi chú cảng",
+    );
+    expect(desktopNavigation?.querySelectorAll("nav a, nav button")).toHaveLength(7);
 
     const mobileSearch = document.querySelector('[data-search-placement="mobile"]');
     expect(mobileSearch).not.toBeNull();
@@ -132,6 +146,7 @@ describe("CrewPort Port Notes route", () => {
       }),
     ).toBeVisible();
     expect(screen.queryByText("New Port berth cluster (demo)")).toBeNull();
+    expect(screen.queryByText("Quick Meal Stop (sample)")).toBeNull();
 
     await user.click(screen.getByRole("tab", { name: "Yeongdo" }));
     expect(
@@ -147,11 +162,11 @@ describe("CrewPort Port Notes route", () => {
     const user = userEvent.setup();
     render(<App />);
     await screen.findByRole("heading", { name: "Busan New Port" });
-    const actionsSection = screen
-      .getByRole("heading", { name: "Chọn nhanh" })
-      .closest("section")!;
-    const taxiAction = within(actionsSection).getByRole("button", {
-      name: /Taxi \/ Grab/,
+    const utilityStrip = screen.getByRole("region", {
+      name: "Thông tin thiết yếu",
+    });
+    const taxiAction = within(utilityStrip).getByRole("button", {
+      name: /^Taxi/,
     });
 
     await user.click(taxiAction);
@@ -205,10 +220,18 @@ describe("CrewPort Port Notes route", () => {
     );
     expect(section).toHaveTextContent(/\d+ xác nhận/);
     expect(section).toHaveTextContent(/\d+ hữu ích/);
-    expect(screen.getByRole("heading", {
-      name: "Thông tin được chia sẻ bởi cộng đồng thuyền viên.",
-    })).toBeVisible();
-    expect(screen.queryByText(/243 visitors|4\.8 score|86% verified|15,000\+ seafarers/i)).toBeNull();
+    expect(
+      screen.getByRole("heading", { name: "Cộng đồng CrewPort" }),
+    ).toBeVisible();
+    expect(
+      screen.getByText("Thông tin được chia sẻ bởi cộng đồng thuyền viên."),
+    ).toBeVisible();
+    expect(screen.getByText(/Dữ liệu mẫu · hoạt động thật/)).toBeVisible();
+    expect(
+      screen.queryByText(
+        /243 visitors|4\.8 score|86% verified|15,000\+ seafarers|1,284 seafarers|72 ports/i,
+      ),
+    ).toBeNull();
     expect(section).not.toHaveTextContent(/★|star rating|premium/i);
     expect(screen.queryByText(/Premium|Gói trả phí/i)).toBeNull();
   });
@@ -218,7 +241,15 @@ describe("CrewPort Port Notes route", () => {
     await screen.findByRole("heading", { name: "Busan New Port" });
 
     expect(screen.getByRole("heading", { name: "Chủ đề cần xem" })).toBeVisible();
-    expect(screen.getByRole("heading", { name: "Cần thêm trợ giúp?" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Tất cả chủ đề cảng" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Cần thêm thông tin?" })).toBeVisible();
+    const topicShortcuts = screen.getByRole("navigation", {
+      name: "Lối tắt chủ đề cảng",
+    });
+    expect(within(topicShortcuts).getAllByRole("link")).toHaveLength(4);
+    expect(
+      screen.getAllByRole("complementary", { name: "Cộng đồng CrewPort" }),
+    ).toHaveLength(1);
 
     for (const leftover of [
       /Topic previews/i,
@@ -233,11 +264,12 @@ describe("CrewPort Port Notes route", () => {
       expect(screen.queryByText(leftover)).toBeNull();
     }
 
-    const mobileNavigation = screen.getByRole("navigation", {
-      name: "Điều hướng ghi chú cảng",
-    });
-    expect(mobileNavigation).toHaveAttribute("data-navigation", "mobile");
-    expect(mobileNavigation.querySelectorAll("a, button")).toHaveLength(5);
+    const mobileNavigation = screen
+      .getAllByRole("navigation", { name: "Điều hướng ghi chú cảng" })
+      .find((navigation) => navigation.getAttribute("data-navigation") === "mobile");
+    expect(mobileNavigation).toBeDefined();
+    expect(mobileNavigation?.getAttribute("data-navigation")).toBe("mobile");
+    expect(mobileNavigation?.querySelectorAll("a, button")).toHaveLength(5);
   });
 
   test("keeps notes and Write a Note usable in Data Saver and Ultra Lite", async () => {
@@ -266,6 +298,8 @@ describe("CrewPort Port Notes route", () => {
       expect(document.documentElement.dataset.bandwidthMode).toBe("ultraLite");
     });
     expect(screen.getByRole("heading", { name: "Ghi chú nổi bật" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Cộng đồng CrewPort" })).toBeVisible();
+    expect(screen.getByRole("region", { name: "Thông tin thiết yếu" })).toBeVisible();
     expect(document.querySelector("img")).toBeNull();
   });
 
