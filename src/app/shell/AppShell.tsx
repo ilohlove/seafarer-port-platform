@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -8,7 +9,7 @@ import { useLocation } from "react-router";
 import { CrewPortBrand, OfflineBanner } from "../../components";
 import { SiteNavigation } from "../../features/navigation";
 import { useI18n } from "../../i18n";
-import type { AppearanceMode, BandwidthMode } from "../../types";
+import type { BandwidthMode } from "../../types";
 import {
   useAppearanceMode,
   useBandwidthMode,
@@ -29,24 +30,16 @@ const bandwidthKeys = {
   ultraLite: "bandwidth.ultraLite",
 } as const;
 
-const appearanceModes: readonly AppearanceMode[] = ["light", "dark", "system"];
+function SunIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+    </svg>
+  );
+}
 
-const appearanceKeys = {
-  light: "appearance.light",
-  dark: "appearance.dark",
-  system: "appearance.system",
-} as const;
-
-function AppearanceIcon({ mode }: { readonly mode: AppearanceMode }) {
-  if (mode === "light") {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <circle cx="12" cy="12" r="4" />
-        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
-      </svg>
-    );
-  }
-
+function MoonIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
       <path d="M20.5 15.5A8.5 8.5 0 0 1 8.5 3.5 8.5 8.5 0 1 0 20.5 15.5Z" />
@@ -71,6 +64,17 @@ function DataModeIcon() {
   );
 }
 
+function SettingsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M4 6h16M4 12h16M4 18h16" />
+      <circle cx="9" cy="6" r="2" />
+      <circle cx="15" cy="12" r="2" />
+      <circle cx="10" cy="18" r="2" />
+    </svg>
+  );
+}
+
 function UserIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -89,6 +93,7 @@ interface PreferenceSelectProps<Value extends string> {
   readonly className: string;
   readonly disabled: boolean;
   readonly onChange: (value: Value) => void;
+  readonly showLabel?: boolean;
 }
 
 function PreferenceSelect<Value extends string>({
@@ -100,10 +105,13 @@ function PreferenceSelect<Value extends string>({
   className,
   disabled,
   onChange,
+  showLabel = false,
 }: PreferenceSelectProps<Value>) {
   return (
     <label className={`${styles.preferenceControl} ${className}`}>
-      <span className="visually-hidden">{label}</span>
+      <span className={showLabel ? styles.preferenceLabel : "visually-hidden"}>
+        {label}
+      </span>
       <span className={styles.preferenceVisual} aria-hidden="true">
         <span className={styles.preferenceIcon}>{icon}</span>
         {displayValue ? (
@@ -126,6 +134,57 @@ function PreferenceSelect<Value extends string>({
   );
 }
 
+interface AppearanceControlProps {
+  readonly resolvedAppearance: "light" | "dark";
+  readonly label: string;
+  readonly lightLabel: string;
+  readonly darkLabel: string;
+  readonly disabled: boolean;
+  readonly className?: string;
+  readonly onToggle: () => void;
+}
+
+function AppearanceControl({
+  resolvedAppearance,
+  label,
+  lightLabel,
+  darkLabel,
+  disabled,
+  className,
+  onToggle,
+}: AppearanceControlProps) {
+  const isDark = resolvedAppearance === "dark";
+  const currentLabel = isDark ? darkLabel : lightLabel;
+
+  return (
+    <div className={`${styles.appearanceControl} ${className ?? ""}`}>
+      <button
+        className={styles.appearanceToggle}
+        type="button"
+        role="switch"
+        aria-checked={isDark}
+        aria-label={`${label}: ${currentLabel}`}
+        disabled={disabled}
+        onClick={onToggle}
+      >
+        <span className={styles.appearanceToggleTrack} aria-hidden="true">
+          <span className={styles.appearanceToggleIcon}>
+            <SunIcon />
+          </span>
+          <span className={styles.appearanceToggleIcon}>
+            <MoonIcon />
+          </span>
+          <span
+            className={`${styles.appearanceToggleThumb} ${
+              isDark ? styles.appearanceToggleThumbDark : ""
+            }`}
+          />
+        </span>
+      </button>
+    </div>
+  );
+}
+
 type ShellNotice =
   | { readonly kind: "login" }
   | { readonly kind: "placeholder"; readonly feature: string };
@@ -134,13 +193,19 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
   const location = useLocation();
   const { status: i18nStatus, t } = useI18n();
   const { locale, setLocale } = usePersistedLocale();
-  const { mode: appearanceMode, setMode: setAppearanceMode } =
+  const {
+    resolvedAppearance,
+    setMode: setAppearanceMode,
+  } =
     useAppearanceMode();
   const { mode, setMode } = useBandwidthMode();
   const { isOnline } = useNetworkState();
   const [isSavingPreference, setIsSavingPreference] = useState(false);
   const [preferenceError, setPreferenceError] = useState(false);
+  const [isMobileSettingsOpen, setIsMobileSettingsOpen] = useState(false);
   const [shellNotice, setShellNotice] = useState<ShellNotice>();
+  const mobileSettingsButtonRef = useRef<HTMLButtonElement>(null);
+  const mobileSettingsPanelRef = useRef<HTMLDivElement>(null);
   const isPreferenceBusy = isSavingPreference || i18nStatus === "loading";
   const isPortNotesRoute = location.pathname.startsWith("/ports/");
   const isHomeRoute = location.pathname === "/";
@@ -155,7 +220,43 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
 
   useEffect(() => {
     setShellNotice(undefined);
+    setIsMobileSettingsOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (!isMobileSettingsOpen) {
+      return;
+    }
+
+    const firstControl = mobileSettingsPanelRef.current?.querySelector<HTMLElement>(
+      "select, button",
+    );
+    firstControl?.focus();
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsMobileSettingsOpen(false);
+        mobileSettingsButtonRef.current?.focus();
+      }
+    }
+
+    function handlePointerDown(event: PointerEvent) {
+      const target = event.target as Node;
+      if (
+        !mobileSettingsPanelRef.current?.contains(target) &&
+        !mobileSettingsButtonRef.current?.contains(target)
+      ) {
+        setIsMobileSettingsOpen(false);
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [isMobileSettingsOpen]);
 
   async function applyPreference(update: () => Promise<void>) {
     setPreferenceError(false);
@@ -167,6 +268,11 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
     } finally {
       setIsSavingPreference(false);
     }
+  }
+
+  function toggleAppearance() {
+    const nextMode = resolvedAppearance === "dark" ? "light" : "dark";
+    void applyPreference(() => setAppearanceMode(nextMode));
   }
 
   return (
@@ -194,50 +300,57 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
           />
 
           <div className={styles.preferences}>
-            <PreferenceSelect
-              className={styles.appearanceControl}
-              label={t("settings.appearanceLabel")}
-              value={appearanceMode}
-              icon={<AppearanceIcon mode={appearanceMode} />}
-              disabled={isPreferenceBusy}
-              options={appearanceModes.map((candidate) => ({
-                value: candidate,
-                label: t(appearanceKeys[candidate]),
-              }))}
-              onChange={(nextMode) =>
-                void applyPreference(() => setAppearanceMode(nextMode))
-              }
-            />
-            <PreferenceSelect
-              className={styles.localeControl}
-              label={t("settings.languageLabel")}
-              value={locale}
-              displayValue={locale.toUpperCase()}
-              icon={<GlobeIcon />}
-              disabled={isPreferenceBusy}
-              options={[
-                { value: "vi" as const, label: "VI" },
-                { value: "en" as const, label: "EN" },
-              ]}
-              onChange={(nextLocale) =>
-                void applyPreference(() => setLocale(nextLocale))
-              }
-            />
-            <PreferenceSelect
-              className={styles.bandwidthControl}
-              label={t("settings.bandwidthLabel")}
-              value={mode}
-              displayValue={t(bandwidthKeys[mode])}
-              icon={<DataModeIcon />}
-              disabled={isPreferenceBusy}
-              options={bandwidthModes.map((candidate) => ({
-                value: candidate,
-                label: t(bandwidthKeys[candidate]),
-              }))}
-              onChange={(nextMode) =>
-                void applyPreference(() => setMode(nextMode))
-              }
-            />
+            <div className={styles.desktopPreferences}>
+              <AppearanceControl
+                resolvedAppearance={resolvedAppearance}
+                label={t("settings.appearanceLabel")}
+                lightLabel={t("appearance.light")}
+                darkLabel={t("appearance.dark")}
+                disabled={isPreferenceBusy}
+                onToggle={toggleAppearance}
+              />
+              <PreferenceSelect
+                className={styles.localeControl}
+                label={t("settings.languageLabel")}
+                value={locale}
+                displayValue={locale.toUpperCase()}
+                icon={<GlobeIcon />}
+                disabled={isPreferenceBusy}
+                options={[
+                  { value: "vi" as const, label: "VI" },
+                  { value: "en" as const, label: "EN" },
+                ]}
+                onChange={(nextLocale) =>
+                  void applyPreference(() => setLocale(nextLocale))
+                }
+              />
+              <PreferenceSelect
+                className={styles.bandwidthControl}
+                label={t("settings.bandwidthLabel")}
+                value={mode}
+                displayValue={t(bandwidthKeys[mode])}
+                icon={<DataModeIcon />}
+                disabled={isPreferenceBusy}
+                options={bandwidthModes.map((candidate) => ({
+                  value: candidate,
+                  label: t(bandwidthKeys[candidate]),
+                }))}
+                onChange={(nextMode) =>
+                  void applyPreference(() => setMode(nextMode))
+                }
+              />
+            </div>
+            <button
+              ref={mobileSettingsButtonRef}
+              className={styles.mobileSettingsButton}
+              type="button"
+              aria-label={t("settings.openDisplaySettings")}
+              aria-expanded={isMobileSettingsOpen}
+              aria-controls="mobile-display-settings"
+              onClick={() => setIsMobileSettingsOpen((open) => !open)}
+            >
+              <SettingsIcon />
+            </button>
             <button
               className={styles.loginButton}
               type="button"
@@ -246,6 +359,66 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
             >
               <UserIcon />
             </button>
+
+            {isMobileSettingsOpen ? (
+              <section
+                ref={mobileSettingsPanelRef}
+                className={styles.mobileSettingsPanel}
+                id="mobile-display-settings"
+                aria-labelledby="mobile-display-settings-heading"
+              >
+                <h2
+                  className="visually-hidden"
+                  id="mobile-display-settings-heading"
+                >
+                  {t("settings.displayPanelLabel")}
+                </h2>
+                <PreferenceSelect
+                  className={styles.mobilePreferenceControl}
+                  label={t("settings.languageLabel")}
+                  value={locale}
+                  displayValue={locale.toUpperCase()}
+                  icon={<GlobeIcon />}
+                  disabled={isPreferenceBusy}
+                  showLabel
+                  options={[
+                    { value: "vi" as const, label: "VI" },
+                    { value: "en" as const, label: "EN" },
+                  ]}
+                  onChange={(nextLocale) =>
+                    void applyPreference(() => setLocale(nextLocale))
+                  }
+                />
+                <div className={styles.mobileAppearancePreference}>
+                  <span>{t("settings.appearanceLabel")}</span>
+                  <AppearanceControl
+                    className={styles.mobileAppearanceControl}
+                    resolvedAppearance={resolvedAppearance}
+                    label={t("settings.appearanceLabel")}
+                    lightLabel={t("appearance.light")}
+                    darkLabel={t("appearance.dark")}
+                    disabled={isPreferenceBusy}
+                    onToggle={toggleAppearance}
+                  />
+                </div>
+                <PreferenceSelect
+                  className={styles.mobilePreferenceControl}
+                  label={t("settings.bandwidthLabel")}
+                  value={mode}
+                  displayValue={t(bandwidthKeys[mode])}
+                  icon={<DataModeIcon />}
+                  disabled={isPreferenceBusy}
+                  showLabel
+                  options={bandwidthModes.map((candidate) => ({
+                    value: candidate,
+                    label: t(bandwidthKeys[candidate]),
+                  }))}
+                  onChange={(nextMode) =>
+                    void applyPreference(() => setMode(nextMode))
+                  }
+                />
+              </section>
+            ) : null}
 
             {isPreferenceBusy ? (
               <output className={styles.preferenceStatus} aria-live="polite">

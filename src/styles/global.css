@@ -105,6 +105,17 @@
   }
 }
 
+@media (min-width: 75rem) {
+  @layer utilities {
+    .content-container {
+      inline-size: min(
+        calc(100% - clamp(4rem, 7vw, 6rem)),
+        var(--content-width)
+      );
+    }
+  }
+}
+
 @media print {
   .skip-link {
     display: none;

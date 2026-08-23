@@ -1,6 +1,7 @@
 .brandLogo {
   display: inline-flex;
-  min-inline-size: max-content;
+  min-inline-size: 0;
+  max-inline-size: 100%;
   align-items: flex-start;
   gap: 0.75rem;
   color: inherit;
@@ -34,10 +35,12 @@
 
 .brandCrew {
   color: #f8fafc;
+  font-weight: 800;
 }
 
 .brandPort {
   color: #14b8a6;
+  font-weight: 900;
 }
 
 .brandTagline {
@@ -65,16 +68,19 @@
 
 @media (max-width: 47.99rem) {
   .brandLogo {
-    gap: 0.625rem;
+    align-items: center;
+    gap: 0.5rem;
   }
 
   .brandAnchor {
-    inline-size: 2.15rem;
-    block-size: 1.15rem;
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
   }
 
   .brandWordmark {
-    font-size: 1.15rem;
+    overflow: hidden;
+    font-size: 1.2rem;
+    text-overflow: ellipsis;
   }
 
   .brandVersion {

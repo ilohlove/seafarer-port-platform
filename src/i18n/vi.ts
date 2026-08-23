@@ -4,6 +4,8 @@ export const viDictionary = {
   "a11y.skipToContent": "Bỏ qua đến nội dung chính",
   "settings.languageLabel": "Ngôn ngữ",
   "settings.appearanceLabel": "Giao diện",
+  "settings.displayPanelLabel": "Tùy chọn hiển thị",
+  "settings.openDisplaySettings": "Mở tùy chọn hiển thị",
   "settings.bandwidthLabel": "Chế độ dữ liệu",
   "settings.loginLabel": "Đăng nhập",
   "settings.loginPlaceholder": "Đăng nhập chưa được triển khai trong bản mẫu.",
@@ -557,7 +559,7 @@ export const viDictionary = {
     "Câu và điểm đến là dữ liệu mẫu. Xác nhận cổng với tàu hoặc đại lý tàu.",
   "portNotes.taxiDialog.done": "Đã hiểu",
   "home.eyebrow": "Cẩm nang cảng cho thuyền viên",
-  "home.heading": "Tìm đúng thông tin trước khi lên bờ",
+  "home.heading": "Tìm nhanh trước khi lên bờ",
   "home.intro":
     "Tìm theo cảng, khu bến hoặc gate để xem kinh nghiệm thực tế về SIM, taxi, mua sắm, đồ ăn và thời gian đi bờ.",
   "home.bandwidth.title": "Đang bật chế độ băng thông thấp",

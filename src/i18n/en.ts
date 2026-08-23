@@ -6,6 +6,8 @@ export const enDictionary = {
   "a11y.skipToContent": "Skip to main content",
   "settings.languageLabel": "Language",
   "settings.appearanceLabel": "Appearance",
+  "settings.displayPanelLabel": "Display settings",
+  "settings.openDisplaySettings": "Open display settings",
   "settings.bandwidthLabel": "Data mode",
   "settings.loginLabel": "Sign in",
   "settings.loginPlaceholder": "Sign-in is not available in this prototype.",
@@ -559,7 +561,7 @@ export const enDictionary = {
     "The phrase and destination are demo data. Confirm the gate with the ship or agent.",
   "portNotes.taxiDialog.done": "Got it",
   "home.eyebrow": "A port guide for seafarers",
-  "home.heading": "Find the right information before going ashore",
+  "home.heading": "Find it fast before going ashore",
   "home.intro":
     "Search by port, berth cluster, or gate to find practical notes about SIMs, taxis, shopping, food, and shore leave.",
   "home.bandwidth.title": "A low-bandwidth mode is active",

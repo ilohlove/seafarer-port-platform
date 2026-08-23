@@ -55,8 +55,10 @@
   }
 
   .trustStatus[data-compact] .trustBadge {
+    max-inline-size: 100%;
     padding-inline: var(--space-1);
     line-height: 1.2;
+    overflow-wrap: anywhere;
     white-space: normal;
   }
 }

@@ -23,6 +23,7 @@
   --search-button-hover-bg: #115e59;
   --search-button-hover-border: #115e59;
   --search-button-text: #ffffff;
+  --search-button-disabled-opacity: 0.72;
   --search-input-border: var(--color-border-strong);
   --search-input-focus: #0f766e;
 }

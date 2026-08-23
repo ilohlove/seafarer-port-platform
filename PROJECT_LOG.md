@@ -22,3 +22,4 @@
 - [2026-08-23 15:49] Tinh gọn Search strip với helper rõ ràng, input có icon/clear và bố cục responsive ưu tiên kết quả.
 - [2026-08-23 16:01] Đồng bộ nội dung English cho snapshot và quick actions, loại bỏ tiếng Việt còn sót trong luồng Port Notes.
 - [2026-08-23 18:45] Hoàn thiện App Shell một hàng với navigation desktop, controls icon/pill responsive và placeholder đăng nhập minh bạch.
+- [2026-08-23 23:35] Hoàn thiện nút chuyển Sáng/Tối, panel cài đặt mobile và tiêu đề responsive cho CrewPort.

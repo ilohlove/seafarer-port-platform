@@ -1,4 +1,11 @@
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -24,7 +31,7 @@ describe("Application shell and demo routing", () => {
 
     expect(
       await screen.findByRole("heading", {
-        name: "Tìm đúng thông tin trước khi lên bờ",
+        name: "Tìm nhanh trước khi lên bờ",
         level: 1,
       }),
     ).toBeVisible();
@@ -67,7 +74,7 @@ describe("Application shell and demo routing", () => {
     render(<App />);
 
     await screen.findByRole("heading", {
-      name: "Tìm đúng thông tin trước khi lên bờ",
+      name: "Tìm nhanh trước khi lên bờ",
     });
     expect(document.documentElement.dataset.appearanceMode).toBe("light");
     expect(document.documentElement.dataset.theme).toBe("light");
@@ -143,13 +150,19 @@ describe("Application shell and demo routing", () => {
     );
 
     expect(
-      await screen.findByRole("heading", { name: "Find the right information before going ashore" }),
+      await screen.findByRole("heading", { name: "Find it fast before going ashore" }),
     ).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute("lang", "en");
 
-    await user.selectOptions(
-      screen.getByRole("combobox", { name: "Appearance" }),
-      "dark",
+    await user.click(
+      screen.getByRole("switch", { name: "Appearance: Dark" }),
+    );
+    await waitFor(() => {
+      expect(document.documentElement.dataset.theme).toBe("light");
+    });
+
+    await user.click(
+      screen.getByRole("switch", { name: "Appearance: Light" }),
     );
     await waitFor(() => {
       expect(document.documentElement.dataset.theme).toBe("dark");
@@ -173,7 +186,7 @@ describe("Application shell and demo routing", () => {
     );
   });
 
-  test("resolves system appearance and follows media changes", async () => {
+  test("keeps persisted system appearance without showing a system control", async () => {
     let changeListener: ((event: { matches: boolean }) => void) | undefined;
     vi.stubGlobal(
       "matchMedia",
@@ -195,21 +208,66 @@ describe("Application shell and demo routing", () => {
         dispatchEvent: () => true,
       })),
     );
-    const user = userEvent.setup();
+    window.localStorage.setItem(
+      "seafarer.preferences.v1",
+      JSON.stringify({
+        locale: "vi",
+        appearanceMode: "system",
+        bandwidthMode: "standard",
+        bandwidthModeWasUserSelected: false,
+      }),
+    );
     render(<App />);
 
-    await user.selectOptions(
-      await screen.findByRole("combobox", { name: "Giao diện" }),
-      "system",
-    );
     await waitFor(() => {
       expect(document.documentElement.dataset.appearanceMode).toBe("system");
       expect(document.documentElement.dataset.theme).toBe("dark");
     });
+    expect(screen.queryByRole("button", { name: "Theo hệ thống" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Use system setting" })).toBeNull();
 
     changeListener?.({ matches: false });
     await waitFor(() => {
       expect(document.documentElement.dataset.theme).toBe("light");
+    });
+  });
+
+  test("groups mobile display settings and restores focus after Escape", async () => {
+    render(<App />);
+    await screen.findByRole("heading", { level: 1 });
+
+    const settingsButton = document.querySelector<HTMLButtonElement>(
+      'button[aria-label="Mở tùy chọn hiển thị"]',
+    );
+    expect(settingsButton).not.toBeNull();
+    fireEvent.click(settingsButton!);
+
+    const settingsPanel = document.getElementById("mobile-display-settings");
+    expect(settingsPanel).toBeInTheDocument();
+    expect(
+      within(settingsPanel!).getByRole("switch", {
+        name: "Giao diện: Tối",
+        hidden: true,
+      }),
+    ).toBeInTheDocument();
+    expect(
+      within(settingsPanel!).getByRole("combobox", {
+        name: "Ngôn ngữ",
+        hidden: true,
+      }),
+    ).toBeInTheDocument();
+    expect(
+      within(settingsPanel!).getByRole("combobox", {
+        name: "Chế độ dữ liệu",
+        hidden: true,
+      }),
+    ).toBeInTheDocument();
+
+    fireEvent.keyDown(document, { key: "Escape" });
+
+    await waitFor(() => {
+      expect(document.getElementById("mobile-display-settings")).toBeNull();
+      expect(settingsButton).toHaveFocus();
     });
   });
 
