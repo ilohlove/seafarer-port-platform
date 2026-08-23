@@ -9,6 +9,7 @@
     color: var(--color-text);
     font-family: var(--font-family-sans);
     line-height: var(--line-height-normal);
+    overflow-x: clip;
     scrollbar-gutter: stable;
   }
 
@@ -17,6 +18,7 @@
     color: var(--color-text);
     font-size: var(--font-size-md);
     font-synthesis: none;
+    overflow-x: clip;
     text-rendering: optimizeLegibility;
   }
 

@@ -1488,17 +1488,17 @@
   }
 
   .actionTile {
-    min-block-size: 10.75rem;
+    min-block-size: 9.5rem;
     grid-template-columns: minmax(0, 1fr);
     align-content: start;
     align-items: start;
-    gap: var(--space-3);
-    padding: var(--space-4);
+    gap: var(--space-2);
+    padding: var(--space-3);
   }
 
   .actionTile .actionSymbol {
-    inline-size: 2.5rem;
-    block-size: 2.5rem;
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
   }
 
   .actionTileBody strong {
@@ -1553,6 +1553,16 @@
 
   .snapshotHeadingRow .saveShort {
     display: inline;
+  }
+
+  .actionTileBody span,
+  .actionTileBody small {
+    font-size: var(--font-size-xs);
+  }
+
+  .sectionHeader h2,
+  .safetyItem h2 {
+    font-size: var(--font-size-lg);
   }
 
   .snapshot h1 {
