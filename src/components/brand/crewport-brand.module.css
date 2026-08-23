@@ -1,7 +1,7 @@
 .brandLogo {
   display: inline-flex;
   min-inline-size: max-content;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.75rem;
   color: inherit;
   text-decoration: none;
@@ -9,7 +9,7 @@
 
 .brandAnchor {
   inline-size: 2.5rem;
-  block-size: 2.5rem;
+  block-size: calc(clamp(1.25rem, 1.7vw, 1.55rem) + 0.125rem + 0.975rem);
   flex: 0 0 auto;
   object-fit: contain;
 }
@@ -70,7 +70,7 @@
 
   .brandAnchor {
     inline-size: 2.15rem;
-    block-size: 2.15rem;
+    block-size: calc(1.15rem + 0.125rem + 0.864rem);
   }
 
   .brandWordmark {
@@ -91,6 +91,10 @@
 }
 
 @media (max-width: 22rem) {
+  .brandAnchor {
+    block-size: 1.15rem;
+  }
+
   .brandTagline {
     display: none;
   }
