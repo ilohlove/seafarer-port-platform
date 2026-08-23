@@ -143,7 +143,7 @@ describe("CrewPort compact Port Notes route", () => {
     expect(screen.queryByRole("heading", { name: "Busan North Port" })).toBeNull();
   });
 
-  test("searches from the desktop header and reuses the Home search flow", async () => {
+  test("searches from the desktop header and opens the Search route", async () => {
     const user = userEvent.setup();
     render(<App />);
     await screen.findByRole("heading", { name: "Busan New Port" });
@@ -152,7 +152,7 @@ describe("CrewPort compact Port Notes route", () => {
     await user.type(search, "Singapore");
     await user.click(screen.getByRole("button", { name: "Tìm" }));
 
-    expect(window.location.pathname).toBe("/");
+    expect(window.location.pathname).toBe("/search");
     expect(window.location.search).toBe("?q=Singapore");
     expect(
       await screen.findByRole("heading", { name: /cảng có thể tham khảo/ }),

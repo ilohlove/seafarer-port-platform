@@ -1420,7 +1420,7 @@
   .topicCard,
   .welfareCard,
   .internetDeal {
-    padding: var(--space-5);
+    padding: var(--space-4);
   }
 
   .snapshotFacts {
@@ -1448,7 +1448,7 @@
 
   .actionGrid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: var(--space-3);
+    gap: var(--space-2);
   }
 
   .actionTile[data-primary="true"] {
@@ -1488,12 +1488,12 @@
   }
 
   .actionTile {
-    min-block-size: 9.5rem;
-    grid-template-columns: minmax(0, 1fr);
-    align-content: start;
-    align-items: start;
+    min-block-size: 7rem;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-content: center;
+    align-items: center;
     gap: var(--space-2);
-    padding: var(--space-3);
+    padding: var(--space-2);
   }
 
   .actionTile .actionSymbol {
@@ -1502,7 +1502,7 @@
   }
 
   .actionTileBody strong {
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-md);
   }
 
   .quickNotesBody > .secondaryButton {
@@ -1511,6 +1511,168 @@
 
   .noteCard[data-featured="true"] {
     grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 48rem) and (min-height: 45rem) {
+  .page {
+    gap: var(--space-3);
+  }
+
+  .workspace {
+    gap: var(--space-2);
+  }
+
+  .page {
+    padding-block-end: 0;
+  }
+
+  .snapshot,
+  .snapshotBody {
+    min-block-size: 0;
+  }
+
+  .snapshotBody {
+    gap: var(--space-2);
+    padding: var(--space-3);
+  }
+
+  .snapshot h1 {
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+  }
+
+  .terminalContext {
+    gap: var(--space-1) var(--space-2);
+  }
+
+  .snapshotFact > button,
+  .snapshotFactStatic {
+    min-block-size: 0;
+    padding: var(--space-2);
+  }
+
+  .snapshotFactIcon {
+    inline-size: 2rem;
+    block-size: 2rem;
+  }
+
+  .snapshotFactBody {
+    gap: 0.1rem;
+  }
+
+  .snapshotFactBody > span:first-child,
+  .snapshotFactBody small,
+  .actionTileBody span,
+  .actionTileBody small {
+    font-size: var(--font-size-xs);
+  }
+
+  .snapshotFactBody strong {
+    font-size: var(--font-size-sm);
+    line-height: 1.25;
+  }
+
+  .actionSection .sectionHeader {
+    margin-block-end: var(--space-2);
+  }
+
+  .actionTile {
+    min-block-size: 6.5rem;
+    padding: var(--space-2);
+  }
+}
+
+@media (min-width: 48rem) and (max-width: 74.99rem) and (min-height: 45rem) {
+  .snapshotBody {
+    gap: var(--space-1);
+    padding: var(--space-2);
+  }
+
+  .snapshot h1 {
+    font-size: clamp(1.625rem, 2.8vw, 2rem);
+  }
+
+  .snapshotFact > button,
+  .snapshotFactStatic {
+    padding: var(--space-1);
+  }
+
+  .snapshotFactIcon {
+    inline-size: 2rem;
+    block-size: 2rem;
+  }
+
+  .snapshotFactBody > span:first-child,
+  .snapshotFactBody small,
+  .actionTileBody span,
+  .actionTileBody small {
+    font-size: 0.75rem;
+  }
+
+  .snapshotFactBody strong,
+  .actionTileBody strong {
+    font-size: var(--font-size-sm);
+    line-height: 1.2;
+  }
+
+  .actionSection .sectionHeader {
+    margin-block-end: var(--space-1);
+  }
+
+  .actionTile {
+    min-block-size: 5.5rem;
+    gap: var(--space-1);
+    padding: var(--space-1);
+  }
+
+  .actionSymbol {
+    inline-size: 2rem;
+    block-size: 2rem;
+  }
+}
+
+@media (min-width: 75rem) and (max-height: 45rem) {
+  .snapshotBody {
+    gap: var(--space-1);
+    padding: var(--space-2);
+  }
+
+  .snapshot h1 {
+    font-size: clamp(1.625rem, 2.8vw, 2rem);
+  }
+
+  .snapshotFact > button,
+  .snapshotFactStatic {
+    padding: var(--space-1);
+  }
+
+  .snapshotFactIcon,
+  .actionSymbol {
+    inline-size: 2rem;
+    block-size: 2rem;
+  }
+
+  .snapshotFactBody > span:first-child,
+  .snapshotFactBody small,
+  .actionTileBody span,
+  .actionTileBody small {
+    font-size: 0.75rem;
+  }
+
+  .snapshotFactBody strong,
+  .actionTileBody strong {
+    font-size: var(--font-size-sm);
+    line-height: 1.2;
+  }
+
+  .actionSection .sectionHeader {
+    margin-block-end: var(--space-1);
+  }
+
+  .actionTile {
+    min-block-size: 5.75rem;
+    gap: var(--space-1);
+    padding: var(--space-1);
   }
 }
 

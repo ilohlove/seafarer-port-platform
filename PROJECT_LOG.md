@@ -15,3 +15,5 @@
 - [2026-08-22 18:02] Hoàn thiện CrewPort theo wireframe desktop/mobile với dark mặc định, Snapshot quyết định và điều hướng thống nhất.
 - [2026-08-22 21:14] Tinh gọn trang Cảng thành Snapshot và Chọn nhanh, chuẩn bị luồng mở nội dung theo nhu cầu.
 - [2026-08-22 21:30] Đồng bộ container, typography và điều hướng client-side giữa Home và trang Cảng trên các breakpoint.
+- [2026-08-23 10:40] Hoàn thiện responsive Home và Port cho mobile, iPad và desktop, giảm cuộn và đồng bộ typography.
+- [2026-08-23 12:02] Tách luồng Search thành /search với kết quả terminal/gate rõ ràng, helper box và giao diện responsive cho thuyền viên.

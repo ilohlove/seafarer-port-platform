@@ -1,4 +1,5 @@
 export * from "./entities";
 export * from "./knowledge-meta";
 export * from "./read-models";
+export * from "./search";
 export * from "./states";

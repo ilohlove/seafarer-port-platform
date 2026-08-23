@@ -283,6 +283,11 @@
     white-space: nowrap;
   }
 
+  .identityCopy > span,
+  .version {
+    display: none;
+  }
+
   .preferenceControl select {
     inline-size: 100%;
     min-block-size: var(--tap-target);
@@ -321,11 +326,6 @@
 
   .portNotesShell .identity {
     grid-area: identity;
-  }
-
-  .portNotesShell .identityCopy > span,
-  .portNotesShell .version {
-    display: none;
   }
 
   .portNotesShell .mark {
@@ -402,26 +402,60 @@
 
 }
 
-@media (min-width: 48rem) and (max-width: 63.99rem) {
+@media (min-width: 48rem) and (max-width: 74.99rem) {
   .portNotesShell .headerInner {
-    grid-template-columns: minmax(12rem, 0.72fr) minmax(18rem, 1fr);
+    grid-template-columns: minmax(8rem, auto) minmax(0, 1fr);
     grid-template-areas:
-      "identity search"
-      "preferences preferences";
+      "identity preferences"
+      "search search";
     align-items: center;
+    gap: var(--space-2);
+    padding-block: var(--space-2);
   }
 
   .portNotesShell .identity {
     grid-area: identity;
   }
 
+  .portNotesShell .identityCopy > span,
+  .portNotesShell .version,
+  .portNotesShell .preferenceControl > span {
+    display: none;
+  }
+
   .portNotesShell .headerSearch {
     grid-area: search;
+    max-inline-size: none;
+    justify-self: stretch;
   }
 
   .portNotesShell .preferences {
     grid-area: preferences;
     justify-self: end;
+  }
+}
+
+@media (min-width: 48rem) and (min-height: 45rem) {
+  .homeShell .main,
+  .portNotesShell .main,
+  .searchShell .main {
+    padding-block: var(--space-2) var(--space-3);
+  }
+
+  .portNotesShell .main,
+  .searchShell .main {
+    padding-block-end: 0;
+  }
+}
+
+@media (min-width: 75rem) and (max-height: 45rem) {
+  .portNotesShell .headerInner {
+    padding-block: var(--space-1);
+  }
+
+  .portNotesShell .identityCopy > span,
+  .portNotesShell .version {
+    display: none;
   }
 }
 

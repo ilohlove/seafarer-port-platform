@@ -49,6 +49,18 @@
   line-height: 1;
 }
 
+@media (max-width: 47.99rem) {
+  .trustStatus[data-compact] {
+    font-size: 0.75rem;
+  }
+
+  .trustStatus[data-compact] .trustBadge {
+    padding-inline: var(--space-1);
+    line-height: 1.2;
+    white-space: normal;
+  }
+}
+
 .trustOfficial {
   border-color: var(--color-status-official-border);
   background: var(--color-status-official-bg);

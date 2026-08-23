@@ -37,6 +37,9 @@ describe("Application shell and demo routing", () => {
     expect(document.documentElement.dataset.theme).toBe("dark");
     expect(screen.getByRole("searchbox", { name: /Tìm cảng/ })).toBeVisible();
     expect(screen.getByRole("button", { name: "Busan" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Busan New Port" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Pasir Panjang" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Westports" })).toBeVisible();
   });
 
   test("keeps a stored light appearance even though new users default to dark", async () => {
@@ -65,12 +68,13 @@ describe("Application shell and demo routing", () => {
 
     await user.click(await screen.findByRole("button", { name: "Busan" }));
 
+    expect(window.location.pathname).toBe("/search");
     expect(window.location.search).toBe("?q=Busan");
     const resultLink = await screen.findByRole("link", {
       name: "Mở ghi chú cảng: Port of Busan",
     });
     expect(resultLink).toHaveAttribute("href", "/ports/busan");
-    expect(screen.getByText("Busan, South Korea")).toBeVisible();
+    expect(screen.getByText("Busan · South Korea · KRPUS")).toBeVisible();
 
     await user.click(resultLink);
 
@@ -78,6 +82,34 @@ describe("Application shell and demo routing", () => {
     expect(
       await screen.findByRole("heading", { name: "Busan New Port", level: 1 }),
     ).toBeVisible();
+  });
+
+  test("keeps Search active and explains an empty result", async () => {
+    window.history.replaceState({}, "", "/search?q=unknown-port");
+    render(<App />);
+
+    expect(
+      await screen.findByRole("heading", {
+        name: 'Chưa có dữ liệu phù hợp với “unknown-port”',
+      }),
+    ).toBeVisible();
+    expect(screen.getByText("Tên cảng")).toBeVisible();
+    expect(screen.getByText("UN/LOCODE")).toBeVisible();
+    expect(
+      screen
+        .getAllByRole("link", { name: "Tìm cảng" })
+        .some((link) => link.getAttribute("aria-current") === "page"),
+    ).toBe(true);
+  });
+
+  test("shows terminal match context on the Search route", async () => {
+    window.history.replaceState({}, "", "/search?q=Pasir%20Panjang");
+    render(<App />);
+
+    expect(
+      await screen.findByText("Khớp terminal: Pasir Panjang Terminal"),
+    ).toBeVisible();
+    expect(screen.getByText("Terminal: Pasir Panjang Terminal")).toBeVisible();
   });
 
   test("switches locale, appearance, and bandwidth independently", async () => {

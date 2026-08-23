@@ -7,7 +7,7 @@ import styles from "./site-navigation.module.css";
 type NavigationIconName = "home" | "search" | "port" | "community" | "saved";
 
 export interface SiteNavigationProps {
-  readonly current: "home" | "port";
+  readonly current: "home" | "search" | "port";
   readonly portSlug?: string;
   readonly onPlaceholder?: (feature: string) => void;
 }
@@ -79,7 +79,7 @@ export function SiteNavigation({
     {
       id: "search",
       label: t("portNotes.nav.search"),
-      href: "/#home-search",
+      href: "/search",
       icon: "search",
     },
     {

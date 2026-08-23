@@ -1,4 +1,11 @@
-import type { PortHubReadModel, PortSummary } from "../../types";
+import type { PortHubReadModel } from "../../types";
+export type {
+  PortSearchHit,
+  PortSearchMatch,
+  PortSearchMatchContext,
+  PortSearchMatchKind,
+  PortSearchResult,
+} from "../../types";
 import type { RequestOptions } from "./request-context";
 
 export interface PortSearchRequest {
@@ -6,11 +13,7 @@ export interface PortSearchRequest {
   readonly limit?: number;
 }
 
-export interface PortSearchResult {
-  readonly items: readonly PortSummary[];
-  readonly total: number;
-  readonly normalizedQuery: string;
-}
+import type { PortSearchResult } from "../../types";
 
 export interface PortHubRequest {
   readonly portSlug: string;

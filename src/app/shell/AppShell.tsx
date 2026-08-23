@@ -74,6 +74,8 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
   const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
   const isPreferenceBusy = isSavingPreference || i18nStatus === "loading";
   const isPortNotesRoute = location.pathname.startsWith("/ports/");
+  const isHomeRoute = location.pathname === "/";
+  const isSearchRoute = location.pathname.startsWith("/search");
   const containerClass = "content-container";
 
   useEffect(() => {
@@ -121,7 +123,7 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
     event.preventDefault();
     const query = headerQuery.trim();
     if (query) {
-      navigate(`/?q=${encodeURIComponent(query)}`);
+      navigate(`/search?q=${encodeURIComponent(query)}`);
     }
   }
 
@@ -129,6 +131,8 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
     <div
       className={`app-shell ${styles.shell} ${
         isPortNotesRoute ? styles.portNotesShell : ""
+      } ${isHomeRoute ? styles.homeShell : ""} ${
+        isSearchRoute ? styles.searchShell : ""
       }`}
     >
       <a className="skip-link" href="#main-content">
@@ -186,7 +190,7 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
             <div className={styles.mobileHeaderActions}>
               <a
                 className={styles.mobileIconButton}
-                href="/#home-search"
+                href="/search"
                 aria-label={t("portNotes.nav.search")}
               >
                 <SearchIcon />

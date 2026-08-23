@@ -10,6 +10,14 @@
   gap: var(--space-5);
 }
 
+.primaryGrid,
+.secondaryGrid,
+.discovery {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--space-4);
+}
+
 .notice {
   display: block;
   padding: var(--space-3) var(--space-4);
@@ -35,14 +43,17 @@
 
 .intro h1 {
   max-inline-size: 19ch;
-  font-size: var(--font-size-page-title);
+  font-size: calc(var(--font-size-page-title) - 0.125rem);
+  line-height: var(--line-height-tight);
   letter-spacing: -0.04em;
+  text-wrap: balance;
 }
 
 .intro > p:last-child {
   max-inline-size: 38rem;
   color: var(--color-text-muted);
-  font-size: var(--font-size-md);
+  font-size: calc(var(--font-size-md) + 0.125rem);
+  line-height: var(--line-height-normal);
 }
 
 .eyebrow,
@@ -156,6 +167,98 @@
   .intro h1 {
     max-inline-size: none;
     white-space: nowrap;
+  }
+}
+
+@media (min-width: 48rem) and (min-height: 45rem) {
+  .workspace,
+  .primaryGrid,
+  .secondaryGrid {
+    gap: var(--space-3);
+  }
+
+  .primaryGrid,
+  .secondaryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .intro {
+    padding-block: var(--space-2);
+  }
+
+  .intro h1 {
+    max-inline-size: none;
+    white-space: nowrap;
+  }
+
+  .searchPanel,
+  .principles {
+    padding: var(--space-3);
+  }
+
+  .exampleList {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .discovery .resultGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 75rem) and (min-height: 45rem) {
+  .primaryGrid,
+  .secondaryGrid {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  }
+
+  .exampleList {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .discovery .resultGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 75rem) and (max-height: 45rem) {
+  .page {
+    gap: var(--space-2);
+    padding-block-end: 0;
+  }
+
+  .workspace,
+  .primaryGrid,
+  .secondaryGrid {
+    gap: var(--space-2);
+  }
+
+  .intro {
+    padding-block: var(--space-1);
+  }
+
+  .searchPanel,
+  .principles {
+    padding: var(--space-2);
+  }
+
+  .exampleList {
+    gap: var(--space-1);
+  }
+
+  .exampleList button {
+    padding: var(--space-2);
+  }
+}
+
+@media (max-width: 47.99rem) {
+  .intro h1 {
+    max-inline-size: 18ch;
+    white-space: normal;
+  }
+
+  .intro > p:last-child {
+    line-height: 1.55;
   }
 }
 

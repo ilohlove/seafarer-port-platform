@@ -166,6 +166,18 @@
   --shadow-raised: none;
 }
 
+@media (min-width: 48rem) and (max-width: 74.99rem) {
+  :root {
+    --font-size-xs: 0.875rem;
+    --font-size-sm: 1rem;
+    --font-size-md: 1.0625rem;
+    --font-size-lg: 1.1875rem;
+    --font-size-xl: 1.4375rem;
+    --font-size-2xl: 1.9375rem;
+    --font-size-page-title: clamp(1.9375rem, 4vw, 2.5rem);
+  }
+}
+
 @media (max-width: 47.99rem) {
   :root {
     --font-size-xs: 0.8125rem;

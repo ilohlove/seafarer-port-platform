@@ -17,16 +17,14 @@ import {
   deriveTrustDisplayStatus,
   type AsyncState,
   type PortHubReadModel,
-  type PortSummary,
+  type PortSearchResult,
   type TrustDisplayStatus,
 } from "../../types";
 import { useBandwidthMode, useServices } from "../../app/providers";
 import styles from "./foundation.module.css";
 
 interface FoundationData {
-  readonly search: {
-    readonly items: readonly PortSummary[];
-  };
+  readonly search: PortSearchResult;
 }
 
 const trustTranslationKeys = {
@@ -244,7 +242,7 @@ export function FoundationRoute() {
 
           {state.status === "success" ? (
             <div className={styles.resultGrid}>
-              {state.data.search.items.map((port) => {
+              {state.data.search.items.map(({ port }) => {
                 const status = deriveTrustDisplayStatus(port.trust);
                 return (
                   <PortResultCard
