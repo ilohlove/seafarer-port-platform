@@ -205,10 +205,6 @@ export function PortNotesRoute() {
               terminal={viewModel.snapshot.terminal}
               gate={viewModel.snapshot.gate}
               onClose={() => setIsNoteDialogOpen(false)}
-              onPreview={() => {
-                setIsNoteDialogOpen(false);
-                setNotice(t("portNotes.capture.previewNotice"));
-              }}
             />
           </div>
         ) : null}

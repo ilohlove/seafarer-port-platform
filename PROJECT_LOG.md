@@ -17,3 +17,7 @@
 - [2026-08-22 21:30] Đồng bộ container, typography và điều hướng client-side giữa Home và trang Cảng trên các breakpoint.
 - [2026-08-23 10:40] Hoàn thiện responsive Home và Port cho mobile, iPad và desktop, giảm cuộn và đồng bộ typography.
 - [2026-08-23 12:02] Tách luồng Search thành /search với kết quả terminal/gate rõ ràng, helper box và giao diện responsive cho thuyền viên.
+- [2026-08-23 15:21] Hoàn thiện luồng Ghi chú 30 giây với topic chips, chi tiết tùy chọn, consent liên hệ và preview session-only.
+- [2026-08-23 15:42] Cập nhật nhận diện CrewPort với anchor teal, wordmark CREWPORT hai màu và tagline theo ngôn ngữ.
+- [2026-08-23 15:49] Tinh gọn Search strip với helper rõ ràng, input có icon/clear và bố cục responsive ưu tiên kết quả.
+- [2026-08-23 16:01] Đồng bộ nội dung English cho snapshot và quick actions, loại bỏ tiếng Việt còn sót trong luồng Port Notes.

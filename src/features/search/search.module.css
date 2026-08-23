@@ -12,14 +12,19 @@
 
 .searchStrip {
   display: grid;
-  grid-template-columns: minmax(12rem, 0.42fr) minmax(0, 1fr);
-  align-items: end;
-  gap: var(--space-4);
+  gap: var(--space-2);
   padding: var(--space-4);
   border: var(--border-width) solid var(--color-border-strong);
   border-radius: var(--radius-lg);
   background: var(--color-surface-elevated);
   box-shadow: var(--shadow-raised);
+  --search-button-bg: #0f766e;
+  --search-button-border: #0f766e;
+  --search-button-hover-bg: #115e59;
+  --search-button-hover-border: #115e59;
+  --search-button-text: #ffffff;
+  --search-input-border: var(--color-border-strong);
+  --search-input-focus: #0f766e;
 }
 
 .searchHeading,
@@ -28,7 +33,6 @@
   gap: var(--space-1);
 }
 
-.searchHeading p,
 .sectionHeading p,
 .helperEyebrow {
   margin: 0;
@@ -38,7 +42,15 @@
   letter-spacing: 0.04em;
 }
 
+.searchHeading p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.45;
+}
+
 .searchHeading h1 {
+  margin: 0;
   font-size: var(--font-size-xl);
 }
 
@@ -221,7 +233,6 @@
 
 @media (max-width: 47.99rem) {
   .searchStrip {
-    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-3);
   }
 

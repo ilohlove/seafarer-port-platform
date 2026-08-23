@@ -1,0 +1,97 @@
+.brandLogo {
+  display: inline-flex;
+  min-inline-size: max-content;
+  align-items: center;
+  gap: 0.75rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.brandAnchor {
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+.brandTextBlock {
+  display: grid;
+  gap: 0.125rem;
+  min-inline-size: 0;
+}
+
+.brandWordmark {
+  font-family:
+    "Montserrat", "Manrope", "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  font-size: clamp(1.25rem, 1.7vw, 1.55rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.brandCrew {
+  color: #f8fafc;
+}
+
+.brandPort {
+  color: #14b8a6;
+}
+
+.brandTagline {
+  overflow: hidden;
+  color: #cbd5e1;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.brandVersion {
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.brandLogo:focus-visible {
+  outline: 0.1875rem solid #14b8a6;
+  outline-offset: 0.25rem;
+  border-radius: 0.25rem;
+}
+
+@media (max-width: 47.99rem) {
+  .brandLogo {
+    gap: 0.625rem;
+  }
+
+  .brandAnchor {
+    inline-size: 2.15rem;
+    block-size: 2.15rem;
+  }
+
+  .brandWordmark {
+    font-size: 1.15rem;
+  }
+
+  .brandVersion {
+    display: none;
+  }
+
+  .brandTagline {
+    font-size: 0.72rem;
+  }
+
+  .brandVersion {
+    font-size: 0.68rem;
+  }
+}
+
+@media (max-width: 22rem) {
+  .brandTagline {
+    display: none;
+  }
+}

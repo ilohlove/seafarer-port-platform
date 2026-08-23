@@ -7,7 +7,7 @@ import {
 } from "react";
 import { useLocation, useNavigate } from "react-router";
 
-import { OfflineBanner } from "../../components";
+import { CrewPortBrand, OfflineBanner } from "../../components";
 import { useI18n } from "../../i18n";
 import type { AppearanceMode, BandwidthMode, Locale } from "../../types";
 import {
@@ -37,8 +37,6 @@ const appearanceKeys = {
   dark: "appearance.dark",
   system: "appearance.system",
 } as const;
-
-const appVersion = __APP_VERSION__;
 
 function SearchIcon() {
   return (
@@ -141,18 +139,7 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
 
       <header className={styles.header}>
         <div className={`${containerClass} ${styles.headerInner}`}>
-          <div className={styles.identity}>
-            <span className={styles.mark} aria-hidden="true">
-              CP
-            </span>
-            <div className={styles.identityCopy}>
-              <strong>{t("app.name")}</strong>
-              <span>{t("app.foundationLabel")}</span>
-              <small className={styles.version} data-testid="app-version">
-                v{appVersion}
-              </small>
-            </div>
-          </div>
+          <CrewPortBrand />
 
           {isPortNotesRoute ? (
             <form

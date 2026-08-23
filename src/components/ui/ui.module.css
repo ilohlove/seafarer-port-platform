@@ -33,10 +33,33 @@
   min-inline-size: 0;
 }
 
+.searchIcon {
+  display: grid;
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: var(--space-3);
+  z-index: 1;
+  place-items: center;
+  inline-size: 1.25rem;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.searchIcon svg {
+  inline-size: 1.15rem;
+  block-size: 1.15rem;
+  fill: none;
+  stroke: currentcolor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
 .searchInput {
   inline-size: 100%;
   min-block-size: var(--tap-target);
   padding: var(--space-3);
+  padding-inline-start: var(--space-7);
   padding-inline-end: var(--space-7);
   border: var(--border-width) solid
     var(--search-input-border, var(--color-border-strong));
@@ -273,6 +296,16 @@
   border: var(--border-width) solid;
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
+}
+
+@media (max-width: 47.99rem) {
+  .searchControls {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .searchButton {
+    inline-size: 100%;
+  }
 }
 
 .bannerCompact {

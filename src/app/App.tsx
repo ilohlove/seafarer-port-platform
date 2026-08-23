@@ -24,13 +24,18 @@ class AppErrorBoundary extends Component<
 
   override render() {
     if (this.state.error) {
+      const english = document.documentElement.lang === "en";
       return (
         <main className="content-container">
           <EmptyState
-            heading="Không thể hiển thị prototype"
+            heading={
+              english
+                ? "The prototype could not be displayed"
+                : "Không thể hiển thị prototype"
+            }
             description={this.state.error.message}
             action={{
-              label: "Tải lại",
+              label: english ? "Reload" : "Tải lại",
               onClick: () => window.location.reload(),
             }}
             announce

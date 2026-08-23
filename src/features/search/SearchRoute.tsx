@@ -165,8 +165,8 @@ export function SearchRoute() {
 
         <section className={styles.searchStrip} aria-labelledby="search-page-heading">
           <div className={styles.searchHeading}>
-            <p>{t("search.eyebrow")}</p>
             <h1 id="search-page-heading">{t("search.heading")}</h1>
+            <p>{t("search.form.helper")}</p>
           </div>
           <SearchBox
             value={query}
@@ -177,6 +177,7 @@ export function SearchRoute() {
             placeholder={t("search.form.placeholder")}
             submitLabel={t("search.form.submit")}
             clearLabel={t("search.form.clear")}
+            labelVisuallyHidden
             id="search-page-input"
           />
         </section>

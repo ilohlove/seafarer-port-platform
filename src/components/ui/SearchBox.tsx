@@ -19,6 +19,7 @@ export interface SearchBoxProps {
   clearLabel?: string;
   onClear?: () => void;
   helperText?: string;
+  labelVisuallyHidden?: boolean;
   id?: string;
   name?: string;
   disabled?: boolean;
@@ -35,6 +36,7 @@ export function SearchBox({
   clearLabel,
   onClear,
   helperText,
+  labelVisuallyHidden = false,
   id,
   name = 'port-search',
   disabled = false,
@@ -78,11 +80,20 @@ export function SearchBox({
     // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- React 19 warns for the newer <search> element.
     <div role="search">
       <form className={styles.searchForm} onSubmit={handleSubmit}>
-        <label className={styles.searchLabel} htmlFor={inputId}>
+        <label
+          className={labelVisuallyHidden ? styles.srOnly : styles.searchLabel}
+          htmlFor={inputId}
+        >
           {label}
         </label>
         <div className={styles.searchControls}>
           <div className={styles.searchInputWrap}>
+            <span className={styles.searchIcon} aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <circle cx="10.5" cy="10.5" r="6.5" />
+                <path d="m16 16 5 5" />
+              </svg>
+            </span>
             <input
               className={styles.searchInput}
               id={inputId}

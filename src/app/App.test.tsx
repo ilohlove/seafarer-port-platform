@@ -33,7 +33,14 @@ describe("Application shell and demo routing", () => {
       "content-container",
     );
     expect(screen.getByTestId("app-version")).toHaveTextContent("v0.1.0");
-    expect(screen.getAllByText("CrewPort").length).toBeGreaterThan(0);
+    const brand = screen.getByRole("link", {
+      name: "CrewPort — Ghi chú cảng cho thuyền viên",
+    });
+    expect(brand.querySelector("img")).toHaveAttribute(
+      "src",
+      "/brand/crewport-anchor.png",
+    );
+    expect(brand).toHaveTextContent("CREWPORT");
     expect(document.documentElement.dataset.theme).toBe("dark");
     expect(screen.getByRole("searchbox", { name: /Tìm cảng/ })).toBeVisible();
     expect(screen.getByRole("button", { name: "Busan" })).toBeVisible();
@@ -93,6 +100,16 @@ describe("Application shell and demo routing", () => {
         name: 'Chưa có dữ liệu phù hợp với “unknown-port”',
       }),
     ).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Tìm cảng", level: 1 })).toBeVisible();
+    expect(
+      screen.getByText("Tìm theo tên cảng, terminal, gate hoặc UN/LOCODE."),
+    ).toBeVisible();
+    expect(
+      screen.getByRole("searchbox", { name: "Ô tìm cảng" }),
+    ).toHaveAttribute("placeholder", "VD: SGSIN, Busan, Crew Gate...");
+    expect(screen.getByRole("button", { name: "Tìm cảng" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Xóa tìm kiếm" })).toBeVisible();
+    expect(screen.queryByText("Tìm trước")).toBeNull();
     expect(screen.getByText("Tên cảng")).toBeVisible();
     expect(screen.getByText("UN/LOCODE")).toBeVisible();
     expect(

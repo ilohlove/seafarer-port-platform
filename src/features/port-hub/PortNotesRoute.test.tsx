@@ -37,7 +37,17 @@ describe("CrewPort compact Port Notes route", () => {
     const actionsHeading = screen.getByRole("heading", { name: "Chọn nhanh" });
     const actions = actionsHeading.closest("section")!;
 
-    expect(screen.getAllByText("CrewPort").length).toBeGreaterThan(0);
+    const brand = screen.getByRole("link", {
+      name: "CrewPort — Ghi chú cảng cho thuyền viên",
+    });
+    expect(brand).toHaveAttribute("href", "/");
+    expect(brand.querySelector("img")).toHaveAttribute(
+      "src",
+      "/brand/crewport-anchor.png",
+    );
+    expect(brand.querySelector("img")).toHaveAttribute("alt", "");
+    expect(brand).toHaveTextContent("CREWPORT");
+    expect(screen.queryByText("CP")).toBeNull();
     expect(document.getElementById("main-content")).toHaveClass(
       "content-container",
     );
@@ -47,7 +57,9 @@ describe("CrewPort compact Port Notes route", () => {
     expect(within(snapshot).queryByText(/CrewPort · Ghi chú cảng/)).toBeNull();
     expect(within(snapshot).getByText("Khu bến đang chọn")).toBeVisible();
     expect(snapshot).toHaveTextContent("Crew Gate");
-    expect(document.querySelector("img")).toBeNull();
+    expect(
+      document.querySelector('img:not([src="/brand/crewport-anchor.png"])'),
+    ).toBeNull();
 
     const snapshotFacts = screen.getByRole("region", {
       name: "Thông tin thiết yếu",
@@ -126,7 +138,7 @@ describe("CrewPort compact Port Notes route", () => {
 
     await user.click(writeNoteAction);
     expect(
-      screen.getByRole("dialog", { name: "Thêm kinh nghiệm cho cảng này" }),
+      screen.getByRole("dialog", { name: "Ghi nhanh trong 30 giây" }),
     ).toBeVisible();
   });
 
@@ -141,6 +153,34 @@ describe("CrewPort compact Port Notes route", () => {
     expect(within(snapshot).getByText("New Port berth cluster (demo)")).toBeVisible();
     expect(within(snapshot).getAllByText("Crew Gate").length).toBeGreaterThan(0);
     expect(screen.queryByRole("heading", { name: "Busan North Port" })).toBeNull();
+  });
+
+  test("keeps the selected port content in English after switching locale", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByRole("heading", { name: "Busan New Port" });
+
+    await user.selectOptions(
+      screen.getByRole("combobox", { name: "Ngôn ngữ" }),
+      "en",
+    );
+
+    const snapshotFacts = await screen.findByRole("region", {
+      name: "Essential port information",
+    });
+    expect(snapshotFacts).toHaveTextContent("Confirm with the ship or agent");
+    expect(snapshotFacts).toHaveTextContent(
+      "Go to the Crew Gate and agree the fare before leaving",
+    );
+
+    const writeNoteAction = await screen.findByRole("button", {
+      name: /Write a Note/,
+    });
+    expect(writeNoteAction).toHaveTextContent(
+      "Just visited Busan? Share what to confirm about the gate and shuttle.",
+    );
+    expect(document.body).not.toHaveTextContent("Bạn vừa ghé Busan");
+    expect(document.body.textContent ?? "").not.toMatch(/[À-ỹĐđ]/);
   });
 
   test("searches from the desktop header and opens the Search route", async () => {
@@ -228,7 +268,7 @@ describe("CrewPort compact Port Notes route", () => {
     ).getByRole("button", { name: /^Viết ghi chú/ });
     await user.click(writeNoteAction);
     const dialog = screen.getByRole("dialog", {
-      name: "Thêm kinh nghiệm cho cảng này",
+      name: "Ghi nhanh trong 30 giây",
     });
     expect(
       within(dialog).getByRole("button", { name: "Đóng form ghi chú" }),
@@ -246,16 +286,101 @@ describe("CrewPort compact Port Notes route", () => {
       within(dialog).getByRole("button", { name: "Xem trước ghi chú" }),
     );
 
+    expect(screen.getByRole("dialog", { name: "Ghi nhanh trong 30 giây" })).toBeVisible();
+    expect(screen.getByText("Bản mẫu chưa được lưu hoặc gửi.")).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Bản xem trước ghi chú" })).toBeVisible();
+
+    await user.click(
+      screen.getByRole("button", { name: "Đóng xem trước" }),
+    );
     expect(screen.queryByRole("dialog")).toBeNull();
-    expect(
-      screen.getByText("Đã tạo bản xem trước. Bản mẫu chưa lưu hoặc gửi dữ liệu."),
-    ).toBeVisible();
     await waitFor(() => expect(writeNoteAction).toHaveFocus());
 
     await user.click(writeNoteAction);
     await user.keyboard("{Escape}");
     expect(screen.queryByRole("dialog")).toBeNull();
     await waitFor(() => expect(writeNoteAction).toHaveFocus());
+  });
+
+  test("keeps the guided note flow compact and validates topic, content, and visibility", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByRole("heading", { name: "Busan New Port" });
+
+    const writeNoteAction = within(
+      screen.getByRole("heading", { name: "Chọn nhanh" }).closest("section")!,
+    ).getByRole("button", { name: /^Viết ghi chú/ });
+    await user.click(writeNoteAction);
+    const dialog = screen.getByRole("dialog", { name: "Ghi nhanh trong 30 giây" });
+
+    expect(within(dialog).getByRole("radio", { name: "Chia sẻ cộng đồng" })).not.toBeChecked();
+    expect(within(dialog).getByRole("radio", { name: "Chỉ mình tôi" })).not.toBeChecked();
+    expect(
+      within(dialog).getByRole("button", { name: "+ Thêm chi tiết nếu nhớ" }),
+    ).toHaveAttribute("aria-expanded", "false");
+    expect(within(dialog).queryByRole("textbox", { name: "Giá hoặc khoảng giá" })).toBeNull();
+
+    await user.click(within(dialog).getByRole("button", { name: "eSIM" }));
+    for (const suggestion of [
+      "Giá",
+      "Dung lượng",
+      "Số ngày",
+      "Hotspot",
+      "Sóng ở cảng",
+      "Website mua",
+    ]) {
+      expect(within(dialog).getByRole("button", { name: suggestion })).toBeVisible();
+    }
+
+    await user.click(within(dialog).getByRole("button", { name: "Giá" }));
+    expect(within(dialog).getByRole("textbox", { name: "Giá" })).toBeVisible();
+    await user.click(within(dialog).getByRole("button", { name: "Xem trước ghi chú" }));
+    expect(within(dialog).getByRole("alert")).toHaveTextContent(
+      "Hãy chọn ai được xem ghi chú này.",
+    );
+
+    await user.click(within(dialog).getByRole("radio", { name: "Chia sẻ cộng đồng" }));
+    await user.click(within(dialog).getByRole("button", { name: "Xem trước ghi chú" }));
+    expect(within(dialog).getByRole("alert")).toHaveTextContent(
+      "Thêm nội dung vào ô ghi nhớ hoặc chọn một chi tiết tùy chọn.",
+    );
+
+    await user.type(within(dialog).getByRole("textbox", { name: "Giá" }), "9 USD");
+    await user.click(within(dialog).getByRole("button", { name: "Xem trước ghi chú" }));
+    expect(within(dialog).getByText("Bản mẫu chưa được lưu hoặc gửi.")).toBeVisible();
+  });
+
+  test("requires permission before a contact can enter a public preview", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByRole("heading", { name: "Busan New Port" });
+
+    const writeNoteAction = within(
+      screen.getByRole("heading", { name: "Chọn nhanh" }).closest("section")!,
+    ).getByRole("button", { name: /^Viết ghi chú/ });
+    await user.click(writeNoteAction);
+    const dialog = screen.getByRole("dialog", { name: "Ghi nhanh trong 30 giây" });
+    await user.click(within(dialog).getByRole("button", { name: "SIM vật lý" }));
+    await user.click(within(dialog).getByRole("button", { name: "+ Thêm chi tiết nếu nhớ" }));
+    await user.type(
+      within(dialog).getByRole("textbox", { name: "Cách liên hệ hoặc mua" }),
+      "Website công khai",
+    );
+    await user.click(within(dialog).getByRole("radio", { name: "Chia sẻ cộng đồng" }));
+    await user.click(within(dialog).getByRole("button", { name: "Xem trước ghi chú" }));
+
+    expect(within(dialog).getByRole("alert")).toHaveTextContent(
+      "Muốn chia sẻ liên hệ công khai, hãy xác nhận đây là kênh được phép chia sẻ.",
+    );
+    expect(within(dialog).queryByRole("heading", { name: "Bản xem trước ghi chú" })).toBeNull();
+
+    await user.click(
+      within(dialog).getByRole("checkbox", {
+        name: "Đây là kênh kinh doanh công khai hoặc được phép chia sẻ",
+      }),
+    );
+    await user.click(within(dialog).getByRole("button", { name: "Xem trước ghi chú" }));
+    expect(within(dialog).getByText("Website công khai")).toBeVisible();
   });
 
   test("keeps navigation and prohibited content checks on the compact page", async () => {
@@ -299,7 +424,9 @@ describe("CrewPort compact Port Notes route", () => {
     expect(screen.getByRole("region", { name: "Thông tin thiết yếu" })).toBeVisible();
     expect(screen.getByRole("button", { name: /Viết ghi chú/ })).toBeVisible();
     expect(screen.queryByRole("heading", { name: "Ghi chú nổi bật" })).toBeNull();
-    expect(document.querySelector("img")).toBeNull();
+    expect(
+      document.querySelector('img:not([src="/brand/crewport-anchor.png"])'),
+    ).toBeNull();
   });
 
   test("surfaces conflicting trust without rendering deeper safety content", async () => {

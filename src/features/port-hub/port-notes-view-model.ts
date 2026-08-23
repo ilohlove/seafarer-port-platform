@@ -217,6 +217,42 @@ const welfareCapabilityKeys: Partial<
   remoteSupport: "portNotes.welfare.badge.support",
 };
 
+const contextSummaryTranslationKeys: Readonly<
+  Record<string, { shoreLeave: TranslationKey; taxi: TranslationKey }>
+> = {
+  "busan-context-new-port": {
+    shoreLeave: "portNotes.contextSummary.busanNewPort.shoreLeave",
+    taxi: "portNotes.contextSummary.busanNewPort.taxi",
+  },
+  "busan-context-north-port": {
+    shoreLeave: "portNotes.contextSummary.busanNorthPort.shoreLeave",
+    taxi: "portNotes.contextSummary.busanNorthPort.taxi",
+  },
+  "busan-context-yeongdo": {
+    shoreLeave: "portNotes.contextSummary.busanYeongdo.shoreLeave",
+    taxi: "portNotes.contextSummary.busanYeongdo.taxi",
+  },
+  "busan-context-gamcheon": {
+    shoreLeave: "portNotes.contextSummary.busanGamcheon.shoreLeave",
+    taxi: "portNotes.contextSummary.busanGamcheon.taxi",
+  },
+};
+
+function contextSummary(
+  contextId: string,
+  kind: "shoreLeave" | "taxi",
+  t: Translate,
+): string {
+  const key = contextSummaryTranslationKeys[contextId]?.[kind];
+  return key
+    ? t(key)
+    : t(
+        kind === "shoreLeave"
+          ? "portNotes.snapshot.shoreLeaveFallback"
+          : "portNotes.snapshot.taxiFallback",
+      );
+}
+
 function trustPresentation(
   evidence: TrustEvidence,
   t: Translate,
@@ -428,16 +464,15 @@ export function buildPortNotesViewModel(
       ? internetEvidenceNote.payload
       : undefined;
   const taxiNote = firstTopicNote(notes, ["taxi", "rideHailing"]);
-  const taxiSummary =
-    activeContext?.taxiPickup.summary ??
-    hub.access.transport.find((item) =>
-      /taxi|ride|xe/i.test(`${item.label} ${item.summary}`),
-    )?.summary ??
-    taxiNote?.summary ??
-    t("portNotes.value.noData");
+  const taxiSummary = activeContext
+    ? contextSummary(activeContext.id, "taxi", t)
+    : t("portNotes.snapshot.taxiFallback");
   const internetSummary = product
     ? productLabel(product, formatMoney, t)
-    : hub.internet.bestOption.summary;
+    : t("portNotes.internet.noDeal");
+  const shoreLeaveSummary = activeContext
+    ? contextSummary(activeContext.id, "shoreLeave", t)
+    : t("portNotes.snapshot.shoreLeaveFallback");
   const topicCount = (topics: readonly NoteTopic[]) =>
     notes.filter((note) => topics.includes(note.topic)).length;
   const confidence = combinedTrust(
@@ -585,9 +620,9 @@ export function buildPortNotesViewModel(
       symbol: "T",
       title: t("portNotes.topicSection.shoreLeave"),
       bullets: [
-        activeContext?.shoreLeave.summary ?? hub.access.shoreLeave.summary,
+        shoreLeaveSummary,
         taxiSummary,
-        hub.access.returnToShip.summary,
+        t("portNotes.safety.returnSummaryFallback"),
       ],
       actionLabel: t("portNotes.topicSection.seeTransport"),
     },
@@ -685,8 +720,7 @@ export function buildPortNotesViewModel(
         id: "shore-leave",
         icon: "shore-leave",
         label: t("portNotes.snapshot.shoreLeave"),
-        value:
-          activeContext?.shoreLeave.summary ?? hub.access.shoreLeave.summary,
+        value: shoreLeaveSummary,
         detail: `${terminalName} · ${gate}`,
         trust: shoreLeaveTrust,
       },
@@ -834,7 +868,7 @@ export function buildPortNotesViewModel(
       {
         id: "write-note",
         label: t("portNotes.action.writeNote"),
-        description: hub.community.contributionPrompt,
+        description: t("portNotes.action.writeNoteDescription"),
         tone: "blue",
       },
     ],
@@ -854,7 +888,7 @@ export function buildPortNotesViewModel(
         hub.emergencyContacts[0]?.trust ?? hub.dataHealth.trust,
         t,
       ),
-      returnSummary: hub.access.returnToShip.summary,
+      returnSummary: t("portNotes.safety.returnSummaryFallback"),
       gate,
       note: t("portNotes.safety.note"),
     },
