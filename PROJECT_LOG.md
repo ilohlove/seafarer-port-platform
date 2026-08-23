@@ -11,3 +11,7 @@
 - [2026-08-10 22:40] Hoàn thành frontend Foundation với typed architecture, mock services, bandwidth modes, component nền tảng và kiểm thử hiệu năng.
 - [2026-08-20 14:30] Hoàn thiện responsive CrewPort Port Notes cho desktop, tablet và mobile, giữ rõ hierarchy, trust và bandwidth modes.
 - [2026-08-20 15:30] Hoàn thiện CrewPort ban đêm với giao diện sáng/tối, bốn cụm Busan, welfare và hướng dẫn taxi tin cậy.
+- [2026-08-22 10:45] Hoàn thiện luồng Home/Search và prototype ghi chú có cấu trúc cho CrewPort, giữ trust, bandwidth và điều hướng responsive.
+- [2026-08-22 18:02] Hoàn thiện CrewPort theo wireframe desktop/mobile với dark mặc định, Snapshot quyết định và điều hướng thống nhất.
+- [2026-08-22 21:14] Tinh gọn trang Cảng thành Snapshot và Chọn nhanh, chuẩn bị luồng mở nội dung theo nhu cầu.
+- [2026-08-22 21:30] Đồng bộ container, typography và điều hướng client-side giữa Home và trang Cảng trên các breakpoint.

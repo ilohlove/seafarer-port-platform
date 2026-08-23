@@ -5,6 +5,18 @@ import { MilestoneUnavailableError } from "../service-errors";
 import { MemoryStorage } from "./storage-utils";
 
 describe("browser storage adapters", () => {
+  test("defaults new users to dark appearance independently of bandwidth", async () => {
+    const services = createServices({
+      storage: new MemoryStorage(),
+      mockLatencyMs: 0,
+    });
+
+    await expect(services.preferences.get()).resolves.toMatchObject({
+      appearanceMode: "dark",
+      bandwidthMode: "standard",
+    });
+  });
+
   test("persists locale and an explicit bandwidth preference", async () => {
     const services = createServices({
       storage: new MemoryStorage(),

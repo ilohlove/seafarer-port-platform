@@ -10,7 +10,7 @@
 
 .intro h1 {
   max-inline-size: 28ch;
-  font-size: clamp(var(--font-size-2xl), 6vw, 2.5rem);
+  font-size: clamp(var(--font-size-2xl), 6vw, 2.625rem);
 }
 
 .intro p:last-child {

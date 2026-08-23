@@ -9,6 +9,7 @@
     color: var(--color-text);
     font-family: var(--font-family-sans);
     line-height: var(--line-height-normal);
+    scrollbar-gutter: stable;
   }
 
   body {
@@ -47,12 +48,12 @@
   }
 
   .content-container {
-    inline-size: min(100% - (2 * var(--space-4)), var(--content-width));
+    inline-size: min(calc(100% - (2 * var(--space-4))), var(--content-width));
     margin-inline: auto;
   }
 
   .wide-container {
-    inline-size: min(100% - (2 * var(--space-4)), 120rem);
+    inline-size: min(calc(100% - (2 * var(--space-4))), 120rem);
     margin-inline: auto;
   }
 
@@ -93,11 +94,11 @@
 @media (min-width: 48rem) {
   @layer utilities {
     .content-container {
-      inline-size: min(100% - (2 * var(--space-6)), var(--content-width));
+      inline-size: min(calc(100% - (2 * var(--space-6))), var(--content-width));
     }
 
     .wide-container {
-      inline-size: min(100% - (2 * var(--space-6)), 120rem);
+      inline-size: min(calc(100% - (2 * var(--space-6))), 120rem);
     }
   }
 }

@@ -11,7 +11,7 @@ const STORAGE_KEY = "seafarer.preferences.v1";
 
 export const DEFAULT_PREFERENCES: Preferences = {
   locale: "vi",
-  appearanceMode: "light",
+  appearanceMode: "dark",
   bandwidthMode: "standard",
   bandwidthModeWasUserSelected: false,
 };

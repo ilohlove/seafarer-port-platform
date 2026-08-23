@@ -1,10 +1,17 @@
-import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import { App } from "../../app/App";
 
-describe("CrewPort Port Notes route", () => {
+describe("CrewPort compact Port Notes route", () => {
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
@@ -19,155 +26,180 @@ describe("CrewPort Port Notes route", () => {
     delete document.documentElement.dataset.theme;
   });
 
-  test("renders the CrewPort snapshot before mobile search", async () => {
+  test("renders only the port snapshot and quick actions in the main port flow", async () => {
     render(<App />);
 
     const snapshotHeading = await screen.findByRole("heading", {
       name: "Busan New Port",
       level: 1,
     });
-    expect(screen.getAllByText("CrewPort").length).toBeGreaterThan(0);
-    expect(document.getElementById("main-content")).toHaveClass("wide-container");
-    expect(snapshotHeading.closest("section")).toHaveAttribute(
-      "data-media",
-      "visible",
-    );
-    expect(screen.getByTestId("port-notes-media")).toBeVisible();
     const snapshot = snapshotHeading.closest("section")!;
+    const actionsHeading = screen.getByRole("heading", { name: "Chọn nhanh" });
+    const actions = actionsHeading.closest("section")!;
+
+    expect(screen.getAllByText("CrewPort").length).toBeGreaterThan(0);
+    expect(document.getElementById("main-content")).toHaveClass(
+      "content-container",
+    );
+    expect(snapshot).toHaveAttribute("data-media", "visible");
+    expect(screen.getByTestId("port-notes-media")).toBeVisible();
+    expect(within(snapshot).queryByText(/Cẩm nang cảng/)).toBeNull();
+    expect(within(snapshot).queryByText(/CrewPort · Ghi chú cảng/)).toBeNull();
     expect(within(snapshot).getByText("Khu bến đang chọn")).toBeVisible();
     expect(snapshot).toHaveTextContent("Crew Gate");
     expect(document.querySelector("img")).toBeNull();
 
-    const utilityStrip = screen.getByRole("region", {
+    const snapshotFacts = screen.getByRole("region", {
       name: "Thông tin thiết yếu",
     });
-    expect(within(utilityStrip).getAllByRole("button")).toHaveLength(4);
-    for (const label of ["Internet / eSIM", "Shuttle / Đi lại", "Taxi", "Đồ ăn"]) {
-      expect(
-        within(utilityStrip).getByRole("button", { name: new RegExp(label) }),
-      ).toBeVisible();
+    expect(within(snapshotFacts).getAllByRole("article")).toHaveLength(4);
+    for (const label of [
+      "Lên bờ",
+      "Internet tốt nhất",
+      "Taxi / Đi bờ",
+      "Cộng đồng",
+    ]) {
+      expect(within(snapshotFacts).getByText(label)).toBeVisible();
     }
-    expect(
-      screen.getByRole("heading", { name: "Thông tin Internet / eSIM" }),
-    ).toBeVisible();
-    expect(screen.getByRole("heading", { name: "Korea Local 10 GB" })).toBeVisible();
-    expect(screen.getAllByText(/9,00 USD/).length).toBeGreaterThan(0);
 
-    const quickNotesHeading = screen.getByRole("heading", {
-      name: "Cần biết ngay",
-    });
-    expect(
-      within(quickNotesHeading.closest("section")!).getAllByRole("listitem"),
-    ).toHaveLength(4);
+    expect(snapshotHeading.compareDocumentPosition(actionsHeading)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+    expect(within(actions).getAllByRole("button")).toHaveLength(8);
 
-    const desktopNavigation = document.querySelector('[data-navigation="desktop"]');
+    for (const removedHeading of [
+      "Xác nhận gate và shuttle trước khi lên bờ",
+      "Cần biết ngay",
+      "Ghi chú nổi bật",
+      "Cộng đồng CrewPort",
+      "Thông tin Internet / eSIM",
+      "Hỗ trợ / Trung tâm thuyền viên",
+      "Chủ đề cần xem",
+      "Tất cả chủ đề cảng",
+      "Cần thêm thông tin?",
+    ]) {
+      expect(screen.queryByRole("heading", { name: removedHeading })).toBeNull();
+    }
+
+    const desktopNavigation = document.querySelector(
+      '[data-navigation="desktop"]',
+    );
     expect(desktopNavigation).toHaveAttribute(
       "aria-label",
       "Điều hướng ghi chú cảng",
     );
-    expect(desktopNavigation?.querySelectorAll("nav a, nav button")).toHaveLength(7);
-
-    const mobileSearch = document.querySelector('[data-search-placement="mobile"]');
-    expect(mobileSearch).not.toBeNull();
-    expect(
-      snapshotHeading.compareDocumentPosition(mobileSearch!),
-    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-
-    const warning = screen.getByRole("note", {
-      name: "Xác nhận gate và shuttle trước khi lên bờ",
-    });
-    expect(within(warning).getByText("Chờ xác nhận")).toBeVisible();
-
-    const actionsHeading = screen.getByRole("heading", { name: "Chọn nhanh" });
-    const notesHeading = screen.getByRole("heading", { name: "Ghi chú nổi bật" });
-    expect(snapshot.parentElement?.contains(warning)).toBe(true);
-    expect(warning.compareDocumentPosition(quickNotesHeading)).toBe(
-      Node.DOCUMENT_POSITION_FOLLOWING,
-    );
-    expect(quickNotesHeading.compareDocumentPosition(actionsHeading)).toBe(
-      Node.DOCUMENT_POSITION_FOLLOWING,
-    );
-    expect(actionsHeading.compareDocumentPosition(notesHeading)).toBe(
-      Node.DOCUMENT_POSITION_FOLLOWING,
-    );
+    expect(desktopNavigation?.querySelectorAll("a, button")).toHaveLength(5);
   });
 
-  test("shows seven need-based actions and keeps Write a Note primary", async () => {
+  test("shows eight need-based actions and keeps Write a Note primary", async () => {
     const user = userEvent.setup();
     render(<App />);
     await screen.findByRole("heading", { name: "Busan New Port" });
     const actionsSection = screen
       .getByRole("heading", { name: "Chọn nhanh" })
-      .closest("section");
-    expect(actionsSection).not.toBeNull();
+      .closest("section")!;
 
-    for (const label of [
-      "eSIM",
-      "SIM vật lý",
-      "Taxi / Grab",
-      "Đồ ăn",
-      "Hỗ trợ thuyền viên",
-      "Chỗ đi",
-      "Viết ghi chú",
-    ]) {
+    const expectedActions = [
+      ["eSIM", "quick-action-compare-esim"],
+      ["SIM vật lý", "quick-action-physical-sim"],
+      ["Đi bờ & Taxi", "quick-action-shore-leave"],
+      ["Đồ ăn & Hoa quả", "quick-action-food-fruit"],
+      ["Mua sắm & Quà", "quick-action-shopping-gifts"],
+      ["Hỗ trợ thuyền viên", "quick-action-seaman-club"],
+      ["Ghi chú khác", "quick-action-other-notes"],
+      ["Viết ghi chú", "quick-action-write-note"],
+    ] as const;
+
+    for (const [label, id] of expectedActions) {
       expect(
-        within(actionsSection!).getByRole("button", {
+        within(actionsSection).getByRole("button", {
           name: new RegExp(label.replace("/", "\\/")),
         }),
-      ).toBeVisible();
+      ).toHaveAttribute("id", id);
     }
 
-    expect(within(actionsSection!).getAllByRole("button")).toHaveLength(7);
-    const writeNoteAction = within(actionsSection!).getByRole("button", {
+    const writeNoteAction = within(actionsSection).getByRole("button", {
       name: /Viết ghi chú/,
     });
     expect(writeNoteAction).toHaveAttribute("data-primary", "true");
     expect(writeNoteAction).toHaveAttribute("data-action-id", "write-note");
 
     await user.click(writeNoteAction);
-    expect(screen.getByText(/mô phỏng giao diện/)).toBeVisible();
+    expect(
+      screen.getByRole("dialog", { name: "Thêm kinh nghiệm cho cảng này" }),
+    ).toBeVisible();
   });
 
-  test("switches among four Busan demo contexts without mixing facts", async () => {
+  test("shows only the selected Busan context without a context switcher", async () => {
+    render(<App />);
+    const heading = await screen.findByRole("heading", {
+      name: "Busan New Port",
+    });
+    const snapshot = heading.closest("section")!;
+
+    expect(screen.queryByRole("tab")).toBeNull();
+    expect(within(snapshot).getByText("New Port berth cluster (demo)")).toBeVisible();
+    expect(within(snapshot).getAllByText("Crew Gate").length).toBeGreaterThan(0);
+    expect(screen.queryByRole("heading", { name: "Busan North Port" })).toBeNull();
+  });
+
+  test("searches from the desktop header and reuses the Home search flow", async () => {
     const user = userEvent.setup();
     render(<App />);
     await screen.findByRole("heading", { name: "Busan New Port" });
 
-    expect(screen.getAllByRole("tab")).toHaveLength(4);
-    const northPortTab = screen.getByRole("tab", { name: "North Port" });
-    await user.click(northPortTab);
-    expect(northPortTab).toHaveAttribute("aria-selected", "true");
+    const search = screen.getByRole("searchbox", { name: "Tìm cảng khác" });
+    await user.type(search, "Singapore");
+    await user.click(screen.getByRole("button", { name: "Tìm" }));
+
+    expect(window.location.pathname).toBe("/");
+    expect(window.location.search).toBe("?q=Singapore");
     expect(
-      screen.getByRole("heading", { name: "Busan North Port", level: 1 }),
+      await screen.findByRole("heading", { name: /cảng có thể tham khảo/ }),
     ).toBeVisible();
+  });
+
+  test("points secondary navigation to the quick-action cards", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByRole("heading", { name: "Busan New Port" });
+
+    const menuButton = screen.getByRole("button", {
+      name: "Mở liên kết phụ",
+      hidden: true,
+    });
+    fireEvent.click(menuButton);
+    const secondaryNavigation = screen.getByRole("navigation", {
+      name: "Lối tắt eSIM và di chuyển",
+      hidden: true,
+    });
     expect(
-      screen.getByRole("heading", {
-        name: "Không dùng hướng dẫn New Port cho North Port",
+      within(secondaryNavigation).getByRole("link", {
+        name: "eSIM",
+        hidden: true,
       }),
-    ).toBeVisible();
-    expect(screen.queryByText("New Port berth cluster (demo)")).toBeNull();
-    expect(screen.queryByText("Quick Meal Stop (sample)")).toBeNull();
+    ).toHaveAttribute("href", "/ports/busan#quick-action-compare-esim");
+    expect(
+      within(secondaryNavigation).getByRole("link", {
+        name: "Di chuyển",
+        hidden: true,
+      }),
+    ).toHaveAttribute("href", "/ports/busan#quick-action-shore-leave");
 
-    await user.click(screen.getByRole("tab", { name: "Yeongdo" }));
+    await user.keyboard("{Escape}");
     expect(
-      screen.getByRole("heading", { name: "Busan Yeongdo", level: 1 }),
-    ).toBeVisible();
-    await user.click(screen.getByRole("tab", { name: "Gamcheon" }));
-    expect(
-      screen.getByRole("heading", { name: "Busan Gamcheon", level: 1 }),
-    ).toBeVisible();
+      screen.queryByRole("navigation", { name: "Lối tắt eSIM và di chuyển" }),
+    ).toBeNull();
+    expect(menuButton).toHaveFocus();
   });
 
-  test("opens and closes the Taxi Hangul dialog", async () => {
+  test("opens and closes the Taxi Hangul dialog from the snapshot", async () => {
     const user = userEvent.setup();
     render(<App />);
     await screen.findByRole("heading", { name: "Busan New Port" });
-    const utilityStrip = screen.getByRole("region", {
-      name: "Thông tin thiết yếu",
-    });
-    const taxiAction = within(utilityStrip).getByRole("button", {
-      name: /^Taxi/,
-    });
+    const taxiAction = within(
+      screen.getByRole("region", { name: "Thông tin thiết yếu" }),
+    ).getByRole("button", { name: /Taxi \/ Đi bờ/ });
 
     await user.click(taxiAction);
     const dialog = screen.getByRole("dialog", {
@@ -186,93 +218,62 @@ describe("CrewPort Port Notes route", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
-  test("renders demo welfare services without a fake phone link", async () => {
-    render(<App />);
-    await screen.findByRole("heading", { name: "Busan New Port" });
-    const welfareSection = screen
-      .getByRole("heading", { name: "Hỗ trợ / Trung tâm thuyền viên" })
-      .closest("section")!;
-    expect(
-      within(welfareSection).getByRole("heading", {
-        name: "Busan New Port Seafarers Center (demo)",
-      }),
-    ).toBeVisible();
-    const serviceBadges = within(welfareSection).getByLabelText(
-      "Dịch vụ được ghi nhận",
-    );
-    for (const badge of ["Wi-Fi", "Xe đưa đón", "SIM", "KRW", "Hỗ trợ"]) {
-      expect(within(serviceBadges).getByText(new RegExp(`${badge}$`))).toBeVisible();
-    }
-    expect(within(welfareSection).getByText("Chưa có số liên hệ đã xác nhận")).toBeVisible();
-    expect(welfareSection.querySelector('a[href^="tel:"]')).toBeNull();
-  });
-
-  test("renders structured notes without star ratings or premium upsell", async () => {
-    render(<App />);
-    const heading = await screen.findByRole("heading", {
-      name: "Ghi chú nổi bật",
-    });
-    const section = heading.closest("section")!;
-    expect(within(section).getAllByRole("article").length).toBeGreaterThanOrEqual(3);
-    expect(within(section).getAllByRole("article")[0]).toHaveAttribute(
-      "data-featured",
-      "true",
-    );
-    expect(section).toHaveTextContent(/\d+ xác nhận/);
-    expect(section).toHaveTextContent(/\d+ hữu ích/);
-    expect(
-      screen.getByRole("heading", { name: "Cộng đồng CrewPort" }),
-    ).toBeVisible();
-    expect(
-      screen.getByText("Thông tin được chia sẻ bởi cộng đồng thuyền viên."),
-    ).toBeVisible();
-    expect(screen.getByText(/Dữ liệu mẫu · hoạt động thật/)).toBeVisible();
-    expect(
-      screen.queryByText(
-        /243 visitors|4\.8 score|86% verified|15,000\+ seafarers|1,284 seafarers|72 ports/i,
-      ),
-    ).toBeNull();
-    expect(section).not.toHaveTextContent(/★|star rating|premium/i);
-    expect(screen.queryByText(/Premium|Gói trả phí/i)).toBeNull();
-  });
-
-  test("uses Vietnamese Port Notes labels and keeps five mobile navigation items", async () => {
+  test("previews a structured public note and restores focus on close", async () => {
+    const user = userEvent.setup();
     render(<App />);
     await screen.findByRole("heading", { name: "Busan New Port" });
 
-    expect(screen.getByRole("heading", { name: "Chủ đề cần xem" })).toBeVisible();
-    expect(screen.getByRole("heading", { name: "Tất cả chủ đề cảng" })).toBeVisible();
-    expect(screen.getByRole("heading", { name: "Cần thêm thông tin?" })).toBeVisible();
-    const topicShortcuts = screen.getByRole("navigation", {
-      name: "Lối tắt chủ đề cảng",
+    const writeNoteAction = within(
+      screen.getByRole("heading", { name: "Chọn nhanh" }).closest("section")!,
+    ).getByRole("button", { name: /^Viết ghi chú/ });
+    await user.click(writeNoteAction);
+    const dialog = screen.getByRole("dialog", {
+      name: "Thêm kinh nghiệm cho cảng này",
     });
-    expect(within(topicShortcuts).getAllByRole("link")).toHaveLength(4);
     expect(
-      screen.getAllByRole("complementary", { name: "Cộng đồng CrewPort" }),
-    ).toHaveLength(1);
+      within(dialog).getByRole("button", { name: "Đóng form ghi chú" }),
+    ).toHaveFocus();
 
-    for (const leftover of [
-      /Topic previews/i,
-      /Need More Help\?/i,
-      /Data trust/i,
-      /Emergency shortcut/i,
-      /Return to Ship/i,
-      /Return Card/i,
-      /Choose what you need/i,
-      /Compare eSIM/i,
-    ]) {
-      expect(screen.queryByText(leftover)).toBeNull();
-    }
+    await user.click(within(dialog).getByRole("button", { name: "eSIM" }));
+    await user.type(
+      within(dialog).getByRole("textbox", { name: /Điều anh em cần nhớ/ }),
+      "Mua gần gate, giá hợp lý.",
+    );
+    await user.click(
+      within(dialog).getByRole("radio", { name: "Chia sẻ cộng đồng" }),
+    );
+    await user.click(
+      within(dialog).getByRole("button", { name: "Xem trước ghi chú" }),
+    );
+
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(
+      screen.getByText("Đã tạo bản xem trước. Bản mẫu chưa lưu hoặc gửi dữ liệu."),
+    ).toBeVisible();
+    await waitFor(() => expect(writeNoteAction).toHaveFocus());
+
+    await user.click(writeNoteAction);
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog")).toBeNull();
+    await waitFor(() => expect(writeNoteAction).toHaveFocus());
+  });
+
+  test("keeps navigation and prohibited content checks on the compact page", async () => {
+    render(<App />);
+    await screen.findByRole("heading", { name: "Busan New Port" });
 
     const mobileNavigation = screen
       .getAllByRole("navigation", { name: "Điều hướng ghi chú cảng" })
       .find((navigation) => navigation.getAttribute("data-navigation") === "mobile");
-    expect(mobileNavigation).toBeDefined();
-    expect(mobileNavigation?.getAttribute("data-navigation")).toBe("mobile");
     expect(mobileNavigation?.querySelectorAll("a, button")).toHaveLength(5);
+    expect(
+      within(mobileNavigation!).getByRole("link", { name: "Cộng đồng" }),
+    ).toHaveAttribute("href", "/ports/busan#quick-action-write-note");
+    expect(document.querySelector('a[href^="tel:"]')).toBeNull();
+    expect(screen.queryByText(/Premium|Gói trả phí|★|star rating/i)).toBeNull();
   });
 
-  test("keeps notes and Write a Note usable in Data Saver and Ultra Lite", async () => {
+  test("keeps Snapshot and Write a Note usable in Data Saver and Ultra Lite", async () => {
     const user = userEvent.setup();
     render(<App />);
 
@@ -290,20 +291,18 @@ describe("CrewPort Port Notes route", () => {
       screen.getByRole("heading", { name: "Busan New Port" }).closest("section"),
     ).toHaveAttribute("data-media", "omitted");
     expect(screen.queryByTestId("port-notes-media")).toBeNull();
-    expect(screen.getByRole("button", { name: /Viết ghi chú/ })).toBeVisible();
-    expect(document.querySelector("img")).toBeNull();
 
     await user.selectOptions(bandwidthSelect, "ultraLite");
     await waitFor(() => {
       expect(document.documentElement.dataset.bandwidthMode).toBe("ultraLite");
     });
-    expect(screen.getByRole("heading", { name: "Ghi chú nổi bật" })).toBeVisible();
-    expect(screen.getByRole("heading", { name: "Cộng đồng CrewPort" })).toBeVisible();
     expect(screen.getByRole("region", { name: "Thông tin thiết yếu" })).toBeVisible();
+    expect(screen.getByRole("button", { name: /Viết ghi chú/ })).toBeVisible();
+    expect(screen.queryByRole("heading", { name: "Ghi chú nổi bật" })).toBeNull();
     expect(document.querySelector("img")).toBeNull();
   });
 
-  test("keeps emergency content logistical and surfaces conflicting reports", async () => {
+  test("surfaces conflicting trust without rendering deeper safety content", async () => {
     window.history.replaceState({}, "", "/ports/port-klang");
     render(<App />);
 
@@ -311,7 +310,7 @@ describe("CrewPort Port Notes route", () => {
       await screen.findByRole("heading", { name: "Westports", level: 1 }),
     ).toBeVisible();
     expect(screen.getAllByText("Báo cáo mâu thuẫn").length).toBeGreaterThan(0);
-    expect(screen.getByText(/không chẩn đoán hoặc tư vấn thuốc/)).toBeVisible();
+    expect(screen.queryByText(/không chẩn đoán hoặc tư vấn thuốc/)).toBeNull();
     expect(screen.queryByText(/liều dùng|hãy uống|khuyên dùng thuốc/i)).toBeNull();
   });
 
@@ -322,9 +321,9 @@ describe("CrewPort Port Notes route", () => {
     expect(
       await screen.findByRole("heading", { name: "Không tìm thấy dữ liệu cảng" }),
     ).toBeVisible();
-    expect(screen.getByRole("link", { name: "Về trang nền tảng" })).toHaveAttribute(
-      "href",
-      "/foundation",
-    );
+    const emptyStateSearchLink = screen
+      .getAllByRole("link", { name: "Tìm cảng" })
+      .find((link) => link.getAttribute("href") === "/?q=unknown-port");
+    expect(emptyStateSearchLink).toHaveAttribute("href", "/?q=unknown-port");
   });
 });

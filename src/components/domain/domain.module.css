@@ -21,7 +21,7 @@
 .trustStatus[data-compact] .trustSymbol {
   inline-size: 0.875rem;
   block-size: 0.875rem;
-  font-size: 0.62rem;
+  font-size: 0.75rem;
 }
 
 .trustBadge {
@@ -44,7 +44,7 @@
   block-size: 1rem;
   border: var(--border-width) solid currentColor;
   border-radius: 50%;
-  font-size: 0.68rem;
+  font-size: 0.8125rem;
   font-weight: var(--font-weight-bold);
   line-height: 1;
 }

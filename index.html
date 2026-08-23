@@ -1,5 +1,10 @@
 <!doctype html>
-<html lang="vi">
+<html
+  lang="vi"
+  data-appearance-mode="dark"
+  data-theme="dark"
+  style="color-scheme: dark"
+>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,12 +12,40 @@
       name="description"
       content="Thông tin cảng thiết yếu dành cho thuyền viên."
     />
-    <meta name="theme-color" content="#0b3a53" />
+    <meta name="theme-color" content="#0b1220" />
+    <script>
+      (() => {
+        const root = document.documentElement;
+        try {
+          const stored = JSON.parse(
+            localStorage.getItem("seafarer.preferences.v1") ?? "{}",
+          );
+          const mode = ["light", "dark", "system"].includes(
+            stored.appearanceMode,
+          )
+            ? stored.appearanceMode
+            : "dark";
+          const theme =
+            mode === "system"
+              ? window.matchMedia("(prefers-color-scheme: dark)").matches
+                ? "dark"
+                : "light"
+              : mode;
+          root.dataset.appearanceMode = mode;
+          root.dataset.theme = theme;
+          root.style.colorScheme = theme;
+        } catch {
+          root.dataset.appearanceMode = "dark";
+          root.dataset.theme = "dark";
+          root.style.colorScheme = "dark";
+        }
+      })();
+    </script>
     <link
       rel="icon"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230f172a'/%3E%3Ctext x='32' y='39' fill='%23f8fafc' font-family='Arial,sans-serif' font-size='22' font-weight='700' text-anchor='middle'%3ECP%3C/text%3E%3C/svg%3E"
     />
-    <title>Seafarer Port</title>
+    <title>CrewPort — Ghi chú cảng từ thuyền viên</title>
   </head>
   <body>
     <div id="root"></div>

@@ -19,18 +19,64 @@ describe("Application shell and demo routing", () => {
     delete document.documentElement.dataset.theme;
   });
 
-  test("redirects root to the Busan Port Notes demo", async () => {
+  test("opens CrewPort Home/Search at the root", async () => {
     render(<App />);
 
     expect(
-      await screen.findByRole("heading", { name: "Busan New Port", level: 1 }),
+      await screen.findByRole("heading", {
+        name: "Tìm đúng thông tin trước khi lên bờ",
+        level: 1,
+      }),
     ).toBeVisible();
-    expect(window.location.pathname).toBe("/ports/busan");
+    expect(window.location.pathname).toBe("/");
+    expect(document.getElementById("main-content")).toHaveClass(
+      "content-container",
+    );
     expect(screen.getByTestId("app-version")).toHaveTextContent("v0.1.0");
     expect(screen.getAllByText("CrewPort").length).toBeGreaterThan(0);
+    expect(document.documentElement.dataset.theme).toBe("dark");
+    expect(screen.getByRole("searchbox", { name: /Tìm cảng/ })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Busan" })).toBeVisible();
+  });
+
+  test("keeps a stored light appearance even though new users default to dark", async () => {
+    window.localStorage.setItem(
+      "seafarer.preferences.v1",
+      JSON.stringify({
+        locale: "vi",
+        appearanceMode: "light",
+        bandwidthMode: "standard",
+        bandwidthModeWasUserSelected: false,
+      }),
+    );
+
+    render(<App />);
+
+    await screen.findByRole("heading", {
+      name: "Tìm đúng thông tin trước khi lên bờ",
+    });
+    expect(document.documentElement.dataset.appearanceMode).toBe("light");
     expect(document.documentElement.dataset.theme).toBe("light");
+  });
+
+  test("searches by port and opens a matching Port Notes result", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(await screen.findByRole("button", { name: "Busan" }));
+
+    expect(window.location.search).toBe("?q=Busan");
+    const resultLink = await screen.findByRole("link", {
+      name: "Mở ghi chú cảng: Port of Busan",
+    });
+    expect(resultLink).toHaveAttribute("href", "/ports/busan");
+    expect(screen.getByText("Busan, South Korea")).toBeVisible();
+
+    await user.click(resultLink);
+
+    expect(window.location.pathname).toBe("/ports/busan");
     expect(
-      screen.getByRole("heading", { name: "Thông tin Internet / eSIM" }),
+      await screen.findByRole("heading", { name: "Busan New Port", level: 1 }),
     ).toBeVisible();
   });
 
@@ -44,7 +90,7 @@ describe("Application shell and demo routing", () => {
     );
 
     expect(
-      await screen.findByRole("heading", { name: "Internet / eSIM information" }),
+      await screen.findByRole("heading", { name: "Find the right information before going ashore" }),
     ).toBeInTheDocument();
     expect(document.documentElement).toHaveAttribute("lang", "en");
 

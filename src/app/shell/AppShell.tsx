@@ -1,5 +1,11 @@
-import { useState, type ReactNode } from "react";
-import { useLocation } from "react-router";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from "react";
+import { useLocation, useNavigate } from "react-router";
 
 import { OfflineBanner } from "../../components";
 import { useI18n } from "../../i18n";
@@ -34,8 +40,26 @@ const appearanceKeys = {
 
 const appVersion = __APP_VERSION__;
 
+function SearchIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <circle cx="10.5" cy="10.5" r="6.5" />
+      <path d="m16 16 5 5" />
+    </svg>
+  );
+}
+
+function MenuIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M4 7h16M4 12h16M4 17h16" />
+    </svg>
+  );
+}
+
 export function AppShell({ children }: { readonly children: ReactNode }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const { status: i18nStatus, t } = useI18n();
   const { locale, setLocale } = usePersistedLocale();
   const { mode: appearanceMode, setMode: setAppearanceMode } =
@@ -44,11 +68,42 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
   const { isOnline } = useNetworkState();
   const [isSavingPreference, setIsSavingPreference] = useState(false);
   const [preferenceError, setPreferenceError] = useState(false);
+  const [headerQuery, setHeaderQuery] = useState("");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
   const isPreferenceBusy = isSavingPreference || i18nStatus === "loading";
   const isPortNotesRoute = location.pathname.startsWith("/ports/");
-  const containerClass = location.pathname.startsWith("/ports/")
-    ? "wide-container"
-    : "content-container";
+  const containerClass = "content-container";
+
+  useEffect(() => {
+    if (!isMobileMenuOpen) {
+      return;
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsMobileMenuOpen(false);
+        mobileMenuButtonRef.current?.focus();
+      }
+    }
+
+    function handlePointerDown(event: PointerEvent) {
+      if (
+        event.target instanceof Node &&
+        !mobileMenuRef.current?.contains(event.target)
+      ) {
+        setIsMobileMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [isMobileMenuOpen]);
 
   async function applyPreference(update: () => Promise<void>) {
     setPreferenceError(false);
@@ -59,6 +114,14 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
       setPreferenceError(true);
     } finally {
       setIsSavingPreference(false);
+    }
+  }
+
+  function submitHeaderSearch(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const query = headerQuery.trim();
+    if (query) {
+      navigate(`/?q=${encodeURIComponent(query)}`);
     }
   }
 
@@ -78,7 +141,7 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
             <span className={styles.mark} aria-hidden="true">
               CP
             </span>
-            <div>
+            <div className={styles.identityCopy}>
               <strong>{t("app.name")}</strong>
               <span>{t("app.foundationLabel")}</span>
               <small className={styles.version} data-testid="app-version">
@@ -87,8 +150,91 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
             </div>
           </div>
 
+          {isPortNotesRoute ? (
+            <form
+              className={styles.headerSearch}
+              aria-label={t("portNotes.search.region")}
+              onSubmit={submitHeaderSearch}
+            >
+              <label className="visually-hidden" htmlFor="shell-port-search">
+                {t("portNotes.search.label")}
+              </label>
+              <span className={styles.headerSearchIcon}>
+                <SearchIcon />
+              </span>
+              <input
+                id="shell-port-search"
+                type="search"
+                value={headerQuery}
+                placeholder={t("portNotes.search.input")}
+                autoCapitalize="none"
+                autoComplete="off"
+                enterKeyHint="search"
+                onChange={(event) => setHeaderQuery(event.currentTarget.value)}
+              />
+              <button
+                type="submit"
+                aria-label={t("portNotes.search.submit")}
+                disabled={!headerQuery.trim()}
+              >
+                <SearchIcon />
+              </button>
+            </form>
+          ) : null}
+
+          {isPortNotesRoute ? (
+            <div className={styles.mobileHeaderActions}>
+              <a
+                className={styles.mobileIconButton}
+                href="/#home-search"
+                aria-label={t("portNotes.nav.search")}
+              >
+                <SearchIcon />
+              </a>
+              <div className={styles.mobileMenu} ref={mobileMenuRef}>
+                <button
+                  className={styles.mobileIconButton}
+                  type="button"
+                  aria-label={
+                    isMobileMenuOpen
+                      ? t("portNotes.nav.closeMore")
+                      : t("portNotes.nav.more")
+                  }
+                  aria-expanded={isMobileMenuOpen}
+                  aria-controls="port-secondary-navigation"
+                  onClick={() => setIsMobileMenuOpen((open) => !open)}
+                  ref={mobileMenuButtonRef}
+                >
+                  <MenuIcon />
+                </button>
+                {isMobileMenuOpen ? (
+                  <nav
+                    className={styles.mobileMenuPanel}
+                    id="port-secondary-navigation"
+                    aria-label={t("portNotes.nav.secondary")}
+                  >
+                    <a
+                      href={`${location.pathname}#quick-action-compare-esim`}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      {t("portNotes.nav.esim")}
+                    </a>
+                    <a
+                      href={`${location.pathname}#quick-action-shore-leave`}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      {t("portNotes.nav.transport")}
+                    </a>
+                  </nav>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
+
           <div className={styles.preferences}>
-            <label className={`${styles.preferenceControl} ${styles.localeControl}`}>
+            <label
+              className={`${styles.preferenceControl} ${styles.localeControl}`}
+            >
               <span>{t("settings.languageLabel")}</span>
               <select
                 value={locale}

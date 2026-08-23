@@ -183,7 +183,7 @@ function AppearanceProvider({
   readonly services: AppServices;
   readonly children: ReactNode;
 }) {
-  const [mode, setModeState] = useState<AppearanceMode>("light");
+  const [mode, setModeState] = useState<AppearanceMode>("dark");
   const [systemAppearance, setSystemAppearance] =
     useState<ResolvedAppearance>(detectSystemAppearance);
   const [isHydrated, setIsHydrated] = useState(false);
@@ -199,7 +199,7 @@ function AppearanceProvider({
       })
       .catch(() => {
         if (active) {
-          setModeState("light");
+          setModeState("dark");
         }
       })
       .finally(() => {

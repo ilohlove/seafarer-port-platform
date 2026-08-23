@@ -21,14 +21,18 @@ export interface PortSnapshotModel {
   readonly location: string;
   readonly terminal: string;
   readonly gate: string;
-  readonly shoreLeave: string;
-  readonly internet: string;
-  readonly transport: string;
-  readonly weather: string;
-  readonly localTime: string;
-  readonly noteCount: number;
-  readonly pendingConfirmations: number;
-  readonly confidence: TrustStatusPresentation;
+}
+
+export type SnapshotFactTarget = "internet" | "taxi" | "community";
+
+export interface SnapshotFactModel {
+  readonly id: "shore-leave" | "internet" | "taxi" | "community";
+  readonly icon: "shore-leave" | "internet" | "taxi" | "community";
+  readonly label: string;
+  readonly value: string;
+  readonly detail?: string;
+  readonly trust: TrustStatusPresentation;
+  readonly target?: SnapshotFactTarget;
 }
 
 export interface QuickNoteItemModel {
@@ -42,21 +46,6 @@ export interface QuickNoteItemModel {
 
 export interface QuickNotesModel {
   readonly items: readonly QuickNoteItemModel[];
-}
-
-export interface PortUtilityItemModel {
-  readonly id: string;
-  readonly target: "internet" | "transport" | "taxi" | "food";
-  readonly symbol: string;
-  readonly label: string;
-  readonly value: string;
-  readonly trust: TrustStatusPresentation;
-}
-
-export interface PortContextTabModel {
-  readonly id: string;
-  readonly label: string;
-  readonly active: boolean;
 }
 
 export interface SafetyAlertModel {
@@ -106,7 +95,6 @@ export interface InternetDealModel {
 
 export interface PortNoteActionModel {
   readonly id: string;
-  readonly symbol: string;
   readonly label: string;
   readonly description: string;
   readonly count?: string;
@@ -151,16 +139,15 @@ export interface SafetyShortcutModel {
 }
 
 export interface PortNotesViewModel {
-  readonly contexts: readonly PortContextTabModel[];
-  readonly activeContextId?: string;
   readonly snapshot: PortSnapshotModel;
+  readonly snapshotFacts: readonly SnapshotFactModel[];
   readonly alerts: readonly SafetyAlertModel[];
   readonly taxiPhrase: TaxiPhraseModel;
   readonly internetDeal: InternetDealModel;
   readonly quickNotes: QuickNotesModel;
-  readonly utilities: readonly PortUtilityItemModel[];
   readonly actions: readonly PortNoteActionModel[];
   readonly topNotes: readonly PortNoteCardModel[];
+  readonly notes: readonly PortNoteCardModel[];
   readonly recentNotes: readonly PortNoteCardModel[];
   readonly topics: readonly TopicPreviewModel[];
   readonly topicShortcuts: readonly TopicShortcutModel[];
@@ -408,12 +395,8 @@ export function buildPortNotesViewModel(
   hub: PortHubReadModel,
   t: Translate,
   formatMoney: FormatMoney,
-  selectedContextId?: string,
 ): PortNotesViewModel {
   const activeContext =
-    hub.portNotesContexts?.find(
-      (context) => context.id === selectedContextId,
-    ) ??
     hub.portNotesContexts?.find(
       (context) => context.id === hub.selectedPortNotesContextId,
     ) ??
@@ -470,12 +453,19 @@ export function buildPortNotesViewModel(
     ],
     t,
   );
-  const foodNote = firstTopicNote(notes, ["foodOrder", "supplies", "shopping"]);
+  const shoreLeaveTrust = trustPresentation(
+    activeContext
+      ? knowledgeTrust(activeContext.shoreLeave)
+      : knowledgeTrust(hub.access.shoreLeave),
+    t,
+  );
+  const communityTrust = combinedTrust(
+    notes.length > 0
+      ? notes.map((note) => note.trust)
+      : [hub.dataHealth.trust],
+    t,
+  );
   const foodSummary = categorySummary(hub, "food", t, selectedTerminal?.id);
-  const shuttleBlock =
-    activeContext?.quickNotes.find((item) =>
-      /shuttle|taxi|transport|di chuyển/i.test(`${item.id} ${item.label}`),
-    ) ?? hub.access.transport[0];
   const internetTrust = combinedTrust(
     [
       product?.trust ?? hub.dataHealth.trust,
@@ -483,18 +473,10 @@ export function buildPortNotesViewModel(
     ],
     t,
   );
-  const transportTrust = trustPresentation(
-    shuttleBlock ? knowledgeTrust(shuttleBlock) : hub.dataHealth.trust,
-    t,
-  );
   const taxiTrust = trustPresentation(
     activeContext
       ? knowledgeTrust(activeContext.taxiPickup)
       : taxiNote?.trust ?? hub.dataHealth.trust,
-    t,
-  );
-  const foodTrust = trustPresentation(
-    foodNote?.trust ?? hub.dataHealth.trust,
     t,
   );
 
@@ -692,29 +674,54 @@ export function buildPortNotesViewModel(
     }));
 
   return {
-    contexts:
-      hub.portNotesContexts?.map((context) => ({
-        id: context.id,
-        label: context.label,
-        active: context.id === activeContext?.id,
-      })) ?? [],
-    activeContextId: activeContext?.id,
     snapshot: {
       name: activeContext?.displayName ?? selectedTerminal?.name ?? hub.port.name,
       location: [hub.port.city, hub.port.country.name].filter(Boolean).join(", "),
       terminal: terminalName,
       gate,
-      shoreLeave:
-        activeContext?.shoreLeave.summary ?? hub.access.shoreLeave.summary,
-      internet: internetSummary,
-      transport: taxiSummary,
-      weather:
-        hub.overview.weatherPlaceholder ?? t("portNotes.snapshot.noWeather"),
-      localTime: t("portNotes.snapshot.noLocalTime"),
-      noteCount: notes.length,
-      pendingConfirmations: hub.community.openConfirmationCount,
-      confidence,
     },
+    snapshotFacts: [
+      {
+        id: "shore-leave",
+        icon: "shore-leave",
+        label: t("portNotes.snapshot.shoreLeave"),
+        value:
+          activeContext?.shoreLeave.summary ?? hub.access.shoreLeave.summary,
+        detail: `${terminalName} · ${gate}`,
+        trust: shoreLeaveTrust,
+      },
+      {
+        id: "internet",
+        icon: "internet",
+        label: t("portNotes.snapshot.bestInternet"),
+        value: product?.name ?? internetSummary,
+        detail: product
+          ? `${product.dataAllowanceGb === "unlimited" ? t("portNotes.internet.unlimited") : `${product.dataAllowanceGb} GB`} / ${product.validityDays} ${t("portNotes.internet.days")} · ${formatMoney(product.price.amount, product.price.currency)}`
+          : undefined,
+        trust: internetTrust,
+        target: "internet",
+      },
+      {
+        id: "taxi",
+        icon: "taxi",
+        label: t("portNotes.snapshot.taxi"),
+        value: taxiSummary,
+        detail: gate,
+        trust: taxiTrust,
+        target: "taxi",
+      },
+      {
+        id: "community",
+        icon: "community",
+        label: t("portNotes.snapshot.community"),
+        value: t("portNotes.snapshot.notesSummary", { count: notes.length }),
+        detail: t("portNotes.snapshot.pendingSummary", {
+          count: hub.community.openConfirmationCount,
+        }),
+        trust: communityTrust,
+        target: "community",
+      },
+    ],
     alerts: (activeContext?.criticalInformation ?? hub.criticalInformation).map(
       (item) => ({
         id: item.id,
@@ -769,45 +776,9 @@ export function buildPortNotesViewModel(
     quickNotes: {
       items: quickInfoItems,
     },
-    utilities: [
-      {
-        id: "internet",
-        target: "internet",
-        symbol: "eSIM",
-        label: t("portNotes.utility.internet"),
-        value: product?.name ?? internetSummary,
-        trust: internetTrust,
-      },
-      {
-        id: "transport",
-        target: "transport",
-        symbol: "S",
-        label: t("portNotes.utility.transport"),
-        value:
-          shuttleBlock?.summary ?? t("portNotes.quickNotes.noTransport"),
-        trust: transportTrust,
-      },
-      {
-        id: "taxi",
-        target: "taxi",
-        symbol: "T",
-        label: t("portNotes.utility.taxi"),
-        value: taxiSummary,
-        trust: taxiTrust,
-      },
-      {
-        id: "food",
-        target: "food",
-        symbol: "F",
-        label: t("portNotes.utility.food"),
-        value: foodSummary,
-        trust: foodTrust,
-      },
-    ],
     actions: [
       {
         id: "compare-esim",
-        symbol: "eSIM",
         label: t("portNotes.action.compareEsim"),
         description: t("portNotes.action.compareEsimDescription"),
         count: actionCount(["esim"]),
@@ -815,31 +786,34 @@ export function buildPortNotesViewModel(
       },
       {
         id: "physical-sim",
-        symbol: "SIM",
         label: t("portNotes.action.physicalSim"),
         description: t("portNotes.action.physicalSimDescription"),
         count: actionCount(["physicalSim"]),
         tone: "teal",
       },
       {
-        id: "taxi",
-        symbol: "T",
-        label: t("portNotes.action.taxi"),
-        description: t("portNotes.action.taxiDescription"),
-        count: actionCount(["taxi", "rideHailing"]),
+        id: "shore-leave",
+        label: t("portNotes.action.shoreLeave"),
+        description: t("portNotes.action.shoreLeaveDescription"),
+        count: actionCount(["taxi", "rideHailing", "placesToVisit"]),
         tone: "orange",
       },
       {
-        id: "food-supplies",
-        symbol: "F",
-        label: t("portNotes.action.foodSupplies"),
-        description: t("portNotes.action.foodSuppliesDescription"),
+        id: "food-fruit",
+        label: t("portNotes.action.foodFruit"),
+        description: t("portNotes.action.foodFruitDescription"),
         count: actionCount(["foodOrder", "supplies", "shopping"]),
         tone: "orange",
       },
       {
+        id: "shopping-gifts",
+        label: t("portNotes.action.shoppingGifts"),
+        description: t("portNotes.action.shoppingGiftsDescription"),
+        count: actionCount(["shopping", "supplies"]),
+        tone: "teal",
+      },
+      {
         id: "seaman-club",
-        symbol: "W",
         label: t("portNotes.action.seamanClub"),
         description: t("portNotes.action.seamanClubDescription"),
         count:
@@ -851,22 +825,21 @@ export function buildPortNotesViewModel(
         tone: "teal",
       },
       {
-        id: "places",
-        symbol: "P",
-        label: t("portNotes.action.places"),
-        description: t("portNotes.action.placesDescription"),
-        count: actionCount(["placesToVisit"]),
-        tone: "blue",
+        id: "other-notes",
+        label: t("portNotes.action.otherNotes"),
+        description: t("portNotes.action.otherNotesDescription"),
+        count: actionCount(["warning", "generalTip"]),
+        tone: "teal",
       },
       {
         id: "write-note",
-        symbol: "+",
         label: t("portNotes.action.writeNote"),
         description: hub.community.contributionPrompt,
         tone: "blue",
       },
     ],
     topNotes: rankedNotes,
+    notes: notes.map((note) => toNoteCardModel(note, hub, t)),
     recentNotes,
     topics,
     topicShortcuts,

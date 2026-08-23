@@ -1,12 +1,11 @@
 export { BestInternetDeal } from "./BestInternetDeal";
 export { DataTrustBanner } from "./DataTrustBanner";
 export { MainActionTiles } from "./MainActionTiles";
-export { PortContextTabs } from "./PortContextTabs";
-export { PortNotesNavigation } from "./PortNotesNavigation";
+export { NoteCaptureDialog } from "./NoteCaptureDialog";
+export { PortNoteExplorer } from "./PortNoteExplorer";
 export { PortNotesSafetyShortcuts } from "./PortNotesSafetyShortcuts";
 export { PortSnapshot } from "./PortSnapshot";
 export { PortSafetyAlert } from "./PortSafetyAlert";
-export { PortUtilityStrip } from "./PortUtilityStrip";
 export { QuickNotesPanel } from "./QuickNotesPanel";
 export { RecentCommunityNotes } from "./RecentCommunityNotes";
 export { TopSeafarerNotes } from "./TopSeafarerNotes";
