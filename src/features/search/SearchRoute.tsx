@@ -10,7 +10,6 @@ import {
 import { useBandwidthMode, useServices } from "../../app/providers";
 import { useI18n } from "../../i18n";
 import type { AsyncState, PortSearchHit, PortSearchResult } from "../../types";
-import { SiteNavigation } from "../navigation";
 import styles from "./search.module.css";
 
 const searchHints = ["Busan", "SGSIN", "Crew Gate", "Port Klang"] as const;
@@ -151,8 +150,6 @@ export function SearchRoute() {
 
   return (
     <div className={styles.page}>
-      <SiteNavigation current="search" />
-
       <div className={styles.workspace}>
         {mode !== "standard" ? (
           <OfflineBanner

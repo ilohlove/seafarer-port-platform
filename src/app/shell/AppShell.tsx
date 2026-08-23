@@ -1,15 +1,14 @@
 import {
   useEffect,
-  useRef,
   useState,
-  type FormEvent,
   type ReactNode,
 } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { useLocation } from "react-router";
 
 import { CrewPortBrand, OfflineBanner } from "../../components";
+import { SiteNavigation } from "../../features/navigation";
 import { useI18n } from "../../i18n";
-import type { AppearanceMode, BandwidthMode, Locale } from "../../types";
+import type { AppearanceMode, BandwidthMode } from "../../types";
 import {
   useAppearanceMode,
   useBandwidthMode,
@@ -38,72 +37,125 @@ const appearanceKeys = {
   system: "appearance.system",
 } as const;
 
-function SearchIcon() {
+function AppearanceIcon({ mode }: { readonly mode: AppearanceMode }) {
+  if (mode === "light") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+      </svg>
+    );
+  }
+
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <circle cx="10.5" cy="10.5" r="6.5" />
-      <path d="m16 16 5 5" />
+      <path d="M20.5 15.5A8.5 8.5 0 0 1 8.5 3.5 8.5 8.5 0 1 0 20.5 15.5Z" />
     </svg>
   );
 }
 
-function MenuIcon() {
+function GlobeIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path d="M4 7h16M4 12h16M4 17h16" />
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M3.5 12h17M12 3.5c2.2 2.4 3.2 5.2 3.2 8.5s-1 6.1-3.2 8.5c-2.2-2.4-3.2-5.2-3.2-8.5s1-6.1 3.2-8.5Z" />
     </svg>
   );
 }
+
+function DataModeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M5 20v-5M10 20V10M15 20V6M20 20V3" />
+    </svg>
+  );
+}
+
+function UserIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <circle cx="12" cy="8" r="3.5" />
+      <path d="M4.5 20c.8-3.2 3.5-5 7.5-5s6.7 1.8 7.5 5" />
+    </svg>
+  );
+}
+
+interface PreferenceSelectProps<Value extends string> {
+  readonly label: string;
+  readonly value: Value;
+  readonly displayValue?: string;
+  readonly options: readonly { readonly value: Value; readonly label: string }[];
+  readonly icon: ReactNode;
+  readonly className: string;
+  readonly disabled: boolean;
+  readonly onChange: (value: Value) => void;
+}
+
+function PreferenceSelect<Value extends string>({
+  label,
+  value,
+  displayValue,
+  options,
+  icon,
+  className,
+  disabled,
+  onChange,
+}: PreferenceSelectProps<Value>) {
+  return (
+    <label className={`${styles.preferenceControl} ${className}`}>
+      <span className="visually-hidden">{label}</span>
+      <span className={styles.preferenceVisual} aria-hidden="true">
+        <span className={styles.preferenceIcon}>{icon}</span>
+        {displayValue ? (
+          <span className={styles.preferenceValue}>{displayValue}</span>
+        ) : null}
+      </span>
+      <select
+        aria-label={label}
+        value={value}
+        disabled={disabled}
+        onChange={(event) => onChange(event.currentTarget.value as Value)}
+      >
+        {options.map((option) => (
+          <option value={option.value} key={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+type ShellNotice =
+  | { readonly kind: "login" }
+  | { readonly kind: "placeholder"; readonly feature: string };
 
 export function AppShell({ children }: { readonly children: ReactNode }) {
   const location = useLocation();
-  const navigate = useNavigate();
   const { status: i18nStatus, t } = useI18n();
   const { locale, setLocale } = usePersistedLocale();
   const { mode: appearanceMode, setMode: setAppearanceMode } =
     useAppearanceMode();
-  const { mode, setMode, saveDataSuggested } = useBandwidthMode();
+  const { mode, setMode } = useBandwidthMode();
   const { isOnline } = useNetworkState();
   const [isSavingPreference, setIsSavingPreference] = useState(false);
   const [preferenceError, setPreferenceError] = useState(false);
-  const [headerQuery, setHeaderQuery] = useState("");
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const mobileMenuRef = useRef<HTMLDivElement>(null);
-  const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
+  const [shellNotice, setShellNotice] = useState<ShellNotice>();
   const isPreferenceBusy = isSavingPreference || i18nStatus === "loading";
   const isPortNotesRoute = location.pathname.startsWith("/ports/");
   const isHomeRoute = location.pathname === "/";
   const isSearchRoute = location.pathname.startsWith("/search");
+  const currentNavigation = isPortNotesRoute
+    ? "port"
+    : isSearchRoute
+      ? "search"
+      : "home";
+  const currentPortSlug = location.pathname.match(/^\/ports\/([^/]+)/)?.[1] ?? "busan";
   const containerClass = "content-container";
 
   useEffect(() => {
-    if (!isMobileMenuOpen) {
-      return;
-    }
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        setIsMobileMenuOpen(false);
-        mobileMenuButtonRef.current?.focus();
-      }
-    }
-
-    function handlePointerDown(event: PointerEvent) {
-      if (
-        event.target instanceof Node &&
-        !mobileMenuRef.current?.contains(event.target)
-      ) {
-        setIsMobileMenuOpen(false);
-      }
-    }
-
-    document.addEventListener("keydown", handleKeyDown);
-    document.addEventListener("pointerdown", handlePointerDown);
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.removeEventListener("pointerdown", handlePointerDown);
-    };
-  }, [isMobileMenuOpen]);
+    setShellNotice(undefined);
+  }, [location.pathname]);
 
   async function applyPreference(update: () => Promise<void>) {
     setPreferenceError(false);
@@ -114,14 +166,6 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
       setPreferenceError(true);
     } finally {
       setIsSavingPreference(false);
-    }
-  }
-
-  function submitHeaderSearch(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const query = headerQuery.trim();
-    if (query) {
-      navigate(`/search?q=${encodeURIComponent(query)}`);
     }
   }
 
@@ -139,153 +183,69 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
 
       <header className={styles.header}>
         <div className={`${containerClass} ${styles.headerInner}`}>
-          <CrewPortBrand />
+          <CrewPortBrand showVersion={false} />
 
-          {isPortNotesRoute ? (
-            <form
-              className={styles.headerSearch}
-              aria-label={t("portNotes.search.region")}
-              onSubmit={submitHeaderSearch}
-            >
-              <label className="visually-hidden" htmlFor="shell-port-search">
-                {t("portNotes.search.label")}
-              </label>
-              <span className={styles.headerSearchIcon}>
-                <SearchIcon />
-              </span>
-              <input
-                id="shell-port-search"
-                type="search"
-                value={headerQuery}
-                placeholder={t("portNotes.search.input")}
-                autoCapitalize="none"
-                autoComplete="off"
-                enterKeyHint="search"
-                onChange={(event) => setHeaderQuery(event.currentTarget.value)}
-              />
-              <button
-                type="submit"
-                aria-label={t("portNotes.search.submit")}
-                disabled={!headerQuery.trim()}
-              >
-                <SearchIcon />
-              </button>
-            </form>
-          ) : null}
-
-          {isPortNotesRoute ? (
-            <div className={styles.mobileHeaderActions}>
-              <a
-                className={styles.mobileIconButton}
-                href="/search"
-                aria-label={t("portNotes.nav.search")}
-              >
-                <SearchIcon />
-              </a>
-              <div className={styles.mobileMenu} ref={mobileMenuRef}>
-                <button
-                  className={styles.mobileIconButton}
-                  type="button"
-                  aria-label={
-                    isMobileMenuOpen
-                      ? t("portNotes.nav.closeMore")
-                      : t("portNotes.nav.more")
-                  }
-                  aria-expanded={isMobileMenuOpen}
-                  aria-controls="port-secondary-navigation"
-                  onClick={() => setIsMobileMenuOpen((open) => !open)}
-                  ref={mobileMenuButtonRef}
-                >
-                  <MenuIcon />
-                </button>
-                {isMobileMenuOpen ? (
-                  <nav
-                    className={styles.mobileMenuPanel}
-                    id="port-secondary-navigation"
-                    aria-label={t("portNotes.nav.secondary")}
-                  >
-                    <a
-                      href={`${location.pathname}#quick-action-compare-esim`}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      {t("portNotes.nav.esim")}
-                    </a>
-                    <a
-                      href={`${location.pathname}#quick-action-shore-leave`}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      {t("portNotes.nav.transport")}
-                    </a>
-                  </nav>
-                ) : null}
-              </div>
-            </div>
-          ) : null}
+          <SiteNavigation
+            current={currentNavigation}
+            portSlug={currentPortSlug}
+            onPlaceholder={(feature) =>
+              setShellNotice({ kind: "placeholder", feature })
+            }
+          />
 
           <div className={styles.preferences}>
-            <label
-              className={`${styles.preferenceControl} ${styles.localeControl}`}
+            <PreferenceSelect
+              className={styles.appearanceControl}
+              label={t("settings.appearanceLabel")}
+              value={appearanceMode}
+              icon={<AppearanceIcon mode={appearanceMode} />}
+              disabled={isPreferenceBusy}
+              options={appearanceModes.map((candidate) => ({
+                value: candidate,
+                label: t(appearanceKeys[candidate]),
+              }))}
+              onChange={(nextMode) =>
+                void applyPreference(() => setAppearanceMode(nextMode))
+              }
+            />
+            <PreferenceSelect
+              className={styles.localeControl}
+              label={t("settings.languageLabel")}
+              value={locale}
+              displayValue={locale.toUpperCase()}
+              icon={<GlobeIcon />}
+              disabled={isPreferenceBusy}
+              options={[
+                { value: "vi" as const, label: "VI" },
+                { value: "en" as const, label: "EN" },
+              ]}
+              onChange={(nextLocale) =>
+                void applyPreference(() => setLocale(nextLocale))
+              }
+            />
+            <PreferenceSelect
+              className={styles.bandwidthControl}
+              label={t("settings.bandwidthLabel")}
+              value={mode}
+              displayValue={t(bandwidthKeys[mode])}
+              icon={<DataModeIcon />}
+              disabled={isPreferenceBusy}
+              options={bandwidthModes.map((candidate) => ({
+                value: candidate,
+                label: t(bandwidthKeys[candidate]),
+              }))}
+              onChange={(nextMode) =>
+                void applyPreference(() => setMode(nextMode))
+              }
+            />
+            <button
+              className={styles.loginButton}
+              type="button"
+              aria-label={t("settings.loginLabel")}
+              onClick={() => setShellNotice({ kind: "login" })}
             >
-              <span>{t("settings.languageLabel")}</span>
-              <select
-                value={locale}
-                disabled={isPreferenceBusy}
-                onChange={(event) => {
-                  const nextLocale = event.currentTarget.value as Locale;
-                  void applyPreference(() => setLocale(nextLocale));
-                }}
-              >
-                <option value="vi">VI</option>
-                <option value="en">EN</option>
-              </select>
-            </label>
-
-            <label
-              className={`${styles.preferenceControl} ${styles.appearanceControl}`}
-            >
-              <span>{t("settings.appearanceLabel")}</span>
-              <select
-                value={appearanceMode}
-                disabled={isPreferenceBusy}
-                onChange={(event) => {
-                  void applyPreference(() =>
-                    setAppearanceMode(
-                      event.currentTarget.value as AppearanceMode,
-                    ),
-                  );
-                }}
-              >
-                {appearanceModes.map((candidate) => (
-                  <option value={candidate} key={candidate}>
-                    {t(appearanceKeys[candidate])}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label
-              className={`${styles.preferenceControl} ${styles.bandwidthControl}`}
-            >
-              <span>{t("settings.bandwidthLabel")}</span>
-              <select
-                value={mode}
-                disabled={isPreferenceBusy}
-                onChange={(event) => {
-                  void applyPreference(() =>
-                    setMode(event.currentTarget.value as BandwidthMode),
-                  );
-                }}
-              >
-                {bandwidthModes.map((candidate) => (
-                  <option value={candidate} key={candidate}>
-                    {t(bandwidthKeys[candidate])}
-                  </option>
-                ))}
-              </select>
-              {saveDataSuggested && mode === "standard" ? (
-                <small className={styles.saveDataHint}>Save-Data</small>
-              ) : null}
-            </label>
+              <UserIcon />
+            </button>
 
             {isPreferenceBusy ? (
               <output className={styles.preferenceStatus} aria-live="polite">
@@ -300,6 +260,16 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
           </div>
         </div>
       </header>
+
+      {shellNotice ? (
+        <div className={`${containerClass} ${styles.shellNotice}`}>
+          <output aria-live="polite">
+            {shellNotice.kind === "login"
+              ? t("settings.loginPlaceholder")
+              : t("portNotes.placeholder", { feature: shellNotice.feature })}
+          </output>
+        </div>
+      ) : null}
 
       {!isOnline ? (
         <div className={`${containerClass} ${styles.networkBanner}`}>

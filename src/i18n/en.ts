@@ -7,6 +7,8 @@ export const enDictionary = {
   "settings.languageLabel": "Language",
   "settings.appearanceLabel": "Appearance",
   "settings.bandwidthLabel": "Data mode",
+  "settings.loginLabel": "Sign in",
+  "settings.loginPlaceholder": "Sign-in is not available in this prototype.",
   "settings.loading": "Applying preference",
   "settings.error": "The preference could not be applied. Please try again.",
   "bandwidth.standard": "Standard",

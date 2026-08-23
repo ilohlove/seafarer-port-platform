@@ -183,14 +183,20 @@ describe("CrewPort compact Port Notes route", () => {
     expect(document.body.textContent ?? "").not.toMatch(/[À-ỹĐđ]/);
   });
 
-  test("searches from the desktop header and opens the Search route", async () => {
+  test("uses the header navigation to open Search and find a port", async () => {
     const user = userEvent.setup();
     render(<App />);
     await screen.findByRole("heading", { name: "Busan New Port" });
 
-    const search = screen.getByRole("searchbox", { name: "Tìm cảng khác" });
+    const desktopNavigation = document.querySelector(
+      '[data-navigation="desktop"]',
+    ) as HTMLElement;
+    fireEvent.click(
+      desktopNavigation.querySelector('a[href="/search"]') as HTMLAnchorElement,
+    );
+    const search = await screen.findByRole("searchbox", { name: "Ô tìm cảng" });
     await user.type(search, "Singapore");
-    await user.click(screen.getByRole("button", { name: "Tìm" }));
+    await user.click(screen.getByRole("button", { name: "Tìm cảng" }));
 
     expect(window.location.pathname).toBe("/search");
     expect(window.location.search).toBe("?q=Singapore");
@@ -199,38 +205,24 @@ describe("CrewPort compact Port Notes route", () => {
     ).toBeVisible();
   });
 
-  test("points secondary navigation to the quick-action cards", async () => {
+  test("keeps header navigation and login placeholder accessible", async () => {
     const user = userEvent.setup();
     render(<App />);
     await screen.findByRole("heading", { name: "Busan New Port" });
 
-    const menuButton = screen.getByRole("button", {
-      name: "Mở liên kết phụ",
-      hidden: true,
-    });
-    fireEvent.click(menuButton);
-    const secondaryNavigation = screen.getByRole("navigation", {
-      name: "Lối tắt eSIM và di chuyển",
-      hidden: true,
-    });
-    expect(
-      within(secondaryNavigation).getByRole("link", {
-        name: "eSIM",
-        hidden: true,
-      }),
-    ).toHaveAttribute("href", "/ports/busan#quick-action-compare-esim");
-    expect(
-      within(secondaryNavigation).getByRole("link", {
-        name: "Di chuyển",
-        hidden: true,
-      }),
-    ).toHaveAttribute("href", "/ports/busan#quick-action-shore-leave");
+    const desktopNavigation = document.querySelector(
+      '[data-navigation="desktop"]',
+    ) as HTMLElement;
+    expect(desktopNavigation?.querySelectorAll("a, button")).toHaveLength(5);
+    expect(desktopNavigation.querySelector('a[aria-current="page"]')).toHaveAttribute(
+      "href",
+      "/ports/busan",
+    );
 
-    await user.keyboard("{Escape}");
+    await user.click(screen.getByRole("button", { name: "Đăng nhập" }));
     expect(
-      screen.queryByRole("navigation", { name: "Lối tắt eSIM và di chuyển" }),
-    ).toBeNull();
-    expect(menuButton).toHaveFocus();
+      screen.getByText("Đăng nhập chưa được triển khai trong bản mẫu."),
+    ).toBeVisible();
   });
 
   test("opens and closes the Taxi Hangul dialog from the snapshot", async () => {

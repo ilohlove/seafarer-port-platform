@@ -70,7 +70,7 @@
 
   .brandAnchor {
     inline-size: 2.15rem;
-    block-size: calc(1.15rem + 0.125rem + 0.864rem);
+    block-size: 1.15rem;
   }
 
   .brandWordmark {
@@ -82,20 +82,10 @@
   }
 
   .brandTagline {
-    font-size: 0.72rem;
+    display: none;
   }
 
   .brandVersion {
     font-size: 0.68rem;
-  }
-}
-
-@media (max-width: 22rem) {
-  .brandAnchor {
-    block-size: 1.15rem;
-  }
-
-  .brandTagline {
-    display: none;
   }
 }

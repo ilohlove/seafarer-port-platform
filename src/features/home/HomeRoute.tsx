@@ -4,7 +4,6 @@ import { Navigate, useLocation, useNavigate } from "react-router";
 import { OfflineBanner, SearchBox } from "../../components";
 import { useBandwidthMode } from "../../app/providers";
 import { useI18n } from "../../i18n";
-import { SiteNavigation } from "../navigation";
 import styles from "./home.module.css";
 
 const exampleQueries = [
@@ -22,7 +21,6 @@ export function HomeRoute() {
   const location = useLocation();
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
-  const [notice, setNotice] = useState<string>();
   const queryFromUrl = new URLSearchParams(location.search).get("q")?.trim();
 
   if (queryFromUrl) {
@@ -31,21 +29,12 @@ export function HomeRoute() {
 
   function submitSearch(nextQuery: string) {
     const normalized = nextQuery.trim();
-    setNotice(undefined);
     navigate(normalized ? `/search?q=${encodeURIComponent(normalized)}` : "/search");
   }
 
   return (
     <div className={styles.page}>
-      <SiteNavigation current="home" onPlaceholder={setNotice} />
-
       <div className={styles.workspace}>
-        {notice ? (
-          <output className={styles.notice} aria-live="polite">
-            {t("portNotes.placeholder", { feature: notice })}
-          </output>
-        ) : null}
-
         {mode !== "standard" ? (
           <OfflineBanner
             compact

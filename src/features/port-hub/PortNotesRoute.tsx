@@ -9,7 +9,6 @@ import {
 } from "../../components";
 import { useI18n } from "../../i18n";
 import type { AsyncState, PortHubReadModel } from "../../types";
-import { SiteNavigation } from "../navigation";
 import {
   MainActionTiles,
   NoteCaptureDialog,
@@ -120,12 +119,6 @@ export function PortNotesRoute() {
 
   return (
     <div className={styles.page}>
-      <SiteNavigation
-        current="port"
-        portSlug={portSlug}
-        onPlaceholder={showPlaceholder}
-      />
-
       <div className={styles.workspace}>
         {notice ? (
           <output className={styles.pageNotice}>

@@ -32,7 +32,7 @@ describe("Application shell and demo routing", () => {
     expect(document.getElementById("main-content")).toHaveClass(
       "content-container",
     );
-    expect(screen.getByTestId("app-version")).toHaveTextContent("v0.1.0");
+    expect(screen.queryByTestId("app-version")).toBeNull();
     const brand = screen.getByRole("link", {
       name: "CrewPort — Ghi chú cảng cho thuyền viên",
     });
@@ -42,6 +42,10 @@ describe("Application shell and demo routing", () => {
     );
     expect(brand).toHaveTextContent("CREWPORT");
     expect(document.documentElement.dataset.theme).toBe("dark");
+    expect(
+      document.querySelector('[data-navigation="desktop"]')?.querySelectorAll("a, button"),
+    ).toHaveLength(5);
+    expect(screen.getByRole("button", { name: "Đăng nhập" })).toBeVisible();
     expect(screen.getByRole("searchbox", { name: /Tìm cảng/ })).toBeVisible();
     expect(screen.getByRole("button", { name: "Busan" })).toBeVisible();
     expect(screen.getByRole("button", { name: "Busan New Port" })).toBeVisible();

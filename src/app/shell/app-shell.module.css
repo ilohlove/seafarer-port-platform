@@ -13,70 +13,148 @@
 }
 
 .headerInner {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: "brand nav preferences";
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-5);
+  gap: var(--space-4);
   padding-block: var(--space-2);
 }
 
-.headerSearch {
-  display: none;
+.headerInner > :first-child {
+  grid-area: brand;
 }
 
-.mobileHeaderActions {
-  display: none;
+.headerInner > :global([data-navigation="desktop"]) {
+  grid-area: nav;
+  justify-self: center;
 }
 
 .preferences {
   display: flex;
   min-inline-size: 0;
+  grid-area: preferences;
   flex: 0 0 auto;
-  align-items: end;
-  gap: var(--space-3);
+  align-items: center;
+  justify-self: end;
+  gap: var(--space-2);
 }
 
 .preferenceControl {
-  display: grid;
   position: relative;
-  min-inline-size: 0;
-  gap: var(--space-1);
+  display: inline-flex;
+  min-inline-size: 2.75rem;
+  min-block-size: var(--tap-target);
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding-inline: var(--space-3);
+  border: var(--border-width) solid rgb(148 163 184 / 28%);
+  border-radius: 999px;
+  background: #101b2e;
   color: #cbd5e1;
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   white-space: nowrap;
 }
 
-.preferenceControl select {
-  min-inline-size: 0;
-  min-block-size: var(--tap-target);
-  padding-inline: var(--space-3) 2rem;
-  border: var(--border-width) solid rgb(148 163 184 / 28%);
-  border-radius: var(--radius-md);
-  background-color: #162033;
+.preferenceControl:hover {
+  border-color: var(--color-primary);
   color: #f8fafc;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+}
+
+.preferenceControl:focus-within {
+  outline: 0.1875rem solid var(--color-primary);
+  outline-offset: 0.125rem;
+}
+
+.preferenceControl select {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.preferenceControl select:disabled {
+  cursor: wait;
+}
+
+.preferenceVisual {
+  display: inline-flex;
+  min-inline-size: 0;
+  align-items: center;
+  gap: var(--space-2);
+  pointer-events: none;
+}
+
+.preferenceIcon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+}
+
+.preferenceIcon svg {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.preferenceValue {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .localeControl {
-  inline-size: 5.5rem;
+  min-inline-size: 4.25rem;
 }
 
 .appearanceControl {
-  inline-size: 7rem;
+  inline-size: 2.75rem;
+  padding-inline: 0;
 }
 
 .bandwidthControl {
-  inline-size: 9rem;
+  min-inline-size: 8.25rem;
 }
 
-.saveDataHint {
-  position: absolute;
-  inset-block-start: 100%;
-  inset-inline-end: 0;
-  color: var(--color-text-muted);
-  font-size: var(--font-size-xs);
+.loginButton {
+  display: grid;
+  inline-size: var(--tap-target);
+  block-size: var(--tap-target);
+  flex: 0 0 auto;
+  place-items: center;
+  padding: 0;
+  border: var(--border-width) solid rgb(148 163 184 / 28%);
+  border-radius: 999px;
+  background: transparent;
+  color: #cbd5e1;
+  cursor: pointer;
+}
+
+.loginButton:hover {
+  border-color: var(--color-primary);
+  color: #f8fafc;
+}
+
+.loginButton:focus-visible {
+  outline: 0.1875rem solid var(--color-primary);
+  outline-offset: 0.125rem;
+}
+
+.loginButton svg {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .preferenceStatus {
@@ -107,96 +185,24 @@
   margin-block-start: var(--space-3);
 }
 
+.shellNotice {
+  margin-block-start: var(--space-3);
+}
+
+.shellNotice output {
+  display: block;
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width) solid var(--color-status-info-border);
+  border-inline-start-width: 0.25rem;
+  border-radius: var(--radius-md);
+  background: var(--color-status-info-bg);
+  color: var(--color-status-info-text);
+}
+
 .main {
   flex: 1;
   min-inline-size: 0;
   padding-block: var(--space-4) var(--space-7);
-}
-
-.portNotesShell .headerInner {
-  display: grid;
-  grid-template-columns:
-    minmax(17rem, 0.9fr)
-    minmax(16rem, 1.3fr)
-    auto;
-  align-items: end;
-  gap: var(--space-4);
-}
-
-.portNotesShell .headerInner > :first-child {
-  align-self: center;
-}
-
-.portNotesShell .headerSearch {
-  display: grid;
-  position: relative;
-  inline-size: 100%;
-  max-inline-size: 34rem;
-  grid-template-columns: minmax(0, 1fr);
-  align-self: center;
-  justify-self: center;
-}
-
-.headerSearch input {
-  inline-size: 100%;
-  min-block-size: var(--tap-target);
-  padding: var(--space-2) 3rem var(--space-2) 2.75rem;
-  border: var(--border-width) solid rgb(148 163 184 / 28%);
-  border-radius: var(--radius-md);
-  background: #162033;
-  color: #f8fafc;
-  font: inherit;
-  font-size: var(--font-size-sm);
-}
-
-.headerSearch input::placeholder {
-  color: #94a3b8;
-  opacity: 1;
-}
-
-.headerSearchIcon,
-.headerSearch button {
-  display: grid;
-  position: absolute;
-  inset-block-start: 50%;
-  place-items: center;
-  transform: translateY(-50%);
-}
-
-.headerSearchIcon {
-  inset-inline-start: var(--space-3);
-  color: #94a3b8;
-  pointer-events: none;
-}
-
-.headerSearch button {
-  inset-inline-end: var(--space-1);
-  inline-size: 2.25rem;
-  block-size: 2.25rem;
-  padding: 0;
-  border: 0;
-  border-radius: var(--radius-sm);
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-}
-
-.headerSearch button:hover:not(:disabled) {
-  background: var(--color-primary-hover);
-}
-
-.headerSearch svg,
-.mobileHeaderActions svg {
-  inline-size: 1.25rem;
-  block-size: 1.25rem;
-  fill: none;
-  stroke: currentcolor;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.portNotesShell .preferenceControl select {
-  border-radius: var(--radius-md);
 }
 
 @media (max-width: 47.99rem) {
@@ -208,162 +214,80 @@
   }
 
   .headerInner {
-    flex-wrap: wrap;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "brand preferences";
     gap: var(--space-2);
+    padding-block: var(--space-2);
+  }
+
+  .preferences {
+    gap: 0.2rem;
+  }
+
+  .preferenceControl {
+    inline-size: 2.75rem;
+    padding-inline: 0;
+  }
+
+  .localeControl {
+    inline-size: 3.75rem;
+  }
+
+  .bandwidthControl {
+    inline-size: 2.75rem;
+  }
+
+  .bandwidthControl .preferenceValue {
+    display: none;
+  }
+
+  .loginButton {
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+  }
+
+  .headerInner > :global([data-navigation="desktop"]) {
+    display: none;
+  }
+
+  .shellNotice {
+    margin-block-start: var(--space-2);
+  }
+}
+
+@media (max-width: 22.49rem) {
+  .headerInner {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "brand"
+      "preferences";
   }
 
   .preferences {
     inline-size: 100%;
-    display: grid;
-    grid-template-columns: 4rem minmax(0, 1fr) minmax(0, 1.25fr);
-    gap: var(--space-2);
+    justify-content: space-between;
   }
-
-  .preferenceControl > span {
-    position: absolute;
-    inline-size: 1px;
-    block-size: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-  }
-
-  .preferenceControl select {
-    inline-size: 100%;
-    min-block-size: var(--tap-target);
-    padding-inline: var(--space-2) 1.4rem;
-    appearance: none;
-    background-image:
-      linear-gradient(45deg, transparent 50%, currentcolor 50%),
-      linear-gradient(135deg, currentcolor 50%, transparent 50%);
-    background-position:
-      calc(100% - 0.75rem) 50%,
-      calc(100% - 0.5rem) 50%;
-    background-size: 0.28rem 0.28rem, 0.28rem 0.28rem;
-    background-repeat: no-repeat;
-    font-size: var(--font-size-xs);
-  }
-
-  .localeControl,
-  .appearanceControl,
-  .bandwidthControl {
-    inline-size: auto;
-  }
-
-  .saveDataHint {
-    display: none;
-  }
-
-  .portNotesShell .headerInner {
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas:
-      "identity actions"
-      "preferences preferences";
-    align-items: center;
-    gap: var(--space-2);
-    padding-block: var(--space-2);
-  }
-
-  .portNotesShell .headerInner > :first-child {
-    grid-area: identity;
-  }
-
-  .portNotesShell .headerSearch {
-    display: none;
-  }
-
-  .portNotesShell .mobileHeaderActions {
-    display: flex;
-    grid-area: actions;
-    align-items: center;
-    gap: var(--space-2);
-  }
-
-  .mobileIconButton {
-    display: grid;
-    inline-size: var(--tap-target);
-    block-size: var(--tap-target);
-    place-items: center;
-    padding: 0;
-    border: var(--border-width) solid rgb(148 163 184 / 28%);
-    border-radius: var(--radius-md);
-    background: #162033;
-    color: #f8fafc;
-    text-decoration: none;
-  }
-
-  .mobileIconButton:hover {
-    border-color: var(--color-primary);
-    color: var(--color-sea);
-  }
-
-  .mobileMenu {
-    position: relative;
-  }
-
-  .mobileMenuPanel {
-    display: grid;
-    position: absolute;
-    inset-block-start: calc(100% + var(--space-2));
-    inset-inline-end: 0;
-    z-index: calc(var(--z-sticky) + 2);
-    min-inline-size: 11rem;
-    padding: var(--space-2);
-    border: var(--border-width) solid var(--color-border-strong);
-    border-radius: var(--radius-md);
-    background: var(--color-surface-elevated);
-    box-shadow: var(--shadow-raised);
-  }
-
-  .mobileMenuPanel a {
-    display: flex;
-    min-block-size: var(--tap-target);
-    align-items: center;
-    padding-inline: var(--space-3);
-    border-radius: var(--radius-sm);
-    color: var(--color-text);
-    font-weight: var(--font-weight-medium);
-    text-decoration: none;
-  }
-
-  .mobileMenuPanel a:hover {
-    background: var(--color-primary-soft);
-    color: var(--color-sea);
-  }
-
-  .portNotesShell .preferences {
-    grid-area: preferences;
-  }
-
 }
 
 @media (min-width: 48rem) and (max-width: 74.99rem) {
-  .portNotesShell .headerInner {
-    grid-template-columns: minmax(8rem, auto) minmax(0, 1fr);
+  .headerInner {
+    grid-template-columns: minmax(10rem, auto) minmax(0, 1fr);
     grid-template-areas:
-      "identity preferences"
-      "search search";
-    align-items: center;
-    gap: var(--space-2);
-    padding-block: var(--space-2);
+      "brand preferences"
+      "nav nav";
+    gap: var(--space-2) var(--space-4);
   }
 
-  .portNotesShell .headerInner > :first-child {
-    grid-area: identity;
-  }
-  .portNotesShell .preferenceControl > span {
-    display: none;
-  }
-
-  .portNotesShell .headerSearch {
-    grid-area: search;
-    max-inline-size: none;
-    justify-self: stretch;
-  }
-
-  .portNotesShell .preferences {
-    grid-area: preferences;
+  .preferences {
     justify-self: end;
+  }
+
+  .appearanceControl {
+    inline-size: 2.75rem;
+  }
+
+  .bandwidthControl {
+    min-inline-size: 7.5rem;
   }
 }
 
@@ -378,17 +302,6 @@
   .searchShell .main {
     padding-block-end: 0;
   }
-}
-
-@media (min-width: 75rem) and (max-height: 45rem) {
-  .portNotesShell .headerInner {
-    padding-block: var(--space-1);
-  }
-
-}
-
-:global([data-bandwidth-mode="ultraLite"]) .mobileMenuPanel {
-  box-shadow: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

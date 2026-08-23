@@ -5,6 +5,8 @@ export const viDictionary = {
   "settings.languageLabel": "Ngôn ngữ",
   "settings.appearanceLabel": "Giao diện",
   "settings.bandwidthLabel": "Chế độ dữ liệu",
+  "settings.loginLabel": "Đăng nhập",
+  "settings.loginPlaceholder": "Đăng nhập chưa được triển khai trong bản mẫu.",
   "settings.loading": "Đang đổi tùy chọn",
   "settings.error": "Không thể áp dụng tùy chọn. Vui lòng thử lại.",
   "bandwidth.standard": "Chuẩn",

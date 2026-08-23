@@ -18,15 +18,6 @@
   gap: var(--space-4);
 }
 
-.notice {
-  display: block;
-  padding: var(--space-3) var(--space-4);
-  border-inline-start: 0.25rem solid var(--color-status-info-border);
-  border-radius: var(--radius-md);
-  background: var(--color-status-info-bg);
-  color: var(--color-status-info-text);
-}
-
 .intro,
 .searchPanel,
 .results,
@@ -144,10 +135,6 @@
 @media (min-width: 48rem) {
   .page {
     padding-block-end: var(--space-7);
-  }
-
-  .page > :global([data-navigation="desktop"]) {
-    inline-size: 100%;
   }
 
   .resultGrid {
