@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "port-hero-media-source.v1",
+  "releaseId": "prototype-2026-08-24",
+  "releaseScope": "prototype",
+  "rankingSource": {
+    "name": "World Shipping Council - Top 50 Container Ports",
+    "statisticsYear": 2024,
+    "url": "https://www.worldshipping.org/top-50-container-ports"
+  },
+  "targets": [
+    { "rank": 1, "portName": "Shanghai", "unLocode": "CNSHG", "mediaStatus": "cssFallbackPendingReview" },
+    { "rank": 2, "portName": "Singapore", "unLocode": "SGSIN", "mediaStatus": "cssFallbackPendingReview" },
+    { "rank": 3, "portName": "Ningbo-Zhoushan", "unLocode": "CNNBG", "mediaStatus": "cssFallbackPendingReview" },
+    { "rank": 4, "portName": "Shenzhen", "unLocode": "CNSZP", "mediaStatus": "cssFallbackPendingReview" },
+    { "rank": 5, "portName": "Qingdao", "unLocode": "CNQDG", "mediaStatus": "cssFallbackPendingReview" },
+    { "rank": 6, "portName": "Guangzhou", "unLocode": "CNGZG", "mediaStatus": "cssFallbackPendingReview" },
+    { "rank": 7, "portName": "Busan", "unLocode": "KRPUS", "mediaStatus": "published" },
+    { "rank": 8, "portName": "Tianjin", "unLocode": "CNTNG", "mediaStatus": "cssFallbackPendingReview" },
+    { "rank": 9, "portName": "Jebel Ali", "unLocode": "AEJEA", "mediaStatus": "cssFallbackPendingReview" },
+    { "rank": 10, "portName": "Port Klang", "unLocode": "MYPKG", "mediaStatus": "cssFallbackPendingReview" },
+    { "rank": 11, "portName": "Rotterdam", "unLocode": "NLRTM", "mediaStatus": "cssFallbackPendingReview" },
+    { "rank": 12, "portName": "Hong Kong", "unLocode": "HKHKG", "mediaStatus": "cssFallbackPendingReview" },
+    { "rank": 13, "portName": "Antwerpen", "unLocode": "BEANR", "mediaStatus": "cssFallbackPendingReview" },
+    { "rank": 14, "portName": "Xiamen", "unLocode": "CNXMG", "mediaStatus": "cssFallbackPendingReview" },
+    { "rank": 15, "portName": "Tanjung Pelepas", "unLocode": "MYTPP", "mediaStatus": "cssFallbackPendingReview" },
+    { "rank": 16, "portName": "Los Angeles", "unLocode": "USLAX", "mediaStatus": "cssFallbackPendingReview" },
+    { "rank": 17, "portName": "Tanger Med", "unLocode": "MAPTM", "mediaStatus": "cssFallbackPendingReview" },
+    { "rank": 18, "portName": "Suzhou", "unLocode": "CNSZG", "mediaStatus": "cssFallbackPendingReview" },
+    { "rank": 19, "portName": "Long Beach", "unLocode": "USLGB", "mediaStatus": "cssFallbackPendingReview" },
+    { "rank": 20, "portName": "Laem Chabang", "unLocode": "THLCH", "mediaStatus": "cssFallbackPendingReview" },
+    { "rank": 21, "portName": "Kaohsiung", "unLocode": "TWKHH", "mediaStatus": "cssFallbackPendingReview" },
+    { "rank": 22, "portName": "Ho Chi Minh City", "unLocode": "VNSGN", "mediaStatus": "cssFallbackPendingReview" },
+    { "rank": 23, "portName": "Beibu Gulf / Qinzhou", "unLocode": "CNQZH", "mediaStatus": "cssFallbackPendingReview" },
+    { "rank": 24, "portName": "New York-New Jersey", "unLocode": "USNYC", "mediaStatus": "cssFallbackPendingReview" },
+    { "rank": 25, "portName": "Mundra", "unLocode": "INMUN", "mediaStatus": "cssFallbackPendingReview" },
+    { "rank": 26, "portName": "Hamburg", "unLocode": "DEHAM", "mediaStatus": "cssFallbackPendingReview" },
+    { "rank": 27, "portName": "Tanjung Priok / Jakarta", "unLocode": "IDJKT", "mediaStatus": "cssFallbackPendingReview" },
+    { "rank": 28, "portName": "Colombo", "unLocode": "LKCMB", "mediaStatus": "cssFallbackPendingReview" },
+    { "rank": 29, "portName": "Haiphong", "unLocode": "VNHPH", "mediaStatus": "cssFallbackPendingReview" },
+    { "rank": 30, "portName": "Cai Mep", "unLocode": "VNTOT", "mediaStatus": "cssFallbackPendingReview" }
+  ],
+  "assets": [
+    {
+      "id": "hero-krpus-new-port-pantos",
+      "publicationStatus": "approved",
+      "portUnLocode": "KRPUS",
+      "portIds": ["port-busan"],
+      "portSlugs": ["busan"],
+      "contextSlug": "new-port",
+      "contextLabel": "Busan New Port",
+      "contextAccuracy": "exact",
+      "objectPosition": "50% 43%",
+      "sourceFileName": "Pantos Logistics - Busan New Port Warehouse.jpg",
+      "attribution": {
+        "creator": "Romlogistics",
+        "provider": "Wikimedia Commons",
+        "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Pantos_Logistics_-_Busan_New_Port_Warehouse.jpg",
+        "licenseName": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+        "capturedAt": "2010-11-24",
+        "changes": "Wikimedia Commons resized variants; CSS crop and overlay in UI."
+      },
+      "review": {
+        "metadataStatus": "verified",
+        "contextStatus": "exact",
+        "reviewedAt": "2026-08-24",
+        "releaseScope": "prototype"
+      },
+      "variants": [
+        {
+          "src": "/media/ports/krpus/busan-new-port-960.jpg",
+          "downloadUrl": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Pantos%20Logistics%20-%20Busan%20New%20Port%20Warehouse.jpg?width=960",
+          "width": 960,
+          "height": 614,
+          "byteSize": 161583,
+          "sha256": "0f6d0ef7f1b75a5977c355c6dd2a5f2cb3db449abb52c577e5fddeb366377e41",
+          "mediaType": "image/jpeg"
+        },
+        {
+          "src": "/media/ports/krpus/busan-new-port-1280.jpg",
+          "downloadUrl": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Pantos%20Logistics%20-%20Busan%20New%20Port%20Warehouse.jpg?width=1280",
+          "width": 1280,
+          "height": 819,
+          "byteSize": 267494,
+          "sha256": "5ac9ce2621256705247cd2c5d54767c58e6ee1d1a6d4b560c25ad6162004b653",
+          "mediaType": "image/jpeg"
+        }
+      ]
+    }
+  ]
+}

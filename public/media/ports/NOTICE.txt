@@ -1,0 +1,11 @@
+CrewPort port hero media attribution
+
+Images are decorative context only and are not operational port guidance.
+Data Saver and Ultra Lite do not request these image files.
+
+Busan New Port
+Title: Pantos Logistics - Busan New Port Warehouse.jpg
+Creator: Romlogistics
+Source: https://commons.wikimedia.org/wiki/File:Pantos_Logistics_-_Busan_New_Port_Warehouse.jpg
+License: CC BY-SA 3.0 (https://creativecommons.org/licenses/by-sa/3.0/)
+Changes: Wikimedia Commons resized variants; CSS crop and overlay in UI.

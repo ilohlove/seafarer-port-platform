@@ -16,8 +16,12 @@
     "data:ports:build": "node scripts/port-data/build-port-data.mjs",
     "data:ports:check": "node scripts/port-data/check-port-data.mjs",
     "data:ports": "npm run data:ports:download && npm run data:ports:build && npm run data:ports:check",
+    "data:media:download": "node scripts/port-media/download-port-media.mjs",
+    "data:media:build": "node scripts/port-media/build-port-media.mjs",
+    "data:media:check": "node scripts/port-media/check-port-media.mjs",
+    "data:media": "npm run data:media:download && npm run data:media:build && npm run data:media:check",
     "check:bundle": "node scripts/check-bundle.mjs",
-    "check": "npm run lint && npm run typecheck && npm run test && npm run data:ports:check && npm run build && npm run check:bundle"
+    "check": "npm run lint && npm run typecheck && npm run test && npm run data:ports:check && npm run data:media:check && npm run build && npm run check:bundle"
   },
   "engines": {
     "node": ">=22.22.0"

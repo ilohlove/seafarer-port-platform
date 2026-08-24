@@ -156,6 +156,37 @@ export interface PortNotesContextReadModel {
   readonly taxiHangulPhrase: string;
 }
 
+export interface PortHeroMediaVariant {
+  readonly src: string;
+  readonly width: number;
+  readonly height: number;
+  readonly byteSize: number;
+  readonly sha256: string;
+  readonly mediaType: "image/jpeg";
+}
+
+/**
+ * Published decorative media for a port or terminal context. Media remains a
+ * separate read model so Port Hub does not become a storage entity.
+ */
+export interface PortHeroMediaReadModel {
+  readonly id: string;
+  readonly portUnLocode: string;
+  readonly contextSlug?: string;
+  readonly contextLabel: string;
+  readonly objectPosition: string;
+  readonly variants: readonly PortHeroMediaVariant[];
+  readonly attribution: {
+    readonly creator: string;
+    readonly provider: string;
+    readonly sourcePageUrl: string;
+    readonly licenseName: string;
+    readonly licenseUrl: string;
+    readonly capturedAt?: string;
+    readonly changes: string;
+  };
+}
+
 export interface PortHubReadModel {
   readonly port: PortSummary;
   readonly terminals: readonly TerminalSummary[];

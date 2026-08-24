@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "port-hero-media-manifest.v1",
+  "releaseId": "prototype-2026-08-24",
+  "releaseScope": "prototype",
+  "targetPortCount": 30,
+  "publishedAssetCount": 1,
+  "assets": [
+    {
+      "id": "hero-krpus-new-port-pantos",
+      "publicationStatus": "approved",
+      "portUnLocode": "KRPUS",
+      "portIds": [
+        "port-busan"
+      ],
+      "portSlugs": [
+        "busan"
+      ],
+      "contextSlug": "new-port",
+      "contextLabel": "Busan New Port",
+      "contextAccuracy": "exact",
+      "objectPosition": "50% 43%",
+      "attribution": {
+        "creator": "Romlogistics",
+        "provider": "Wikimedia Commons",
+        "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Pantos_Logistics_-_Busan_New_Port_Warehouse.jpg",
+        "licenseName": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+        "capturedAt": "2010-11-24",
+        "changes": "Wikimedia Commons resized variants; CSS crop and overlay in UI."
+      },
+      "review": {
+        "metadataStatus": "verified",
+        "contextStatus": "exact",
+        "reviewedAt": "2026-08-24",
+        "releaseScope": "prototype"
+      },
+      "variants": [
+        {
+          "src": "/media/ports/krpus/busan-new-port-960.jpg",
+          "width": 960,
+          "height": 614,
+          "byteSize": 161583,
+          "sha256": "0f6d0ef7f1b75a5977c355c6dd2a5f2cb3db449abb52c577e5fddeb366377e41",
+          "mediaType": "image/jpeg"
+        },
+        {
+          "src": "/media/ports/krpus/busan-new-port-1280.jpg",
+          "width": 1280,
+          "height": 819,
+          "byteSize": 267494,
+          "sha256": "5ac9ce2621256705247cd2c5d54767c58e6ee1d1a6d4b560c25ad6162004b653",
+          "mediaType": "image/jpeg"
+        }
+      ]
+    }
+  ]
+}

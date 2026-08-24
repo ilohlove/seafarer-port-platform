@@ -1,5 +1,8 @@
+import { useEffect, useState } from "react";
+
 import { TrustStatus } from "../../../components";
 import { useI18n } from "../../../i18n";
+import type { PortHeroMediaReadModel } from "../../../types";
 import type {
   PortSnapshotModel,
   SnapshotFactModel,
@@ -13,6 +16,52 @@ export interface PortSnapshotProps {
   readonly onFactSelect: (target: SnapshotFactTarget) => void;
   readonly onPlaceholder: (feature: string) => void;
   readonly showMedia: boolean;
+  readonly media?: PortHeroMediaReadModel;
+}
+
+function SnapshotMedia({
+  media,
+}: {
+  readonly media?: PortHeroMediaReadModel;
+}) {
+  const [failedMediaId, setFailedMediaId] = useState<string>();
+  const mediaFailed = failedMediaId === media?.id;
+  const variants = media
+    ? [...media.variants].sort((left, right) => left.width - right.width)
+    : [];
+  const fallback = variants.at(-1);
+
+  useEffect(() => {
+    setFailedMediaId(undefined);
+  }, [media?.id]);
+
+  return (
+    <div
+      className={styles.snapshotMedia}
+      data-image={media && fallback && !mediaFailed ? "true" : "false"}
+      data-testid="port-notes-media"
+      aria-hidden="true"
+    >
+      {media && fallback && !mediaFailed ? (
+        <img
+          className={styles.snapshotMediaImage}
+          src={fallback.src}
+          srcSet={variants
+            .map((variant) => `${variant.src} ${variant.width}w`)
+            .join(", ")}
+          sizes="(max-width: 47.99rem) 100vw, 80rem"
+          width={fallback.width}
+          height={fallback.height}
+          alt=""
+          loading="eager"
+          decoding="async"
+          fetchPriority="high"
+          style={{ objectPosition: media.objectPosition }}
+          onError={() => setFailedMediaId(media.id)}
+        />
+      ) : null}
+    </div>
+  );
 }
 
 function SnapshotFactIcon({ icon }: Pick<SnapshotFactModel, "icon">) {
@@ -88,6 +137,7 @@ export function PortSnapshot({
   onFactSelect,
   onPlaceholder,
   showMedia,
+  media,
 }: PortSnapshotProps) {
   const { t } = useI18n();
 
@@ -97,13 +147,7 @@ export function PortSnapshot({
       data-media={showMedia ? "visible" : "omitted"}
       aria-labelledby="port-snapshot-heading"
     >
-      {showMedia ? (
-        <div
-          className={styles.snapshotMedia}
-          data-testid="port-notes-media"
-          aria-hidden="true"
-        />
-      ) : null}
+      {showMedia ? <SnapshotMedia media={media} /> : null}
       <div className={styles.snapshotBody}>
         <div className={styles.snapshotHeadingRow}>
           <div>
@@ -160,6 +204,35 @@ export function PortSnapshot({
             </article>
           ))}
         </section>
+
+        {media ? (
+          <footer className={styles.snapshotCredit}>
+            <span>{t("portNotes.snapshot.photoCredit")}:</span>{" "}
+            <a
+              href={media.attribution.sourcePageUrl}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={t("portNotes.snapshot.photoSource", {
+                creator: media.attribution.creator,
+              })}
+            >
+              {media.attribution.creator}
+            </a>
+            <span aria-hidden="true"> · </span>
+            <a
+              href={media.attribution.licenseUrl}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={t("portNotes.snapshot.photoLicense", {
+                license: media.attribution.licenseName,
+              })}
+            >
+              {media.attribution.licenseName}
+            </a>
+            <span aria-hidden="true"> · </span>
+            <span>{t("portNotes.snapshot.photoChanges")}</span>
+          </footer>
+        ) : null}
       </div>
     </section>
   );

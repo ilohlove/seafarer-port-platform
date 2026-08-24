@@ -57,9 +57,19 @@ describe("CrewPort compact Port Notes route", () => {
     expect(within(snapshot).queryByText(/CrewPort · Ghi chú cảng/)).toBeNull();
     expect(within(snapshot).getByText("Khu bến đang chọn")).toBeVisible();
     expect(snapshot).toHaveTextContent("Crew Gate");
+    await waitFor(() => {
+      expect(
+        document.querySelector(
+          'img[src="/media/ports/krpus/busan-new-port-1280.jpg"]',
+        ),
+      ).toBeVisible();
+    });
     expect(
-      document.querySelector('img:not([src="/brand/crewport-anchor.png"])'),
-    ).toBeNull();
+      within(snapshot).getByRole("link", { name: "Mở nguồn ảnh của Romlogistics" }),
+    ).toHaveAttribute(
+      "href",
+      "https://commons.wikimedia.org/wiki/File:Pantos_Logistics_-_Busan_New_Port_Warehouse.jpg",
+    );
 
     const snapshotFacts = screen.getByRole("region", {
       name: "Thông tin thiết yếu",
@@ -395,7 +405,13 @@ describe("CrewPort compact Port Notes route", () => {
     render(<App />);
 
     await screen.findByRole("heading", { name: "Busan New Port" });
-    expect(screen.getByTestId("port-notes-media")).toBeVisible();
+    await waitFor(() => {
+      expect(
+        document.querySelector(
+          'img[src="/media/ports/krpus/busan-new-port-1280.jpg"]',
+        ),
+      ).toBeVisible();
+    });
     const bandwidthSelect = screen.getByRole("combobox", {
       name: "Chế độ dữ liệu",
     });

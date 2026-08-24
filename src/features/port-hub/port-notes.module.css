@@ -220,6 +220,19 @@
     linear-gradient(180deg, rgb(8 47 73 / 40%), rgb(6 31 49 / 82%));
 }
 
+.snapshotMedia[data-image="true"]::before,
+.snapshotMedia[data-image="true"]::after {
+  display: none;
+}
+
+.snapshotMediaImage {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  filter: saturate(0.82) contrast(1.04);
+}
+
 .snapshotBody {
   position: relative;
   display: grid;
@@ -321,6 +334,38 @@
 .terminalContext span {
   color: rgb(226 232 240 / 86%);
   font-size: var(--font-size-sm);
+}
+
+.snapshotCredit {
+  display: flex;
+  min-block-size: var(--tap-target);
+  align-items: center;
+  justify-self: end;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+  padding-inline: var(--space-2);
+  border: var(--border-width) solid rgb(226 232 240 / 18%);
+  border-radius: var(--radius-pill);
+  background: rgb(4 19 37 / 48%);
+  color: rgb(226 232 240 / 72%);
+  font-size: var(--font-size-xs);
+  line-height: 1.3;
+}
+
+.snapshotCredit a {
+  color: #ccfbf1;
+  font-weight: var(--font-weight-semibold);
+  text-underline-offset: 0.16em;
+}
+
+.snapshotCredit a:hover {
+  color: #f8fafc;
+}
+
+.snapshotCredit a:focus-visible {
+  border-radius: var(--radius-sm);
+  outline: 0.16rem solid var(--color-focus);
+  outline-offset: 0.14rem;
 }
 
 .contextLabel {
@@ -1928,6 +1973,10 @@
 
   .snapshotHeadingRow .saveShort {
     display: inline;
+  }
+
+  .snapshotCredit {
+    justify-self: start;
   }
 
   .actionTileBody span,

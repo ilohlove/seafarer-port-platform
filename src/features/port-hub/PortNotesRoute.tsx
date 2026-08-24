@@ -8,7 +8,11 @@ import {
   Skeleton,
 } from "../../components";
 import { useI18n } from "../../i18n";
-import type { AsyncState, PortHubReadModel } from "../../types";
+import type {
+  AsyncState,
+  PortHeroMediaReadModel,
+  PortHubReadModel,
+} from "../../types";
 import {
   MainActionTiles,
   NoteCaptureDialog,
@@ -33,6 +37,7 @@ export function PortNotesRoute() {
   });
   const [reloadToken, setReloadToken] = useState(0);
   const [notice, setNotice] = useState<string>();
+  const [heroMedia, setHeroMedia] = useState<PortHeroMediaReadModel>();
   const [isTaxiDialogOpen, setIsTaxiDialogOpen] = useState(false);
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
   const writeNoteRequested =
@@ -89,6 +94,38 @@ export function PortNotesRoute() {
         : undefined,
     [formatMoney, state, t],
   );
+
+  useEffect(() => {
+    setHeroMedia(undefined);
+    if (mode !== "standard" || state.status !== "success") {
+      return;
+    }
+
+    const controller = new AbortController();
+    const activeContext = state.data.portNotesContexts?.find(
+      (context) => context.id === state.data.selectedPortNotesContextId,
+    );
+    void services.portMedia
+      .getHero(
+        {
+          portId: state.data.port.id,
+          portSlug: state.data.port.slug,
+          portUnLocode: state.data.port.unLocode,
+          contextSlug: activeContext?.slug,
+        },
+        { signal: controller.signal },
+      )
+      .then((media) => {
+        if (!controller.signal.aborted) {
+          setHeroMedia(media);
+        }
+      })
+      .catch(() => {
+        // A licensed image is optional; the snapshot keeps its CSS fallback.
+      });
+
+    return () => controller.abort();
+  }, [mode, services, state]);
 
   const closeTaxiDialog = useCallback(() => setIsTaxiDialogOpen(false), []);
 
@@ -184,6 +221,7 @@ export function PortNotesRoute() {
                 onFactSelect={handleSnapshotFact}
                 onPlaceholder={showPlaceholder}
                 showMedia={mode === "standard"}
+                media={heroMedia}
               />
               <MainActionTiles
                 actions={viewModel.actions}
