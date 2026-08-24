@@ -9,6 +9,11 @@ const packageJson = JSON.parse(
 
 export default defineConfig({
   plugins: [react()],
+  server: {
+    watch: {
+      ignored: ['**/.cache/**'],
+    },
+  },
   define: {
     __APP_VERSION__: JSON.stringify(packageJson.version),
   },
