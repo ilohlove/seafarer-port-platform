@@ -4,6 +4,7 @@ import { Navigate, useLocation, useNavigate } from "react-router";
 import { OfflineBanner, SearchBox } from "../../components";
 import { useBandwidthMode } from "../../app/providers";
 import { useI18n } from "../../i18n";
+import { usePortSuggestions } from "../search/use-port-suggestions";
 import styles from "./home.module.css";
 
 const exampleQueries = [
@@ -21,6 +22,12 @@ export function HomeRoute() {
   const location = useLocation();
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
+  const autocompleteEnabled = mode !== "ultraLite";
+  const { suggestions, loading: suggestionsLoading } = usePortSuggestions(query, {
+    enabled: autocompleteEnabled,
+    minimumLength: mode === "dataSaver" ? 3 : 2,
+    debounceMs: mode === "dataSaver" ? 350 : 180,
+  });
   const queryFromUrl = new URLSearchParams(location.search).get("q")?.trim();
 
   if (queryFromUrl) {
@@ -69,6 +76,21 @@ export function HomeRoute() {
               submitLabel={t("home.search.submit")}
               clearLabel={t("home.search.clear")}
               helperText={t("home.search.help")}
+              suggestions={autocompleteEnabled ? suggestions : undefined}
+              suggestionsLabel={t("home.results.eyebrow")}
+              suggestionsLoading={suggestionsLoading}
+              onSuggestionSelect={
+                autocompleteEnabled
+                  ? (suggestion) => {
+                      const selected = suggestions.find(
+                        (candidate) => candidate.id === suggestion.id,
+                      );
+                      if (selected) {
+                        navigate(`/ports/${selected.slug}`);
+                      }
+                    }
+                  : undefined
+              }
               id="home-port-search"
             />
           </section>

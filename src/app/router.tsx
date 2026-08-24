@@ -19,6 +19,12 @@ const SearchRoute = lazy(() =>
   })),
 );
 
+const CommunityRoute = lazy(() =>
+  import("../features/community/CommunityRoute").then((module) => ({
+    default: module.CommunityRoute,
+  })),
+);
+
 function RouteFallback() {
   const { t } = useI18n();
   return <Skeleton label={t("portNotes.loading")} lines={6} variant="card" />;
@@ -46,6 +52,7 @@ export function AppRouter() {
           <Routes>
             <Route path="/" element={<HomeRoute />} />
             <Route path="/search" element={<SearchRoute />} />
+            <Route path="/community" element={<CommunityRoute />} />
             <Route path="/foundation" element={<FoundationRoute />} />
             <Route path="/ports/:portSlug" element={<PortNotesRoute />} />
             <Route path="*" element={<NotImplementedRoute />} />

@@ -36,6 +36,16 @@ export interface PortSummary {
   readonly trust: TrustEvidence;
 }
 
+/**
+ * Public, moderated note plus the minimum port context needed by community UI.
+ * This is a read projection and is not a persisted entity.
+ */
+export interface PublishedPortNoteReadModel {
+  readonly note: PortNote;
+  readonly port: PortSummary;
+  readonly terminals: readonly TerminalSummary[];
+}
+
 export type CriticalInformationSeverity = "info" | "warning" | "critical";
 
 export interface CriticalInformation {

@@ -14,6 +14,7 @@ import {
   ServiceCard,
   Skeleton,
   TrustStatus,
+  type SearchSuggestion,
 } from '.';
 
 function ControlledSearchBox({ inputRef }: { readonly inputRef: Ref<HTMLInputElement> }) {
@@ -78,6 +79,40 @@ describe('foundation components', () => {
     expect(
       controlled.queryByRole('button', { name: 'Xóa tìm kiếm' }),
     ).not.toBeInTheDocument();
+  });
+
+  it('supports keyboard selection from port suggestions', async () => {
+    const user = userEvent.setup();
+    const onSelect = vi.fn<(suggestion: SearchSuggestion) => void>();
+
+    render(
+      <SearchBox
+        value="Bu"
+        onChange={() => undefined}
+        onSubmit={() => undefined}
+        label="Tìm cảng"
+        placeholder="Tên cảng"
+        submitLabel="Tìm"
+        suggestions={[
+          {
+            id: 'port-busan',
+            value: 'Busan',
+            primary: 'Busan',
+            secondary: 'South Korea · KRPUS',
+          },
+        ]}
+        suggestionsLabel="Cảng phù hợp"
+        onSuggestionSelect={onSelect}
+      />,
+    );
+
+    const input = screen.getByRole('combobox', { name: 'Tìm cảng' });
+    await user.click(input);
+    await user.keyboard('{ArrowDown}{Enter}');
+
+    expect(onSelect).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'port-busan', value: 'Busan' }),
+    );
   });
 
   it('renders a port result as a descriptive link with derived trust text', () => {

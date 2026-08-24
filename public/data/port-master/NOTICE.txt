@@ -1,0 +1,8 @@
+CrewPort Port Directory
+
+Contains data derived from UN/LOCODE release 2025-1.
+Source: https://unlocode.unece.org/publications/
+License stated by UN/CEFACT: CC-BY-4.0 (https://creativecommons.org/licenses/by/4.0/)
+Attribution: United Nations Economic Commission for Europe (UNECE), UN/CEFACT.
+Production redistribution remains subject to CrewPort legal/compliance review.
+NGA WPI data is not included because the official CSV download was unavailable.

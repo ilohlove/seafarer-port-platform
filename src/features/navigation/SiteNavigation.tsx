@@ -7,7 +7,7 @@ import styles from "./site-navigation.module.css";
 type NavigationIconName = "home" | "search" | "port" | "community" | "saved";
 
 export interface SiteNavigationProps {
-  readonly current: "home" | "search" | "port";
+  readonly current: "home" | "search" | "port" | "community";
   readonly portSlug?: string;
   readonly onPlaceholder?: (feature: string) => void;
 }
@@ -91,7 +91,7 @@ export function SiteNavigation({
     {
       id: "community",
       label: t("portNotes.nav.notes"),
-      href: `${portHref}#quick-action-write-note`,
+      href: "/community",
       icon: "community",
     },
   ] as const;
@@ -109,15 +109,7 @@ export function SiteNavigation({
       "aria-current": isCurrent ? ("page" as const) : undefined,
     };
 
-    return item.href.includes("#") ? (
-      <a
-        {...sharedProps}
-        href={item.href}
-        key={item.id}
-      >
-        {content}
-      </a>
-    ) : (
+    return (
       <Link {...sharedProps} to={item.href} key={item.id}>
         {content}
       </Link>

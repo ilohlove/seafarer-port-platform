@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router";
+import { useLocation, useParams } from "react-router";
 
 import { useBandwidthMode, useServices } from "../../app/providers";
 import {
@@ -24,6 +24,7 @@ import styles from "./port-notes.module.css";
 
 export function PortNotesRoute() {
   const { portSlug = "" } = useParams();
+  const location = useLocation();
   const services = useServices();
   const { mode } = useBandwidthMode();
   const { t, formatMoney } = useI18n();
@@ -34,6 +35,8 @@ export function PortNotesRoute() {
   const [notice, setNotice] = useState<string>();
   const [isTaxiDialogOpen, setIsTaxiDialogOpen] = useState(false);
   const [isNoteDialogOpen, setIsNoteDialogOpen] = useState(false);
+  const writeNoteRequested =
+    new URLSearchParams(location.search).get("writeNote") === "1";
 
   useEffect(() => {
     if (!portSlug) {
@@ -56,7 +59,7 @@ export function PortNotesRoute() {
             : { status: "empty", reason: "port-not-found" },
         );
         setIsTaxiDialogOpen(false);
-        setIsNoteDialogOpen(false);
+        setIsNoteDialogOpen(Boolean(hub && writeNoteRequested));
       })
       .catch((error: unknown) => {
         if (controller.signal.aborted) {
@@ -73,7 +76,7 @@ export function PortNotesRoute() {
       });
 
     return () => controller.abort();
-  }, [portSlug, reloadToken, services]);
+  }, [portSlug, reloadToken, services, writeNoteRequested]);
 
   const viewModel = useMemo(
     () =>

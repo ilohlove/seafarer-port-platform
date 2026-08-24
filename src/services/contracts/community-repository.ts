@@ -1,4 +1,7 @@
-import type { Review } from "../../types";
+import type {
+  PublishedPortNoteReadModel,
+  Review,
+} from "../../types";
 import type { RequestContext, RequestOptions } from "./request-context";
 
 export interface ReviewSubmission {
@@ -35,6 +38,10 @@ export interface ContributionReceipt {
 }
 
 export interface CommunityRepository {
+  listPublishedPortNotes(
+    options?: RequestOptions,
+  ): Promise<readonly PublishedPortNoteReadModel[]>;
+
   listApprovedReviews(
     subjectId: string,
     options?: RequestOptions,

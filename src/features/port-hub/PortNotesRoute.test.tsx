@@ -194,7 +194,7 @@ describe("CrewPort compact Port Notes route", () => {
     fireEvent.click(
       desktopNavigation.querySelector('a[href="/search"]') as HTMLAnchorElement,
     );
-    const search = await screen.findByRole("searchbox", { name: "Ô tìm cảng" });
+    const search = await screen.findByRole("combobox", { name: "Ô tìm cảng" });
     await user.type(search, "Singapore");
     await user.click(screen.getByRole("button", { name: "Tìm cảng" }));
 
@@ -385,7 +385,7 @@ describe("CrewPort compact Port Notes route", () => {
     expect(mobileNavigation?.querySelectorAll("a, button")).toHaveLength(5);
     expect(
       within(mobileNavigation!).getByRole("link", { name: "Cộng đồng" }),
-    ).toHaveAttribute("href", "/ports/busan#quick-action-write-note");
+    ).toHaveAttribute("href", "/community");
     expect(document.querySelector('a[href^="tel:"]')).toBeNull();
     expect(screen.queryByText(/Premium|Gói trả phí|★|star rating/i)).toBeNull();
   });

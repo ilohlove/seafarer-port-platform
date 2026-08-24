@@ -742,7 +742,7 @@ export function buildPortNotesViewModel(
         value: taxiSummary,
         detail: gate,
         trust: taxiTrust,
-        target: "taxi",
+        target: activeContext || taxiNote ? "taxi" : undefined,
       },
       {
         id: "community",

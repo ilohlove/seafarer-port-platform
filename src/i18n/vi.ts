@@ -633,6 +633,112 @@ export const viDictionary = {
   "search.helper.methodLocation": "Thành phố hoặc quốc gia",
   "search.helper.methodCode": "UN/LOCODE: SGSIN, KRPUS",
   "search.helper.examplesLabel": "Ví dụ tìm kiếm",
+  "community.loading": "Đang tải ghi chú cộng đồng",
+  "community.error.heading": "Không thể tải ghi chú cộng đồng",
+  "community.error.description":
+    "Dữ liệu ghi chú tạm thời không truy cập được. Vui lòng thử lại.",
+  "community.error.retry": "Thử lại",
+  "community.eyebrow": "Kinh nghiệm từ thuyền viên",
+  "community.heading": "Cộng đồng CrewPort",
+  "community.description":
+    "Tìm ghi chú thực tế theo cảng, khu bến và nhu cầu.",
+  "community.write": "Viết ghi chú",
+  "community.write.choosePort": "Chọn cảng để viết ghi chú",
+  "community.write.helper":
+    "CrewPort sẽ mở form Ghi nhanh trong 30 giây theo đúng cảng đã chọn.",
+  "community.write.close": "Đóng danh sách cảng",
+  "community.search.label": "Tìm trong ghi chú cộng đồng",
+  "community.search.placeholder": "Tìm theo cảng, khu bến hoặc nội dung...",
+  "community.port.label": "Lọc theo cảng",
+  "community.port.all": "Tất cả cảng",
+  "community.filters.label": "Lọc ghi chú theo chủ đề",
+  "community.filter.all": "Tất cả",
+  "community.filter.connectivity": "eSIM & SIM",
+  "community.filter.transport": "Đi bờ & Taxi",
+  "community.filter.food": "Đồ ăn",
+  "community.filter.shopping": "Mua sắm & Quà",
+  "community.filter.welfare": "Hỗ trợ thuyền viên",
+  "community.filter.other": "Mẹo & Cảnh báo",
+  "community.useful.heading": "Ghi chú hữu ích",
+  "community.attention.heading": "Cần anh em xác nhận",
+  "community.section.count": "{{count}} ghi chú",
+  "community.empty.heading": "Chưa có ghi chú phù hợp",
+  "community.empty.description":
+    "Thử đổi từ khóa, cảng hoặc chủ đề để xem các ghi chú khác.",
+  "community.empty.clear": "Xóa bộ lọc",
+  "community.note.expand": "Mở chi tiết {{title}}",
+  "community.note.collapse": "Đóng chi tiết {{title}}",
+  "community.note.details": "Thông tin trong ghi chú",
+  "community.note.context": "Phạm vi áp dụng",
+  "community.note.evidence": "Bằng chứng cộng đồng",
+  "community.note.confirmations": "{{count}} xác nhận",
+  "community.note.usefulness": "{{count}} hữu ích",
+  "community.note.openPort": "Xem cẩm nang cảng",
+  "community.note.gate": "Gate {{gate}}",
+  "community.note.busanEsim.title":
+    "Korea Local 10 GB dùng ổn cho WhatsApp",
+  "community.note.busanEsim.summary":
+    "Gói cài trước; hotspot đã được ghi nhận nhưng tín hiệu có thể yếu dưới boong.",
+  "community.note.busanPhysicalSim.title":
+    "Chưa có điểm bán SIM vật lý đã xác nhận",
+  "community.note.busanPhysicalSim.summary":
+    "Hỏi agent hoặc seafarer center trước khi đi tìm booth; không dùng số cá nhân chưa được kiểm duyệt.",
+  "community.note.busanTaxi.title": "Hỏi giá trước khi rời Crew Gate",
+  "community.note.busanTaxi.summary":
+    "Điểm đón và shuttle có thể đổi theo terminal; xác nhận giá trước khi lên xe.",
+  "community.note.busanFood.title": "Quick Meal Stop ở ngoài terminal",
+  "community.note.busanFood.summary":
+    "Có báo cáo phục vụ nhanh; cần tính thời gian đi và quay lại trong buffer 75 phút mẫu.",
+  "community.note.busanSupplies.title":
+    "Chưa có ghi nhận supplies đủ tin cậy",
+  "community.note.busanSupplies.summary":
+    "Ưu tiên hỏi crew đã ghé gần đây; dữ liệu mua sắm của terminal này còn thiếu.",
+  "community.note.busanNorthTaxi.title":
+    "North Port không dùng cùng gate với New Port",
+  "community.note.busanNorthTaxi.summary":
+    "Ghi đúng Gamman và xác nhận điểm đón với agent trước khi rời tàu.",
+  "community.note.busanYeongdoTaxi.title":
+    "Yeongdo cần tên berth cụ thể",
+  "community.note.busanYeongdoTaxi.summary":
+    "Chỉ ghi Yeongdo là chưa đủ; hãy lưu berth và pickup point do tàu xác nhận.",
+  "community.note.busanGamcheonTaxi.title":
+    "Giữ tên berth khi đi taxi từ Gamcheon",
+  "community.note.busanGamcheonTaxi.summary":
+    "Điểm đón trong mock cần xác nhận lại với port security hoặc agent.",
+  "community.note.singaporeEsim.title":
+    "Singapore Local 10 GB là lựa chọn nhanh",
+  "community.note.singaporeEsim.summary":
+    "Cài trước khi xuống tàu để giảm thời gian tìm SIM; hotspot được ghi nhận hoạt động.",
+  "community.note.singaporePhysicalSim.title":
+    "SIM vật lý có tại cửa hàng tiện lợi ngoài gate",
+  "community.note.singaporePhysicalSim.summary":
+    "Có thể cần hộ chiếu để kích hoạt; hỏi cửa hàng về gói data trước khi trả tiền.",
+  "community.note.singaporeTransport.title":
+    "Hỏi chuyến shuttle cuối trước khi rời tàu",
+  "community.note.singaporeTransport.summary":
+    "Crew shuttle giúp ra gate; taxi và ride-hailing đón ở khu vực ngoài gate.",
+  "community.note.singaporeFood.title":
+    "Food Court gần gate cho chuyến đi ngắn",
+  "community.note.singaporeFood.summary":
+    "Có lựa chọn phục vụ nhanh và một số món halal đã được ghi nhận.",
+  "community.note.singaporeWelfare.title":
+    "Seafarers’ Centre có Wi-Fi và hỗ trợ pickup",
+  "community.note.singaporeWelfare.summary":
+    "Pickup và return transport cần được sắp xếp trước khi rời centre.",
+  "community.note.klangEsim.title":
+    "eSIM khu vực thuận tiện hơn nếu cần hotspot",
+  "community.note.klangEsim.summary":
+    "Gói khu vực có hotspot trong dữ liệu mẫu; kiểm tra vùng phủ theo terminal trước khi dùng.",
+  "community.note.klangShuttleA.title": "Báo cáo A: có shuttle theo giờ",
+  "community.note.klangShuttleA.summary":
+    "Một thuyền viên ghi nhận shuttle theo giờ tại Westports; cần xác nhận chuyến cuối.",
+  "community.note.klangShuttleB.title": "Báo cáo B: agent đặt xe riêng",
+  "community.note.klangShuttleB.summary":
+    "Báo cáo khác không thấy shuttle và dùng xe do agent sắp xếp; không coi shuttle là chắc chắn.",
+  "community.note.klangPlaces.title":
+    "Chưa có điểm tham quan đủ tin cậy cho chuyến ngắn",
+  "community.note.klangPlaces.summary":
+    "Ưu tiên chốt phương tiện và buffer quay lại trước khi chọn nơi đi.",
   "foundation.eyebrow": "Milestone F1",
   "foundation.heading": "Nền tảng giao diện đã sẵn sàng để review",
   "foundation.intro":

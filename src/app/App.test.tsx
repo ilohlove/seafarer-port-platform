@@ -53,7 +53,7 @@ describe("Application shell and demo routing", () => {
       document.querySelector('[data-navigation="desktop"]')?.querySelectorAll("a, button"),
     ).toHaveLength(5);
     expect(screen.getByRole("button", { name: "Đăng nhập" })).toBeVisible();
-    expect(screen.getByRole("searchbox", { name: /Tìm cảng/ })).toBeVisible();
+    expect(screen.getByRole("combobox", { name: /Tìm cảng/ })).toBeVisible();
     expect(screen.getByRole("button", { name: "Busan" })).toBeVisible();
     expect(screen.getByRole("button", { name: "Busan New Port" })).toBeVisible();
     expect(screen.getByRole("button", { name: "Pasir Panjang" })).toBeVisible();
@@ -116,7 +116,7 @@ describe("Application shell and demo routing", () => {
       screen.getByText("Tìm theo tên cảng, terminal, gate hoặc UN/LOCODE."),
     ).toBeVisible();
     expect(
-      screen.getByRole("searchbox", { name: "Ô tìm cảng" }),
+      screen.getByRole("combobox", { name: "Ô tìm cảng" }),
     ).toHaveAttribute("placeholder", "VD: SGSIN, Busan, Crew Gate...");
     expect(screen.getByRole("button", { name: "Tìm cảng" })).toBeVisible();
     expect(screen.getByRole("button", { name: "Xóa tìm kiếm" })).toBeVisible();

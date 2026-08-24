@@ -11,6 +11,7 @@ import { MockConnectivityRepository } from "./mock/mock-connectivity-repository"
 import { MockOfflinePackStore } from "./mock/mock-offline-pack-store";
 import { MockPlannerService } from "./mock/mock-planner-service";
 import { MockPortRepository } from "./mock/mock-port-repository";
+import { StaticPortDirectoryRepository } from "./static/static-port-directory-repository";
 import { LocalStoragePreferencesStore } from "./storage/local-storage-preferences-store";
 import { resolveStorage } from "./storage/storage-utils";
 
@@ -33,7 +34,11 @@ export function createServices(
 ): AppServices {
   const storage = resolveStorage(options.storage);
   const latencyMs = options.mockLatencyMs ?? 80;
-  const ports = new MockPortRepository(latencyMs);
+  const mockPorts = new MockPortRepository(latencyMs);
+  const ports =
+    import.meta.env.MODE === "test"
+      ? mockPorts
+      : new StaticPortDirectoryRepository(mockPorts);
 
   return {
     ports,

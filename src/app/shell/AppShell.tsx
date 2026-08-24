@@ -210,8 +210,11 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
   const isPortNotesRoute = location.pathname.startsWith("/ports/");
   const isHomeRoute = location.pathname === "/";
   const isSearchRoute = location.pathname.startsWith("/search");
+  const isCommunityRoute = location.pathname.startsWith("/community");
   const currentNavigation = isPortNotesRoute
     ? "port"
+    : isCommunityRoute
+      ? "community"
     : isSearchRoute
       ? "search"
       : "home";

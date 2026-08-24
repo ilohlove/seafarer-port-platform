@@ -11,6 +11,7 @@ import { useBandwidthMode, useServices } from "../../app/providers";
 import { useI18n } from "../../i18n";
 import type { AsyncState, PortSearchHit, PortSearchResult } from "../../types";
 import styles from "./search.module.css";
+import { usePortSuggestions } from "./use-port-suggestions";
 
 const searchHints = ["Busan", "SGSIN", "Crew Gate", "Port Klang"] as const;
 
@@ -90,6 +91,15 @@ export function SearchRoute() {
   const navigate = useNavigate();
   const queryFromUrl = new URLSearchParams(location.search).get("q")?.trim() ?? "";
   const [query, setQuery] = useState(queryFromUrl);
+  const autocompleteEnabled = mode !== "ultraLite";
+  const { suggestions, loading: suggestionsLoading } = usePortSuggestions(
+    query,
+    {
+      enabled: autocompleteEnabled && query.trim() !== queryFromUrl,
+      minimumLength: mode === "dataSaver" ? 3 : 2,
+      debounceMs: mode === "dataSaver" ? 350 : 180,
+    },
+  );
   const [state, setState] = useState<AsyncState<PortSearchResult>>({
     status: queryFromUrl.trim() ? "loading" : "empty",
     ...(queryFromUrl.trim() ? {} : { reason: "idle" }),
@@ -174,6 +184,21 @@ export function SearchRoute() {
             placeholder={t("search.form.placeholder")}
             submitLabel={t("search.form.submit")}
             clearLabel={t("search.form.clear")}
+            suggestions={autocompleteEnabled ? suggestions : undefined}
+            suggestionsLabel={t("search.results.title")}
+            suggestionsLoading={suggestionsLoading}
+            onSuggestionSelect={
+              autocompleteEnabled
+                ? (suggestion) => {
+                    const selected = suggestions.find(
+                      (candidate) => candidate.id === suggestion.id,
+                    );
+                    if (selected) {
+                      navigate(`/ports/${selected.slug}`);
+                    }
+                  }
+                : undefined
+            }
             labelVisuallyHidden
             id="search-page-input"
           />

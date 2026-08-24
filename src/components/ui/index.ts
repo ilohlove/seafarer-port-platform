@@ -13,6 +13,6 @@ export type {
   OfflineBannerProps,
 } from './OfflineBanner';
 export { SearchBox } from './SearchBox';
-export type { SearchBoxProps } from './SearchBox';
+export type { SearchBoxProps, SearchSuggestion } from './SearchBox';
 export { Skeleton } from './Skeleton';
 export type { SkeletonProps, SkeletonVariant } from './Skeleton';

@@ -634,6 +634,115 @@ export const enDictionary = {
   "search.helper.methodLocation": "City or country",
   "search.helper.methodCode": "UN/LOCODE: SGSIN, KRPUS",
   "search.helper.examplesLabel": "Search examples",
+  "community.loading": "Loading community notes",
+  "community.error.heading": "Community notes could not be loaded",
+  "community.error.description":
+    "Community note data is temporarily unavailable. Please try again.",
+  "community.error.retry": "Retry",
+  "community.eyebrow": "Experience from seafarers",
+  "community.heading": "CrewPort Community",
+  "community.description":
+    "Find practical notes by port, berth cluster, and need.",
+  "community.write": "Write a Note",
+  "community.write.choosePort": "Choose a port for your note",
+  "community.write.helper":
+    "CrewPort will open the 30-second note form for the selected port.",
+  "community.write.close": "Close port list",
+  "community.search.label": "Search community notes",
+  "community.search.placeholder": "Search by port, berth cluster, or content...",
+  "community.port.label": "Filter by port",
+  "community.port.all": "All ports",
+  "community.filters.label": "Filter notes by topic",
+  "community.filter.all": "All",
+  "community.filter.connectivity": "eSIM & SIM",
+  "community.filter.transport": "Shore Leave & Taxi",
+  "community.filter.food": "Food",
+  "community.filter.shopping": "Shopping & Gifts",
+  "community.filter.welfare": "Seafarer Support",
+  "community.filter.other": "Tips & Warnings",
+  "community.useful.heading": "Useful notes",
+  "community.attention.heading": "Needs crew confirmation",
+  "community.section.count": "{{count}} notes",
+  "community.empty.heading": "No matching notes yet",
+  "community.empty.description":
+    "Try another keyword, port, or topic to see more notes.",
+  "community.empty.clear": "Clear filters",
+  "community.note.expand": "Open details for {{title}}",
+  "community.note.collapse": "Close details for {{title}}",
+  "community.note.details": "Information in this note",
+  "community.note.context": "Applies to",
+  "community.note.evidence": "Community evidence",
+  "community.note.confirmations": "{{count}} confirmations",
+  "community.note.usefulness": "{{count}} found useful",
+  "community.note.openPort": "View port guide",
+  "community.note.gate": "Gate {{gate}}",
+  "community.note.busanEsim.title":
+    "Korea Local 10 GB works well for WhatsApp",
+  "community.note.busanEsim.summary":
+    "Install before arrival; hotspot was reported working, but signal may be weak below deck.",
+  "community.note.busanPhysicalSim.title":
+    "No confirmed physical SIM seller yet",
+  "community.note.busanPhysicalSim.summary":
+    "Ask the agent or seafarers’ centre before looking for a booth; do not use unmoderated personal contacts.",
+  "community.note.busanTaxi.title":
+    "Agree the fare before leaving Crew Gate",
+  "community.note.busanTaxi.summary":
+    "Pickup points and shuttles may change by terminal; confirm the fare before boarding.",
+  "community.note.busanFood.title": "Quick Meal Stop outside the terminal",
+  "community.note.busanFood.summary":
+    "Quick service was reported; include outbound and return time within the sample 75-minute buffer.",
+  "community.note.busanSupplies.title":
+    "No sufficiently trusted supplies note yet",
+  "community.note.busanSupplies.summary":
+    "Ask crew who visited recently; shopping data for this terminal remains incomplete.",
+  "community.note.busanNorthTaxi.title":
+    "North Port does not use the same gate as New Port",
+  "community.note.busanNorthTaxi.summary":
+    "Record Gamman correctly and confirm the pickup point with the agent before leaving the ship.",
+  "community.note.busanYeongdoTaxi.title":
+    "Yeongdo needs a specific berth name",
+  "community.note.busanYeongdoTaxi.summary":
+    "Yeongdo alone is not enough; save the berth and ship-confirmed pickup point.",
+  "community.note.busanGamcheonTaxi.title":
+    "Keep the berth name when taking a taxi from Gamcheon",
+  "community.note.busanGamcheonTaxi.summary":
+    "The sample pickup point still needs confirmation from port security or the agent.",
+  "community.note.singaporeEsim.title":
+    "Singapore Local 10 GB is a quick option",
+  "community.note.singaporeEsim.summary":
+    "Install before disembarking to reduce time spent finding a SIM; hotspot was reported working.",
+  "community.note.singaporePhysicalSim.title":
+    "Physical SIMs are available at a convenience store outside the gate",
+  "community.note.singaporePhysicalSim.summary":
+    "A passport may be needed for activation; ask about the data plan before paying.",
+  "community.note.singaporeTransport.title":
+    "Ask for the last shuttle before leaving the ship",
+  "community.note.singaporeTransport.summary":
+    "The crew shuttle reaches the gate; taxis and ride-hailing pick up outside the gate.",
+  "community.note.singaporeFood.title":
+    "Food Court near the gate for a short trip",
+  "community.note.singaporeFood.summary":
+    "Fast-service options and some halal dishes have been reported.",
+  "community.note.singaporeWelfare.title":
+    "Seafarers’ Centre has Wi-Fi and pickup support",
+  "community.note.singaporeWelfare.summary":
+    "Pickup and return transport must be arranged before leaving the centre.",
+  "community.note.klangEsim.title":
+    "A regional eSIM is convenient when hotspot is needed",
+  "community.note.klangEsim.summary":
+    "The sample regional plan includes hotspot; check coverage for the terminal before use.",
+  "community.note.klangShuttleA.title":
+    "Report A: scheduled shuttle available",
+  "community.note.klangShuttleA.summary":
+    "One seafarer reported a scheduled shuttle at Westports; confirm the final run.",
+  "community.note.klangShuttleB.title":
+    "Report B: the agent arranges a separate car",
+  "community.note.klangShuttleB.summary":
+    "Another report found no shuttle and used agent-arranged transport; do not assume a shuttle is available.",
+  "community.note.klangPlaces.title":
+    "No sufficiently trusted attraction for a short trip yet",
+  "community.note.klangPlaces.summary":
+    "Secure transport and a return buffer before choosing where to go.",
   "foundation.eyebrow": "Milestone F1",
   "foundation.heading": "The interface foundation is ready for review",
   "foundation.intro":

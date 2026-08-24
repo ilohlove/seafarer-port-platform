@@ -1,4 +1,8 @@
-import type { PortHubReadModel, Review } from "../../types";
+import type {
+  PortHubReadModel,
+  PublishedPortNoteReadModel,
+  Review,
+} from "../../types";
 import type {
   CommunityRepository,
   ContributionReceipt,
@@ -41,6 +45,31 @@ function deferredWrite(
 
 export class MockCommunityRepository implements CommunityRepository {
   constructor(private readonly latencyMs = 80) {}
+
+  async listPublishedPortNotes(
+    options: RequestOptions = {},
+  ): Promise<readonly PublishedPortNoteReadModel[]> {
+    const scenarios = await withAbort(
+      Promise.all([delay(this.latencyMs), loadScenarios()]).then(
+        ([, loadedScenarios]) => loadedScenarios,
+      ),
+      options.signal,
+    );
+
+    return scenarios.flatMap((scenario) =>
+      scenario.community.notes
+        .filter(
+          (note) =>
+            note.visibility === "public" &&
+            note.moderationState === "approved",
+        )
+        .map((note) => ({
+          note,
+          port: scenario.port,
+          terminals: scenario.terminals,
+        })),
+    );
+  }
 
   async listApprovedReviews(
     subjectId: string,
