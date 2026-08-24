@@ -35,6 +35,11 @@ jobs:
       - name: Run quality checks and build
         run: npm run check
 
+      - name: Verify built port data
+        run: |
+          test -f dist/data/port-master/manifest.json
+          test "$(find dist/data/port-master/search -type f -name '*.json' | wc -l)" -eq 256
+
       - name: Publish dist to Nginx root
         run: |
           rsync -a --delete dist/ /var/www/seafarer-port-platform/app/seafarer-port-platform/dist/
@@ -43,3 +48,4 @@ jobs:
         run: |
           curl -fsSI http://localhost/
           curl -fsSI http://localhost/ports/busan
+          curl -fsSI http://localhost/data/port-master/manifest.json

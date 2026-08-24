@@ -163,9 +163,11 @@ describe("CrewPort Community note library", () => {
       await screen.findByRole("heading", { name: "CrewPort Community" }),
     ).toBeVisible();
     expect(
-      screen.getByText("Korea Local 10 GB works well for WhatsApp"),
+      await screen.findByText("Korea Local 10 GB works well for WhatsApp"),
     ).toBeVisible();
-    expect(screen.getByRole("button", { name: "Write a Note" })).toBeVisible();
+    expect(
+      await screen.findByRole("button", { name: "Write a Note" }),
+    ).toBeVisible();
     expect(document.body).not.toHaveTextContent("Ghi chú hữu ích");
     expect(document.body).not.toHaveTextContent("Cần anh em xác nhận");
     expect(document.body).not.toHaveTextContent("dùng ổn");
