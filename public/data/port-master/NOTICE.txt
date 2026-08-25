@@ -5,4 +5,5 @@ Source: https://unlocode.unece.org/publications/
 License stated by UN/CEFACT: CC-BY-4.0 (https://creativecommons.org/licenses/by/4.0/)
 Attribution: United Nations Economic Commission for Europe (UNECE), UN/CEFACT.
 Production redistribution remains subject to CrewPort legal/compliance review.
-NGA WPI data is not included because the official CSV download was unavailable.
+Public search records require an exact UN/LOCODE match in NGA World Port Index (https://msi.nga.mil/Publications/WPI) or a reviewed official override.
+NGA WPI snapshot checksum: 417dd45b897d6301cfd184455b3da957fe7281795874f954576542e6dadbe2a6

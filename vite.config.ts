@@ -11,7 +11,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     watch: {
-      ignored: ['**/.cache/**'],
+      ignored: ['**/.cache/**', '**/public/data/port-master/**'],
     },
   },
   define: {

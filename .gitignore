@@ -3,6 +3,8 @@ dist/
 coverage/
 .vite/
 .cache/
+public/data/.port-master-staging/
+public/data/.port-master-backup/
 *.tsbuildinfo
 
 .env

@@ -9,6 +9,8 @@ export const UNLOCODE_TERMS_URL = "https://unlocode.unece.org/terms/";
 export const UNLOCODE_LICENSE_URL =
   "https://creativecommons.org/licenses/by/4.0/";
 export const WPI_SOURCE_URL = "https://msi.nga.mil/Publications/WPI";
+export const WPI_FEATURE_LAYER_URL =
+  "https://fgmod.nga.mil/nauticalpubs-feature/rest/services/WPI/World_Port_Index_Viewer/FeatureServer/0";
 export const WPI_DOWNLOAD_URL =
   "https://msi.nga.mil/api/publications/download?type=view&key=16920959/SFH00000/UpdatedPub150.csv";
 

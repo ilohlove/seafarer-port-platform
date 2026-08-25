@@ -1,17 +1,28 @@
 import { readFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
+import { basename, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { byteMetrics } from "./port-data-lib.mjs";
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
-const outputDirectory = resolve(projectRoot, "public/data/port-master");
+const rootArgumentIndex = process.argv.indexOf("--root");
+const outputDirectory =
+  rootArgumentIndex >= 0
+    ? resolve(projectRoot, process.argv[rootArgumentIndex + 1] ?? "")
+    : resolve(projectRoot, "public/data/port-master");
 const manifest = JSON.parse(
   await readFile(resolve(outputDirectory, "manifest.json"), "utf8"),
 );
 
 if (manifest.schemaVersion !== "port-search-manifest.v1") {
   throw new Error(`Unexpected manifest schema: ${manifest.schemaVersion}`);
+}
+if (
+  manifest.classifierVersion !== "port-classifier.v2" ||
+  manifest.sources?.wpi !== "required-for-publication-by-exact-locode" ||
+  !manifest.wpiAttribution?.checksum
+) {
+  throw new Error("Port directory does not enforce official WPI classification");
 }
 if (manifest.counts.publishedPorts < 1) {
   throw new Error("Port directory contains no published ports");
@@ -26,11 +37,14 @@ const requiredPorts = new Map([
   ["KRPUS", "busan"],
   ["SGSIN", "singapore"],
   ["MYPKG", "port-klang"],
+  ["AUSYD", "ausyd"],
+  ["CAVAN", "cavan"],
 ]);
+const forbiddenCandidates = new Set(["AUCBR", "CAWNP", "MXANH", "GBLCY"]);
 let largestShard;
 
 for (const [key, descriptor] of Object.entries(manifest.shards)) {
-  const path = resolve(projectRoot, `public${descriptor.path}`);
+  const path = resolve(outputDirectory, "search", basename(descriptor.path));
   const content = await readFile(path);
   const metrics = byteMetrics(content);
   if (metrics.sha256 !== descriptor.sha256 || metrics.bytes !== descriptor.bytes) {
@@ -50,6 +64,20 @@ for (const [key, descriptor] of Object.entries(manifest.shards)) {
   for (const port of shard.items) {
     if (!/^[A-Z]{2}[A-Z0-9]{3}$/u.test(port.unLocode)) {
       throw new Error(`Invalid UN/LOCODE in shard ${key}: ${port.unLocode}`);
+    }
+    if (
+      !["wpi-confirmed", "officially-curated"].includes(port.classification) ||
+      port.confidence !== "official" ||
+      !port.sourceIds?.includes("unlocode") ||
+      (port.classification === "wpi-confirmed" &&
+        (!port.sourceIds.includes("nga-wpi") || port.wpiNumbers?.length < 1)) ||
+      (port.classification === "officially-curated" &&
+        !port.sourceIds.includes("official-port-authority"))
+    ) {
+      throw new Error(`Missing publication evidence for ${port.unLocode}`);
+    }
+    if (forbiddenCandidates.has(port.unLocode)) {
+      throw new Error(`Unverified non-seaport candidate is public: ${port.unLocode}`);
     }
     if (shardIds.has(port.id)) {
       throw new Error(`Duplicate ${port.id} inside shard ${key}`);
@@ -87,6 +115,14 @@ if (allPortIds.size !== manifest.counts.publishedPorts) {
   throw new Error(
     `Directory union count ${allPortIds.size} does not match manifest ${manifest.counts.publishedPorts}`,
   );
+}
+if (
+  manifest.counts.unlocodeCandidates !==
+    manifest.counts.publishedPorts + manifest.counts.unLocodeOnlyQuarantined ||
+  manifest.counts.publishedPorts !==
+    manifest.counts.wpiMatchedLocodes + manifest.counts.manualIncluded
+) {
+  throw new Error("Port classification counters do not reconcile");
 }
 if (requiredPorts.size > 0) {
   throw new Error(

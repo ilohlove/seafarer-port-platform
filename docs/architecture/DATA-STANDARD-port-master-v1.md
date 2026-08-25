@@ -3,7 +3,7 @@
 Status: DRAFT
 Owner: Data Architecture
 Reviewers: Maritime Operations Expert, Performance Architect, Frontend Architect, Legal and Compliance Reviewer, QA Lead
-Last updated: 2026-08-24
+Last updated: 2026-08-25
 
 ## Purpose
 
@@ -30,10 +30,11 @@ Tài liệu này là chuẩn ingestion và phân phối dữ liệu. Phase 1 hi�
 
 ## Trạng thái triển khai Phase 1
 
-- Snapshot UN/LOCODE `2025-1` đã được tải từ artifact chính thức, kiểm checksum và lọc theo maritime function.
-- Search projection hiện có 17.520 địa điểm cảng biển thuộc 232 quốc gia/vùng lãnh thổ, sau khi loại trạng thái không xuất bản và gộp LOCODE trùng.
+- Snapshot UN/LOCODE `2025-1` đã được tải từ artifact chính thức, kiểm checksum và tạo 17.520 candidate có maritime function.
+- Snapshot NGA WPI chính thức có 3.807 bản ghi; exact LOCODE join xác nhận 2.833 candidate và một override MPA xác nhận Port of Singapore.
+- Search projection công khai hiện có 2.834 cảng thuộc 185 quốc gia/vùng lãnh thổ; 14.686 UN-only candidate được giữ nội bộ để rà soát.
 - Client chỉ tải manifest nhỏ và một shard phù hợp với truy vấn; dữ liệu không được đóng vào JavaScript bundle.
-- NGA WPI chưa được nhập vì endpoint CSV chính thức đang trả lỗi dịch vụ. Không dùng mirror bên thứ ba để thay thế.
+- NGA WPI được tải từ FeatureServer công khai chính thức; endpoint CSV chính thức là fallback. Không dùng mirror bên thứ ba để thay thế.
 - Attribution được xuất cùng artifact; việc phân phối production vẫn mang trạng thái `pending-production-review` cho đến khi Legal/Compliance khóa điều khoản release.
 
 ## Quyết định kiến trúc
@@ -91,6 +92,8 @@ CDN giúp tách chi phí phân phối khỏi request search và cho phép hàng 
 4. Trang chính thức của port authority hoặc terminal operator cho manual enrichment sau khi có URL, ngày kiểm tra và reviewer.
 
 Thứ tự trên là thứ tự ingestion và vai trò dữ liệu; không có nghĩa một nguồn thắng mọi field. Ví dụ, UN là authority cho identity nhưng tọa độ WPI có thể phù hợp hơn cho port point. Nguồn chính thức của terminal có thể xác nhận context do OSM phát hiện.
+
+UN/LOCODE function `1` chỉ tạo candidate đường thủy. Candidate chỉ được publish khi exact LOCODE xuất hiện trong NGA WPI hoặc có override được reviewer xác nhận bằng trang port authority chính thức. Airport function có thể cùng tồn tại với port function và không phải điều kiện loại trừ độc lập.
 
 ### License và provenance gate
 
@@ -183,6 +186,8 @@ Confidence phải giải thích được bằng nguồn, thời điểm và fiel
 
 Mỗi release sinh data-health report gồm source rows đọc, accepted, duplicate, quarantined, unmatched, conflict, coverage theo country và tỷ lệ field thiếu. Report dùng cho QA/admin, không tải vào first screen.
 
+Public search record phải có `classification` là `wpi-confirmed` hoặc `officially-curated`, cùng WPI Number hoặc source reference của port authority. UN status không tự tạo trust “official port”.
+
 ## Search index contract và ranking
 
 Search projection phải có các field sau:
@@ -203,6 +208,9 @@ portId
 slug
 confidenceSummary
 conflictFlags
+classification
+wpiNumbers
+sourceIds
 ```
 
 ### Sharding
@@ -248,7 +256,7 @@ Tie-break dùng country match, confidence và alphabetical canonical name. Khôn
 - Release mới tạo diff theo source identity, canonical ID, field value và provenance.
 - Record bị remove hoặc đổi code trở thành tombstone/redirect, không hard-delete.
 - Schema fingerprint thay đổi phải review trước promotion.
-- Global accepted-port count giảm trên 2% hoặc một country giảm trên 10% so với release trước thì chặn release để điều tra.
+- Global accepted-port count giảm trên 2% hoặc một country giảm trên 10% trong cùng classifier version thì chặn release để điều tra. Migration classifier có chủ đích phải có review và baseline mới.
 - Release chỉ promote khi license, schema, dedupe, integrity và search golden set đều đạt.
 - Manifest pointer đổi atomically; giữ bản release trước để rollback nhanh.
 
@@ -257,8 +265,9 @@ Tie-break dùng country match, confidence và alphabetical canonical name. Khôn
 ### Phase 1 - Seed và search base ports
 
 - Nhập production UN/LOCODE sau license review; chỉ nhập WPI từ endpoint chính thức khi nguồn khả dụng và được duyệt.
-- Lọc các row có maritime port function theo quy tắc UN/LOCODE.
-- Tạo PortMasterRecord, exact dedupe, country shard và name-prefix shard.
+- Lọc các row có maritime port function thành candidate theo quy tắc UN/LOCODE.
+- Chỉ publish exact UN/LOCODE–WPI match hoặc official override đã review; UN-only và WPI-only giữ trong data-health/canonical layer.
+- Tạo PortMasterRecord, exact dedupe, search shard và provenance tối thiểu.
 - Search được theo name, alias, country, city, UN/LOCODE; terminal/gate chưa được bịa hoặc suy đoán.
 
 ### Phase 2 - Curate top ports
@@ -294,6 +303,7 @@ Các scenario tối thiểu:
 - Một-nhiều, khác country, conflict tọa độ và duplicate listing không bị auto-merge sai.
 - Terminal/gate không làm lẫn hai port khác nhau.
 - Missing source, invalid coordinate, schema change và license chưa duyệt đều bị quarantine/block.
+- Airport-only và UN-only candidate không xuất hiện trong public search; port đa chức năng vẫn được giữ khi WPI hoặc port authority xác nhận.
 - Query rộng không tải nhiều shard vượt budget.
 - Query lặp lại dùng cache; detail không tải trước khi người dùng chọn.
 - Data Saver, Ultra Lite và mạng mất kết nối có trạng thái rõ ràng.

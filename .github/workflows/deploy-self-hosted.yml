@@ -38,7 +38,7 @@ jobs:
       - name: Verify built port data
         run: |
           test -f dist/data/port-master/manifest.json
-          test "$(find dist/data/port-master/search -type f -name '*.json' | wc -l)" -eq 256
+          node scripts/port-data/check-port-data.mjs --root dist/data/port-master
 
       - name: Publish dist to Nginx root
         run: |

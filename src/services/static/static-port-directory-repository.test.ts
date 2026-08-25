@@ -28,6 +28,9 @@ function repositoryFixture(): {
     unLocode: "ZZEXM",
     sourceStatus: "AA",
     confidence: "official",
+    classification: "wpi-confirmed",
+    wpiNumbers: ["1000"],
+    sourceIds: ["unlocode", "nga-wpi"],
     searchValues: [
       "example harbour",
       "example port",
@@ -39,6 +42,7 @@ function repositoryFixture(): {
   } as const;
   const manifest = {
     schemaVersion: "port-search-manifest.v1",
+    classifierVersion: "port-classifier.v2",
     datasetVersion: "unlocode-test",
     retrievedAt: "2026-08-24T00:00:00.000Z",
     minimumQueryLength: 2,
@@ -102,5 +106,24 @@ describe("StaticPortDirectoryRepository", () => {
     expect(hub?.dataHealth.coverage).toBe("limited");
     expect(hub?.terminals).toEqual([]);
     expect(hub?.community.notes).toEqual([]);
+  });
+
+  it("fails closed when the directory lacks the WPI classifier gate", async () => {
+    const repository = new StaticPortDirectoryRepository(new MockPortRepository(0), {
+      manifestPath: "/unsafe/manifest.json",
+      fetcher: async () =>
+        jsonResponse({
+          schemaVersion: "port-search-manifest.v1",
+          datasetVersion: "unlocode-only",
+          retrievedAt: "2026-08-24T00:00:00.000Z",
+          minimumQueryLength: 2,
+          routing: { strategy: "fnv1a-8", prefixLength: 2, bucketCount: 256 },
+          shards: {},
+        }),
+    });
+
+    await expect(repository.search({ query: "Unsafe Harbour" })).rejects.toThrow(
+      "Unsupported port directory manifest",
+    );
   });
 });

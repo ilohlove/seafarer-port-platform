@@ -27,3 +27,4 @@
 - [2026-08-24 13:24] Hoàn thiện chuẩn Port Master Data toàn cầu với ingestion có provenance, dedupe, search shard CDN và quality gate cho quy mô lớn.
 - [2026-08-24 14:23] Triển khai UN/LOCODE 2025-1 với 17.520 cảng, autocomplete lazy-shard, integrity checks và fallback dữ liệu demo minh bạch.
 - [2026-08-24 18:35] Triển khai ảnh hero cảng có nguồn, responsive variants, kiểm tra toàn vẹn và chặn tải ở chế độ tiết kiệm dữ liệu.
+- [2026-08-25 01:03] Làm sạch Port Directory bằng xác nhận NGA WPI, cách ly UN-only candidates và thêm release gate fail-closed.

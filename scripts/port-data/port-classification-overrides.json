@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "port-classification-overrides.v1",
+  "records": [
+    {
+      "unLocode": "SGSIN",
+      "decision": "include",
+      "sourceUrl": "https://www.mpa.gov.sg/who-we-are/about-mpa",
+      "reviewedAt": "2026-08-25",
+      "reviewer": "CrewPort Data Architecture",
+      "reason": "The Maritime and Port Authority of Singapore identifies and regulates the Port of Singapore."
+    }
+  ]
+}

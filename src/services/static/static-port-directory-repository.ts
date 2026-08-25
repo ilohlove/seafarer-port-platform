@@ -31,6 +31,7 @@ const SEARCH_STOP_WORDS = new Set([
 
 interface DirectoryManifest {
   readonly schemaVersion: "port-search-manifest.v1";
+  readonly classifierVersion: "port-classifier.v2";
   readonly datasetVersion: string;
   readonly retrievedAt: string;
   readonly minimumQueryLength: number;
@@ -60,6 +61,9 @@ interface DirectoryPortRecord {
   readonly unLocode: string;
   readonly sourceStatus: string;
   readonly confidence: "official" | "reference" | "pending";
+  readonly classification: "wpi-confirmed" | "officially-curated";
+  readonly wpiNumbers: readonly string[];
+  readonly sourceIds: readonly string[];
   readonly searchValues: readonly string[];
 }
 
@@ -511,6 +515,7 @@ export class StaticPortDirectoryRepository implements PortRepository {
       const manifest = (await response.json()) as DirectoryManifest;
       if (
         manifest.schemaVersion !== "port-search-manifest.v1" ||
+        manifest.classifierVersion !== "port-classifier.v2" ||
         manifest.routing.strategy !== "fnv1a-8"
       ) {
         throw new Error("Unsupported port directory manifest");
@@ -526,7 +531,20 @@ export class StaticPortDirectoryRepository implements PortRepository {
         throw new Error(`Port directory shard ${key} failed: ${response.status}`);
       }
       const shard = (await response.json()) as DirectoryShard;
-      if (shard.schemaVersion !== "port-search-shard.v1" || shard.key !== key) {
+      if (
+        shard.schemaVersion !== "port-search-shard.v1" ||
+        shard.key !== key ||
+        shard.items.some(
+          (record) =>
+            !["wpi-confirmed", "officially-curated"].includes(
+              record.classification,
+            ) ||
+            !record.sourceIds.includes("unlocode") ||
+            (record.classification === "wpi-confirmed" &&
+              (!record.sourceIds.includes("nga-wpi") ||
+                record.wpiNumbers.length === 0)),
+        )
+      ) {
         throw new Error(`Invalid port directory shard ${key}`);
       }
       return shard;
