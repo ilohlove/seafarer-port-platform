@@ -16,6 +16,7 @@ function jsonResponse(value: unknown): Response {
 
 function repositoryFixture(): {
   readonly repository: PortRepository;
+  readonly fetcher: ReturnType<typeof vi.fn<typeof fetch>>;
 } {
   const key = directorySearchShardKey("ex");
   const port = {
@@ -48,20 +49,25 @@ function repositoryFixture(): {
     minimumQueryLength: 2,
     routing: { strategy: "fnv1a-8", prefixLength: 2, bucketCount: 256 },
     shards: {
-      [key]: { path: `/test/${key}.json`, recordCount: 1 },
+      [key]: {
+        path: `/test/${key}.json`,
+        recordCount: 1,
+        sha256: "test-sha",
+      },
       [directorySearchShardKey("zz")]: {
         path: `/test/${directorySearchShardKey("zz")}.json`,
         recordCount: 1,
+        sha256: "test-sha",
       },
     },
   } as const;
   const fetcher = vi.fn<typeof fetch>(async (input) => {
-    const path = String(input);
-    if (path === "/test/manifest.json") {
+    const url = new URL(String(input), "http://test.local");
+    if (url.pathname === "/test/manifest.json") {
       return jsonResponse(manifest);
     }
-    if (path.startsWith("/test/")) {
-      const shardKey = path.replace("/test/", "").replace(".json", "");
+    if (url.pathname.startsWith("/test/")) {
+      const shardKey = url.pathname.replace("/test/", "").replace(".json", "");
       return jsonResponse({
         schemaVersion: "port-search-shard.v1",
         datasetVersion: "unlocode-test",
@@ -76,6 +82,7 @@ function repositoryFixture(): {
       manifestPath: "/test/manifest.json",
       fetcher,
     }),
+    fetcher,
   };
 }
 
@@ -89,6 +96,18 @@ describe("StaticPortDirectoryRepository", () => {
     expect(byName.items[0]?.match.kind).toBe("portName");
     expect(byCode.items[0]?.port.unLocode).toBe("ZZEXM");
     expect(byCode.items[0]?.match.kind).toBe("unLocode");
+  });
+
+  it("does not reuse a shard URL from a previous dataset version", async () => {
+    const { repository, fetcher } = repositoryFixture();
+    await repository.search({ query: "Example", limit: 20 });
+
+    expect(fetcher).toHaveBeenCalledWith("/test/manifest.json", {
+      cache: "no-store",
+    });
+    expect(fetcher).toHaveBeenCalledWith(
+      `/test/${directorySearchShardKey("ex")}.json?v=test-sha`,
+    );
   });
 
   it("keeps terminal and gate matches from the curated repository", async () => {

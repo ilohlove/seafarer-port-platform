@@ -40,7 +40,13 @@ const requiredPorts = new Map([
   ["AUSYD", "ausyd"],
   ["CAVAN", "cavan"],
 ]);
-const forbiddenCandidates = new Set(["AUCBR", "CAWNP", "MXANH", "GBLCY"]);
+const forbiddenCandidates = new Set([
+  "AUCBR",
+  "CAWNP",
+  "MXANH",
+  "GBLCY",
+  "SGCHG",
+]);
 let largestShard;
 
 for (const [key, descriptor] of Object.entries(manifest.shards)) {

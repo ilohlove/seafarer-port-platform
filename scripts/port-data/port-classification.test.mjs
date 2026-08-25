@@ -51,6 +51,9 @@ describe("port master classification", () => {
     expect(classificationForCandidate("AUCBR", index).classification).toBe(
       "candidate",
     );
+    expect(classificationForCandidate("SGCHG", index).classification).toBe(
+      "candidate",
+    );
     expect(
       classificationForCandidate("AUCBR", index, { decision: "include" })
         .classification,

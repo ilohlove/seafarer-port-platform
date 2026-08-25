@@ -10,6 +10,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import { App } from "./App";
+import { MockPortRepository } from "../services/mock/mock-port-repository";
 
 describe("Application shell and demo routing", () => {
   afterEach(() => {
@@ -82,6 +83,7 @@ describe("Application shell and demo routing", () => {
 
   test("searches by port and opens a matching Port Notes result", async () => {
     const user = userEvent.setup();
+    const searchSpy = vi.spyOn(MockPortRepository.prototype, "search");
     render(<App />);
 
     await user.click(await screen.findByRole("button", { name: "Busan" }));
@@ -93,6 +95,10 @@ describe("Application shell and demo routing", () => {
     });
     expect(resultLink).toHaveAttribute("href", "/ports/busan");
     expect(screen.getByText("Busan · South Korea · KRPUS")).toBeVisible();
+    expect(searchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ query: "Busan", limit: 20 }),
+      expect.anything(),
+    );
 
     await user.click(resultLink);
 
@@ -242,8 +248,14 @@ describe("Application shell and demo routing", () => {
     expect(settingsButton).not.toBeNull();
     fireEvent.click(settingsButton!);
 
-    const settingsPanel = document.getElementById("mobile-display-settings");
-    expect(settingsPanel).toBeInTheDocument();
+    await waitFor(() => {
+      expect(settingsButton).toHaveAttribute("aria-expanded", "true");
+    });
+    const settingsPanel = await waitFor(() => {
+      const panel = document.getElementById("mobile-display-settings");
+      expect(panel).not.toBeNull();
+      return panel as HTMLElement;
+    });
     expect(
       within(settingsPanel!).getByRole("switch", {
         name: "Giao diện: Tối",

@@ -14,6 +14,7 @@ import styles from "./search.module.css";
 import { usePortSuggestions } from "./use-port-suggestions";
 
 const searchHints = ["Busan", "SGSIN", "Crew Gate", "Port Klang"] as const;
+const SEARCH_RESULTS_LIMIT = 20;
 
 function uniqueLocationParts(hit: PortSearchHit): string {
   const parts = [hit.port.city, hit.port.country.name].filter(
@@ -117,7 +118,10 @@ export function SearchRoute() {
     setState({ status: "loading" });
 
     void services.ports
-      .search({ query: queryFromUrl, limit: 6 }, { signal: controller.signal })
+      .search(
+        { query: queryFromUrl, limit: SEARCH_RESULTS_LIMIT },
+        { signal: controller.signal },
+      )
       .then((result) => {
         if (!controller.signal.aborted) {
           setState(
@@ -210,7 +214,7 @@ export function SearchRoute() {
               <p>{t("search.results.eyebrow")}</p>
               <h2 id="search-results-heading">
                 {state.status === "success"
-                  ? t("search.results.heading", { count: state.data.total })
+                  ? t("search.results.heading", { count: state.data.items.length })
                   : t("search.results.title")}
               </h2>
             </div>

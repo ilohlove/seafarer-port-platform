@@ -44,6 +44,14 @@ jobs:
         run: |
           rsync -a --delete dist/ /var/www/seafarer-port-platform/app/seafarer-port-platform/dist/
 
+      - name: Verify deployed port data
+        run: |
+          node scripts/port-data/check-port-data.mjs --root /var/www/seafarer-port-platform/app/seafarer-port-platform/dist/data/port-master
+          served_manifest="$(mktemp)"
+          trap 'rm -f "$served_manifest"' EXIT
+          curl -fsS -H 'Cache-Control: no-cache' http://localhost/data/port-master/manifest.json -o "$served_manifest"
+          cmp -s dist/data/port-master/manifest.json "$served_manifest"
+
       - name: Smoke test
         run: |
           curl -fsSI http://localhost/

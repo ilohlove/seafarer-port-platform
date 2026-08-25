@@ -46,6 +46,7 @@ interface DirectoryManifest {
       {
         readonly path: string;
         readonly recordCount: number;
+        readonly sha256: string;
       }
     >
   >;
@@ -460,7 +461,7 @@ export class StaticPortDirectoryRepository implements PortRepository {
       return { items: [], total: 0, normalizedQuery };
     }
 
-    const shard = await this.#shard(shardKey, descriptor.path);
+    const shard = await this.#shard(shardKey, descriptor);
     if (shard.datasetVersion !== manifest.datasetVersion) {
       throw new Error("Port directory manifest and shard versions differ");
     }
@@ -497,7 +498,7 @@ export class StaticPortDirectoryRepository implements PortRepository {
     if (!descriptor) {
       return undefined;
     }
-    const shard = await this.#shard(key, descriptor.path);
+    const shard = await this.#shard(key, descriptor);
     return shard.items.find(
       (record) =>
         normalizeDirectorySearchText(record.slug) === normalized ||
@@ -508,7 +509,9 @@ export class StaticPortDirectoryRepository implements PortRepository {
 
   #manifest(): Promise<DirectoryManifest> {
     return this.#cached(this.#manifestPath, async () => {
-      const response = await this.#fetcher(this.#manifestPath);
+      const response = await this.#fetcher(this.#manifestPath, {
+        cache: "no-store",
+      });
       if (!response.ok) {
         throw new Error(`Port directory manifest failed: ${response.status}`);
       }
@@ -516,7 +519,10 @@ export class StaticPortDirectoryRepository implements PortRepository {
       if (
         manifest.schemaVersion !== "port-search-manifest.v1" ||
         manifest.classifierVersion !== "port-classifier.v2" ||
-        manifest.routing.strategy !== "fnv1a-8"
+        manifest.routing.strategy !== "fnv1a-8" ||
+        Object.values(manifest.shards).some(
+          (descriptor) => typeof descriptor.sha256 !== "string",
+        )
       ) {
         throw new Error("Unsupported port directory manifest");
       }
@@ -524,31 +530,38 @@ export class StaticPortDirectoryRepository implements PortRepository {
     });
   }
 
-  #shard(key: string, path: string): Promise<DirectoryShard> {
-    return this.#cached(`shard:${key}:${path}`, async () => {
-      const response = await this.#fetcher(path);
-      if (!response.ok) {
-        throw new Error(`Port directory shard ${key} failed: ${response.status}`);
-      }
-      const shard = (await response.json()) as DirectoryShard;
-      if (
-        shard.schemaVersion !== "port-search-shard.v1" ||
-        shard.key !== key ||
-        shard.items.some(
-          (record) =>
-            !["wpi-confirmed", "officially-curated"].includes(
-              record.classification,
-            ) ||
-            !record.sourceIds.includes("unlocode") ||
-            (record.classification === "wpi-confirmed" &&
-              (!record.sourceIds.includes("nga-wpi") ||
-                record.wpiNumbers.length === 0)),
-        )
-      ) {
-        throw new Error(`Invalid port directory shard ${key}`);
-      }
-      return shard;
-    });
+  #shard(
+    key: string,
+    descriptor: DirectoryManifest["shards"][string],
+  ): Promise<DirectoryShard> {
+    const versionedPath = `${descriptor.path}?v=${descriptor.sha256.slice(0, 12)}`;
+    return this.#cached(
+      `shard:${key}:${descriptor.path}:${descriptor.sha256}`,
+      async () => {
+        const response = await this.#fetcher(versionedPath);
+        if (!response.ok) {
+          throw new Error(`Port directory shard ${key} failed: ${response.status}`);
+        }
+        const shard = (await response.json()) as DirectoryShard;
+        if (
+          shard.schemaVersion !== "port-search-shard.v1" ||
+          shard.key !== key ||
+          shard.items.some(
+            (record) =>
+              !["wpi-confirmed", "officially-curated"].includes(
+                record.classification,
+              ) ||
+              !record.sourceIds.includes("unlocode") ||
+              (record.classification === "wpi-confirmed" &&
+                (!record.sourceIds.includes("nga-wpi") ||
+                  record.wpiNumbers.length === 0)),
+          )
+        ) {
+          throw new Error(`Invalid port directory shard ${key}`);
+        }
+        return shard;
+      },
+    );
   }
 
   #cached<T>(key: string, factory: () => Promise<T>): Promise<T> {
