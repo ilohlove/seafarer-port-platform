@@ -1,0 +1,320 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+
+import { TrustStatus, type TrustStatusPresentation } from "../../../components";
+import { useServices, useSession } from "../../../app/providers";
+import { useI18n, type TranslationKey } from "../../../i18n";
+import type {
+  AccuracyAnswer,
+  PortNoteRecord,
+  PortNoteTopic,
+} from "../../../types";
+import type { PortNoteCardModel } from "../port-notes-view-model";
+import styles from "../port-notes.module.css";
+
+const topicKeys: Readonly<Record<PortNoteTopic, TranslationKey>> = {
+  esim: "portNotes.topic.esim",
+  physicalSim: "portNotes.topic.physicalSim",
+  shoreLeave: "portNotes.topic.shoreLeave",
+  food: "portNotes.topic.foodOrder",
+  shopping: "portNotes.topic.shopping",
+  welfare: "portNotes.topic.seamanClub",
+  general: "portNotes.topic.generalTip",
+};
+
+interface TopicNotesPanelProps {
+  readonly topic: PortNoteTopic;
+  readonly portKey: string;
+  readonly contextKey?: string;
+  readonly fallbackNotes: readonly PortNoteCardModel[];
+  readonly onWriteNote: () => void;
+}
+
+function mapLegacyTopic(note: PortNoteCardModel): PortNoteTopic {
+  if (note.topicKey === "esim") return "esim";
+  if (note.topicKey === "physicalSim") return "physicalSim";
+  if (["taxi", "rideHailing", "shoreLeave"].includes(note.topicKey)) return "shoreLeave";
+  if (["foodOrder", "supplies"].includes(note.topicKey)) return "food";
+  if (["shopping", "placesToVisit"].includes(note.topicKey)) return "shopping";
+  if (note.topicKey === "seamanClub") return "welfare";
+  return "general";
+}
+
+function legacyNotes(
+  notes: readonly PortNoteCardModel[],
+  topic: PortNoteTopic,
+): readonly PortNoteRecord[] {
+  return notes
+    .filter((note) => mapLegacyTopic(note) === topic)
+    .slice(0, 3)
+    .map((note) => {
+      const details: Record<string, string> = {};
+      if (note.context) details.context = note.context;
+      return {
+        id: note.id,
+        portKey: "demo",
+        topic,
+        visibility: "public" as const,
+        moderationState: "approved" as const,
+        summary: note.summary,
+        details,
+        contactIsPublicBusiness: false,
+        publicAlias: note.authorLabel,
+        createdAt: "",
+        accuracy: {
+          state:
+            note.trust.status === "communityConfirmed"
+              ? "communityConfirmed" as const
+              : note.trust.status === "conflictingReports"
+                ? "needsReview" as const
+                : "needsConfirmation" as const,
+          stillCorrect: 0,
+          changed: 0,
+          notSure: 0,
+        },
+      };
+    });
+}
+
+function trustForNote(
+  note: PortNoteRecord,
+  t: (key: TranslationKey) => string,
+): TrustStatusPresentation {
+  if (note.accuracy.state === "communityConfirmed") {
+    return { status: "communityConfirmed", label: t("trust.communityConfirmed") };
+  }
+  if (note.accuracy.state === "needsReview") {
+    return { status: "conflictingReports", label: t("portNotes.topicPanel.needsReview") };
+  }
+  return { status: "needsConfirmation", label: t("trust.needsConfirmation") };
+}
+
+function NoteCard({
+  note,
+  featured,
+  onAssess,
+  canAssess,
+}: {
+  readonly note: PortNoteRecord;
+  readonly featured: boolean;
+  readonly onAssess: (answer: AccuracyAnswer) => void;
+  readonly canAssess: boolean;
+}) {
+  const { t } = useI18n();
+  const trust = trustForNote(note, t);
+
+  return (
+    <article className={styles.topicNoteCard} data-featured={featured ? "true" : undefined}>
+      <div className={styles.topicNoteMeta}>
+        <span>{note.publicAlias || t("profile.defaultAlias")}</span>
+        <TrustStatus {...trust} compact />
+      </div>
+      <p className={styles.topicNoteSummary}>{note.summary}</p>
+      {Object.keys(note.details).length > 0 ? (
+        <dl className={styles.topicNoteDetails}>
+          <dt>{t("portNotes.topicPanel.details")}</dt>
+          {Object.entries(note.details).map(([key, value]) => (
+            <dd key={key}>{value}</dd>
+          ))}
+        </dl>
+      ) : null}
+      <div className={styles.topicNoteEvidence}>
+        {t("portNotes.topicPanel.evidence", {
+          confirmed: note.accuracy.stillCorrect,
+          changed: note.accuracy.changed,
+        })}
+      </div>
+      {canAssess ? (
+        <fieldset className={styles.accuracyFieldset}>
+          <legend>{t("portNotes.topicPanel.accuracy")}</legend>
+          <button
+            type="button"
+            aria-pressed={note.accuracy.viewerAnswer === "stillCorrect"}
+            onClick={() => onAssess("stillCorrect")}
+          >
+            {t("portNotes.topicPanel.stillCorrect")}
+          </button>
+          <button
+            type="button"
+            aria-pressed={note.accuracy.viewerAnswer === "changed"}
+            onClick={() => onAssess("changed")}
+          >
+            {t("portNotes.topicPanel.changed")}
+          </button>
+          <button
+            type="button"
+            aria-pressed={note.accuracy.viewerAnswer === "notSure"}
+            onClick={() => onAssess("notSure")}
+          >
+            {t("portNotes.topicPanel.notSure")}
+          </button>
+        </fieldset>
+      ) : null}
+    </article>
+  );
+}
+
+export function TopicNotesPanel({
+  topic,
+  portKey,
+  contextKey,
+  fallbackNotes,
+  onWriteNote,
+}: TopicNotesPanelProps) {
+  const services = useServices();
+  const session = useSession();
+  const { t } = useI18n();
+  const panelRef = useRef<HTMLElement>(null);
+  const [notes, setNotes] = useState<readonly PortNoteRecord[]>([]);
+  const [ownNotes, setOwnNotes] = useState<readonly PortNoteRecord[]>([]);
+  const [nextCursor, setNextCursor] = useState<string>();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [error, setError] = useState(false);
+
+  const topicLabel = t(topicKeys[topic]);
+
+  useEffect(() => {
+    panelRef.current?.scrollIntoView?.({ block: "start", behavior: "smooth" });
+    const controller = new AbortController();
+    setIsLoading(true);
+    setError(false);
+    setNextCursor(undefined);
+
+    if (!services.portNotes.isConfigured()) {
+      setNotes(legacyNotes(fallbackNotes, topic));
+      setOwnNotes([]);
+      setIsLoading(false);
+      return () => controller.abort();
+    }
+
+    void services.portNotes
+      .listTopicNotes({
+        portKey,
+        contextKey,
+        topic,
+        limit: 3,
+        signal: controller.signal,
+      })
+      .then((page) => {
+        if (!controller.signal.aborted) {
+          setNotes(page.items);
+          setNextCursor(page.nextCursor);
+        }
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setError(true);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsLoading(false);
+      });
+
+    if (session.status === "authenticated") {
+      void services.portNotes
+        .listMyNotes(portKey, contextKey, { signal: controller.signal })
+        .then((items) => {
+          if (!controller.signal.aborted) {
+            setOwnNotes(items.filter((item) => item.topic === topic));
+          }
+        })
+        .catch(() => undefined);
+    }
+
+    return () => controller.abort();
+  }, [contextKey, fallbackNotes, portKey, services, session.status, topic]);
+
+  const visibleOwnNotes = useMemo(
+    () => ownNotes.filter((note) => note.visibility === "private" || note.moderationState !== "approved"),
+    [ownNotes],
+  );
+
+  async function assess(noteId: string, answer: AccuracyAnswer) {
+    try {
+      await services.portNotes.assessAccuracy(noteId, answer);
+      setNotes((current) =>
+        current.map((note) =>
+          note.id === noteId
+            ? { ...note, accuracy: { ...note.accuracy, viewerAnswer: answer } }
+            : note,
+        ),
+      );
+    } catch {
+      setError(true);
+    }
+  }
+
+  async function loadMore() {
+    if (!nextCursor || isLoadingMore) return;
+    setIsLoadingMore(true);
+    try {
+      const page = await services.portNotes.listTopicNotes({
+        portKey,
+        contextKey,
+        topic,
+        cursor: nextCursor,
+        limit: 5,
+      });
+      setNotes((current) => [...current, ...page.items]);
+      setNextCursor(page.nextCursor);
+    } catch {
+      setError(true);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }
+
+  return (
+    <section className={styles.topicNotesPanel} ref={panelRef} aria-labelledby="topic-notes-heading">
+      <div className={styles.topicNotesHeader}>
+        <div>
+          <p className={styles.sectionEyebrow}>{t("portNotes.topicPanel.featured")}</p>
+          <h2 id="topic-notes-heading">{t("portNotes.topicPanel.heading", { topic: topicLabel })}</h2>
+        </div>
+        <button className={styles.textButton} type="button" onClick={onWriteNote}>
+          {t("portNotes.topicPanel.write")}
+        </button>
+      </div>
+
+      {visibleOwnNotes.length > 0 ? (
+        <div className={styles.topicOwnNotes}>
+          {visibleOwnNotes.map((note) => (
+            <p key={note.id}>
+              {note.visibility === "private"
+                ? t("portNotes.topicPanel.private")
+                : t("portNotes.topicPanel.pending")}
+            </p>
+          ))}
+        </div>
+      ) : null}
+
+      {isLoading ? <p className={styles.topicNotesState}>{t("portNotes.topicPanel.loading")}</p> : null}
+      {error ? <p className={styles.topicNotesState} role="alert">{t("state.error")}</p> : null}
+      {!isLoading && !error && notes.length === 0 ? (
+        <div className={styles.topicNotesEmpty}>
+          <p>{t("portNotes.topicPanel.empty")}</p>
+          <button className={styles.primaryButton} type="button" onClick={onWriteNote}>
+            {t("portNotes.topicPanel.write")}
+          </button>
+        </div>
+      ) : null}
+      <div className={styles.topicNotesGrid}>
+        {notes.map((note, index) => (
+          <NoteCard
+            key={note.id}
+            note={note}
+            featured={index === 0}
+            canAssess={session.status === "authenticated" && note.authorId !== session.profile?.userId}
+            onAssess={(answer) => void assess(note.id, answer)}
+          />
+        ))}
+      </div>
+      {session.status !== "authenticated" && notes.length > 0 ? (
+        <p className={styles.topicNotesLogin}>{t("portNotes.topicPanel.loginToAssess")}</p>
+      ) : null}
+      {nextCursor ? (
+        <button className={styles.secondaryButton} type="button" onClick={() => void loadMore()} disabled={isLoadingMore}>
+          {isLoadingMore ? t("portNotes.topicPanel.loading") : t("portNotes.topicPanel.more")}
+        </button>
+      ) : null}
+    </section>
+  );
+}

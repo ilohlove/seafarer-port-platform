@@ -1,12 +1,23 @@
 import type {
+  AuthRepository,
   CommunityRepository,
   ConnectivityRepository,
   OfflinePackStore,
   PlannerService,
   PortMediaRepository,
   PortRepository,
+  PortNotesRepository,
   PreferencesStore,
 } from "./contracts";
+import { hasSupabaseConfig } from "./supabase/supabase-client";
+import {
+  SupabaseAuthRepository,
+  UnavailableAuthRepository,
+} from "./supabase/supabase-auth-repository";
+import {
+  SupabasePortNotesRepository,
+  UnavailablePortNotesRepository,
+} from "./supabase/supabase-port-notes-repository";
 import { MockCommunityRepository } from "./mock/mock-community-repository";
 import { MockConnectivityRepository } from "./mock/mock-connectivity-repository";
 import { MockOfflinePackStore } from "./mock/mock-offline-pack-store";
@@ -24,6 +35,8 @@ export interface AppServices {
   readonly planner: PlannerService;
   readonly connectivity: ConnectivityRepository;
   readonly community: CommunityRepository;
+  readonly auth: AuthRepository;
+  readonly portNotes: PortNotesRepository;
   readonly offlinePacks: OfflinePackStore;
   readonly preferences: PreferencesStore;
 }
@@ -47,6 +60,12 @@ export function createServices(
     import.meta.env.MODE === "test"
       ? new MockPortMediaRepository()
       : new StaticPortMediaRepository();
+  const auth: AuthRepository = hasSupabaseConfig()
+    ? new SupabaseAuthRepository()
+    : new UnavailableAuthRepository();
+  const portNotes: PortNotesRepository = hasSupabaseConfig()
+    ? new SupabasePortNotesRepository()
+    : new UnavailablePortNotesRepository();
 
   return {
     ports,
@@ -54,6 +73,8 @@ export function createServices(
     planner: new MockPlannerService(),
     connectivity: new MockConnectivityRepository(latencyMs),
     community: new MockCommunityRepository(latencyMs),
+    auth,
+    portNotes,
     offlinePacks: new MockOfflinePackStore(),
     preferences: new LocalStoragePreferencesStore(storage),
   };

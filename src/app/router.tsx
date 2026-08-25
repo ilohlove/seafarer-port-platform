@@ -25,6 +25,30 @@ const CommunityRoute = lazy(() =>
   })),
 );
 
+const ProfileRoute = lazy(() =>
+  import("../features/profile/ProfileRoute").then((module) => ({
+    default: module.ProfileRoute,
+  })),
+);
+
+const AdminNotesRoute = lazy(() =>
+  import("../features/admin/AdminNotesRoute").then((module) => ({
+    default: module.AdminNotesRoute,
+  })),
+);
+
+const AuthCallbackRoute = lazy(() =>
+  import("../features/auth/AuthCallbackRoute").then((module) => ({
+    default: module.AuthCallbackRoute,
+  })),
+);
+
+const MyNotesRoute = lazy(() =>
+  import("../features/my-notes/MyNotesRoute").then((module) => ({
+    default: module.MyNotesRoute,
+  })),
+);
+
 function RouteFallback() {
   const { t } = useI18n();
   return <Skeleton label={t("portNotes.loading")} lines={6} variant="card" />;
@@ -53,6 +77,10 @@ export function AppRouter() {
             <Route path="/" element={<HomeRoute />} />
             <Route path="/search" element={<SearchRoute />} />
             <Route path="/community" element={<CommunityRoute />} />
+            <Route path="/profile" element={<ProfileRoute />} />
+            <Route path="/admin/notes" element={<AdminNotesRoute />} />
+            <Route path="/auth/callback" element={<AuthCallbackRoute />} />
+            <Route path="/my-notes" element={<MyNotesRoute />} />
             <Route path="/foundation" element={<FoundationRoute />} />
             <Route path="/ports/:portSlug" element={<PortNotesRoute />} />
             <Route path="*" element={<NotImplementedRoute />} />

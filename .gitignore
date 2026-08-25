@@ -3,6 +3,7 @@ dist/
 coverage/
 .vite/
 .cache/
+supabase/.temp/
 public/data/.port-master-staging/
 public/data/.port-master-backup/
 *.tsbuildinfo

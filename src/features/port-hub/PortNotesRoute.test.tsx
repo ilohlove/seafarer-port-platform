@@ -152,6 +152,24 @@ describe("CrewPort compact Port Notes route", () => {
     ).toBeVisible();
   });
 
+  test("opens one topic note panel below the quick actions", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByRole("heading", { name: "Busan New Port" });
+
+    await user.click(
+      within(
+        screen.getByRole("heading", { name: "Chọn nhanh" }).closest("section")!,
+      ).getByRole("button", { name: /eSIM/ }),
+    );
+    expect(
+      await screen.findByRole("heading", { name: "Ghi chú về eSIM" }),
+    ).toBeVisible();
+    expect(screen.getAllByRole("region", { name: "Thông tin thiết yếu" })).toHaveLength(1);
+    expect(screen.getByRole("button", { name: "Viết ghi chú cho mục này" })).toBeVisible();
+    expect(screen.queryByRole("heading", { name: "Ghi chú về SIM vật lý" })).toBeNull();
+  });
+
   test("shows only the selected Busan context without a context switcher", async () => {
     render(<App />);
     const heading = await screen.findByRole("heading", {
@@ -229,9 +247,9 @@ describe("CrewPort compact Port Notes route", () => {
       "/ports/busan",
     );
 
-    await user.click(screen.getByRole("button", { name: "Đăng nhập" }));
+    await user.click(screen.getByRole("button", { name: "Đăng nhập bằng Google" }));
     expect(
-      screen.getByText("Đăng nhập chưa được triển khai trong bản mẫu."),
+      screen.getByText("Đăng nhập Google chưa được cấu hình cho bản triển khai này."),
     ).toBeVisible();
   });
 

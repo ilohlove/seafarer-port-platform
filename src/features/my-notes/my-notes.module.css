@@ -1,0 +1,70 @@
+.page {
+  display: grid;
+  gap: 1rem;
+  max-inline-size: 54rem;
+  margin-inline: auto;
+}
+
+.header {
+  padding-block: 1rem;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--color-primary);
+  font-weight: 800;
+}
+
+.header h1,
+.header p {
+  margin: 0.35rem 0 0;
+}
+
+.header h1 {
+  color: var(--color-text);
+  font-size: clamp(1.6rem, 4vw, 2.35rem);
+}
+
+.header p,
+.empty {
+  color: var(--color-text-muted);
+}
+
+.list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.card {
+  display: grid;
+  gap: 0.65rem;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-raised);
+}
+
+.card p,
+.card small {
+  margin: 0;
+}
+
+.card p {
+  color: var(--color-text);
+  font-size: 1rem;
+  line-height: var(--line-height-normal);
+}
+
+.card small {
+  color: var(--color-text-muted);
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: var(--color-primary);
+  font-size: 0.82rem;
+  font-weight: 800;
+}

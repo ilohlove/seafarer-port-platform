@@ -28,3 +28,5 @@
 - [2026-08-24 14:23] Triển khai UN/LOCODE 2025-1 với 17.520 cảng, autocomplete lazy-shard, integrity checks và fallback dữ liệu demo minh bạch.
 - [2026-08-24 18:35] Triển khai ảnh hero cảng có nguồn, responsive variants, kiểm tra toàn vẹn và chặn tải ở chế độ tiết kiệm dữ liệu.
 - [2026-08-25 01:03] Làm sạch Port Directory bằng xác nhận NGA WPI, cách ly UN-only candidates và thêm release gate fail-closed.
+- [2026-08-25 11:19] Triển khai nền F6 với Google Auth, hồ sơ riêng tư, note moderation, accuracy panel và khóa khu vực Cộng đồng.
+- [2026-08-25 12:18] Apply migration F6 lên Supabase Cloud và cấu hình môi trường local cùng GitHub Actions cho CrewPort.

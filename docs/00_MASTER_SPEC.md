@@ -372,6 +372,10 @@ Dùng mock data có cấu trúc cho 2–3 cảng đại diện, ví dụ Busan, 
 - Payment/booking.
 - Complex animations.
 
+### Chuyển tiếp F6 được yêu cầu rõ ràng
+
+Luồng F6 gồm Google authentication, profile riêng tư, port notes có moderation và accuracy confirmation được triển khai như một vertical slice riêng sau prototype. Slice này không mở rộng thành social feed, không thay thế Port Hub read model và không tự động thay đổi phạm vi các milestone F4/F5.
+
 ## 14. Quyền riêng tư và bảo mật
 
 - Không công khai vị trí tàu thời gian thực, lịch trình cá nhân hoặc danh sách crew.

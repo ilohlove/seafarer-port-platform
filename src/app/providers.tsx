@@ -13,7 +13,9 @@ import type {
   AppearanceMode,
   BandwidthMode,
   Locale,
+  ProfileReadModel,
   ResolvedAppearance,
+  SessionStatus,
 } from "../types";
 
 const ServicesContext = createContext<AppServices | undefined>(undefined);
@@ -44,12 +46,16 @@ interface NetworkContextValue {
 
 const NetworkContext = createContext<NetworkContextValue | undefined>(undefined);
 
-export interface MockSession {
-  readonly status: "anonymous" | "member";
-  readonly displayName?: string;
+export interface AppSession {
+  readonly status: SessionStatus;
+  readonly profile?: ProfileReadModel;
+  readonly isConfigured: boolean;
 }
 
-const SessionContext = createContext<MockSession>({ status: "anonymous" });
+const SessionContext = createContext<AppSession>({
+  status: "anonymous",
+  isConfigured: false,
+});
 
 interface NavigatorWithConnection extends Navigator {
   readonly connection?: {
@@ -300,6 +306,59 @@ function NetworkProvider({ children }: { readonly children: ReactNode }) {
   );
 }
 
+function SessionProvider({
+  services,
+  children,
+}: {
+  readonly services: AppServices;
+  readonly children: ReactNode;
+}) {
+  const isConfigured = services.auth.isConfigured();
+  const [session, setSession] = useState<AppSession>({
+    status: isConfigured ? "loading" : "anonymous",
+    isConfigured,
+  });
+
+  useEffect(() => {
+    let active = true;
+    if (!isConfigured) {
+      return () => {
+        active = false;
+      };
+    }
+
+    void services.auth
+      .getState()
+      .then((state) => {
+        if (active) {
+          setSession({ ...state, isConfigured });
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setSession({ status: "unavailable", isConfigured });
+        }
+      });
+
+    const unsubscribe = services.auth.subscribe((state) => {
+      if (active) {
+        setSession({ ...state, isConfigured });
+      }
+    });
+
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, [isConfigured, services]);
+
+  return (
+    <SessionContext.Provider value={session}>
+      {children}
+    </SessionContext.Provider>
+  );
+}
+
 function LocalePreferenceBridge({ services }: { readonly services: AppServices }) {
   const { setLocale } = useI18n();
 
@@ -333,9 +392,9 @@ export function AppProviders({ children }: { readonly children: ReactNode }) {
         <AppearanceProvider services={services}>
           <BandwidthProvider services={services}>
             <NetworkProvider>
-              <SessionContext.Provider value={{ status: "anonymous" }}>
+              <SessionProvider services={services}>
                 {children}
-              </SessionContext.Provider>
+              </SessionProvider>
             </NetworkProvider>
           </BandwidthProvider>
         </AppearanceProvider>
@@ -376,7 +435,7 @@ export function useNetworkState(): NetworkContextValue {
   return value;
 }
 
-export function useSession(): MockSession {
+export function useSession(): AppSession {
   return useContext(SessionContext);
 }
 

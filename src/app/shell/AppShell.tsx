@@ -4,7 +4,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useLocation } from "react-router";
+import { Link, useLocation } from "react-router";
 
 import { CrewPortBrand, OfflineBanner } from "../../components";
 import { SiteNavigation } from "../../features/navigation";
@@ -15,6 +15,8 @@ import {
   useBandwidthMode,
   useNetworkState,
   usePersistedLocale,
+  useServices,
+  useSession,
 } from "../providers";
 import styles from "./app-shell.module.css";
 
@@ -191,6 +193,8 @@ type ShellNotice =
 
 export function AppShell({ children }: { readonly children: ReactNode }) {
   const location = useLocation();
+  const services = useServices();
+  const session = useSession();
   const { status: i18nStatus, t } = useI18n();
   const { locale, setLocale } = usePersistedLocale();
   const {
@@ -203,9 +207,12 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
   const [isSavingPreference, setIsSavingPreference] = useState(false);
   const [preferenceError, setPreferenceError] = useState(false);
   const [isMobileSettingsOpen, setIsMobileSettingsOpen] = useState(false);
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
+  const [isAuthBusy, setIsAuthBusy] = useState(false);
   const [shellNotice, setShellNotice] = useState<ShellNotice>();
   const mobileSettingsButtonRef = useRef<HTMLButtonElement>(null);
   const mobileSettingsPanelRef = useRef<HTMLDivElement>(null);
+  const accountMenuRef = useRef<HTMLDivElement>(null);
   const isPreferenceBusy = isSavingPreference || i18nStatus === "loading";
   const isPortNotesRoute = location.pathname.startsWith("/ports/");
   const isHomeRoute = location.pathname === "/";
@@ -224,7 +231,33 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
   useEffect(() => {
     setShellNotice(undefined);
     setIsMobileSettingsOpen(false);
+    setIsAccountMenuOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (!isAccountMenuOpen) {
+      return;
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsAccountMenuOpen(false);
+      }
+    }
+
+    function handlePointerDown(event: PointerEvent) {
+      if (!accountMenuRef.current?.contains(event.target as Node)) {
+        setIsAccountMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [isAccountMenuOpen]);
 
   useEffect(() => {
     if (!isMobileSettingsOpen) {
@@ -276,6 +309,45 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
   function toggleAppearance() {
     const nextMode = resolvedAppearance === "dark" ? "light" : "dark";
     void applyPreference(() => setAppearanceMode(nextMode));
+  }
+
+  async function handleAccountClick() {
+    if (session.status === "authenticated") {
+      setIsAccountMenuOpen((open) => !open);
+      return;
+    }
+    if (session.status === "loading") {
+      return;
+    }
+
+    if (!session.isConfigured || session.status === "unavailable") {
+      setShellNotice({ kind: "login" });
+      return;
+    }
+
+    setIsAuthBusy(true);
+    setShellNotice(undefined);
+    try {
+      await services.auth.signInWithGoogle(
+        `${location.pathname}${location.search}${location.hash}`,
+      );
+    } catch {
+      setShellNotice({ kind: "login" });
+    } finally {
+      setIsAuthBusy(false);
+    }
+  }
+
+  async function handleSignOut() {
+    setIsAuthBusy(true);
+    try {
+      await services.auth.signOut();
+      setIsAccountMenuOpen(false);
+    } catch {
+      setShellNotice({ kind: "login" });
+    } finally {
+      setIsAuthBusy(false);
+    }
   }
 
   return (
@@ -354,14 +426,68 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
             >
               <SettingsIcon />
             </button>
-            <button
-              className={styles.loginButton}
-              type="button"
-              aria-label={t("settings.loginLabel")}
-              onClick={() => setShellNotice({ kind: "login" })}
-            >
-              <UserIcon />
-            </button>
+            <div className={styles.accountControl} ref={accountMenuRef}>
+              <button
+                className={styles.loginButton}
+                type="button"
+                aria-label={
+                  session.status === "authenticated"
+                    ? t("settings.accountMenu")
+                    : t("settings.loginLabel")
+                }
+                aria-expanded={
+                  session.status === "authenticated" ? isAccountMenuOpen : undefined
+                }
+                disabled={isAuthBusy}
+                onClick={() => void handleAccountClick()}
+              >
+                {session.status === "authenticated" && session.profile ? (
+                  <span className={styles.accountAvatar} aria-hidden="true">
+                    <span>{session.profile.fullName.charAt(0).toUpperCase() || "C"}</span>
+                    {mode === "standard" && session.profile.avatarUrl ? (
+                      <img
+                        src={session.profile.avatarUrl}
+                        alt=""
+                        loading="lazy"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : null}
+                  </span>
+                ) : (
+                  <UserIcon />
+                )}
+              </button>
+
+              {session.status === "authenticated" && session.profile && isAccountMenuOpen ? (
+                <section className={styles.accountMenu} aria-label={t("settings.accountMenu")}>
+                  <div className={styles.accountMenuHeader}>
+                    <span className={styles.accountMenuName}>
+                      {session.profile.nickname
+                        ? `@${session.profile.nickname}`
+                        : t("profile.defaultAlias")}
+                    </span>
+                    <span>{session.profile.email}</span>
+                  </div>
+                  <Link to="/profile" onClick={() => setIsAccountMenuOpen(false)}>
+                    {t("settings.profile")}
+                  </Link>
+                  <Link
+                    to="/my-notes"
+                    onClick={() => setIsAccountMenuOpen(false)}
+                  >
+                    {t("settings.myNotes")}
+                  </Link>
+                  {session.profile.role === "admin" ? (
+                    <Link to="/admin/notes" onClick={() => setIsAccountMenuOpen(false)}>
+                      {t("settings.adminNotes")}
+                    </Link>
+                  ) : null}
+                  <button type="button" onClick={() => void handleSignOut()}>
+                    {t("settings.signOut")}
+                  </button>
+                </section>
+              ) : null}
+            </div>
 
             {isMobileSettingsOpen ? (
               <section
@@ -426,6 +552,13 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
             {isPreferenceBusy ? (
               <output className={styles.preferenceStatus} aria-live="polite">
                 {t("settings.loading")}
+              </output>
+            ) : null}
+            {isAuthBusy ? (
+              <output className={styles.preferenceStatus} aria-live="polite">
+                {session.status === "authenticated"
+                  ? t("settings.signingOut")
+                  : t("settings.signingIn")}
               </output>
             ) : null}
             {i18nStatus === "error" || preferenceError ? (

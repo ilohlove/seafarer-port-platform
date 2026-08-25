@@ -94,3 +94,5 @@
 | D-603 | Search engine/cache/queue/storage stack | OPEN |
 | D-604 | Crawler source licensing/compliance | OPEN |
 | D-605 | Production hosting/DevOps | OPEN |
+| D-606 | F6 auth/community persistence uses Supabase Auth + Postgres/RLS; Google-only in first slice | REVIEW |
+| D-607 | Public profile identity uses optional CrewPort nickname; full name/email remain private | REVIEW |

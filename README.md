@@ -63,7 +63,7 @@ App shell / providers / declarative router
 - Presentation components chỉ nhận typed props; architecture tests ngăn import `services` hoặc `data/mock`.
 - `PortHubReadModel` tổng hợp knowledge items, không mô phỏng Port Hub như một entity vật lý.
 - `PortNote` là lớp note có topic, visibility, payload typed, moderation state, confirmation/usefulness và trust; Port Notes vẫn là read model, không phải bảng vật lý đơn.
-- Search và trust mapping nằm trong pure service/use-case. Planner, eSIM compare, community writes và Offline Pack mới có typed contracts; adapter F1 trả lỗi `milestone-unavailable` thay vì khóa sớm business rules F4–F6.
+- Search và trust mapping nằm trong pure service/use-case. Planner, eSIM compare và Offline Pack vẫn dùng typed contracts; F6 có thêm Supabase auth/note adapter nhưng vẫn giữ static Port Hub read model.
 - Preferences đi qua browser-storage adapter; Offline Pack dùng empty-state adapter, chưa có persistence, Service Worker hoặc PWA.
 - VI và lightweight search index nằm trong entry; EN chỉ tải khi chuyển ngôn ngữ. Mỗi mock port detail được code-split và chỉ tải khi người review chủ động mở preview chi tiết.
 
@@ -105,7 +105,7 @@ Các action tile chính là Compare eSIM, Physical SIM Notes, Taxi / Grab / Uber
 
 Desktop từ `64rem` dùng sidebar `220px`, hero Snapshot + Quick Notes right rail và nội dung linh hoạt; dưới `64rem` dùng bottom navigation năm mục, action tiles hai cột và notes/topic cards một cột hoặc hai cột tùy chiều rộng. Standard có minh họa CSS nhẹ; Data Saver ẩn media trang trí, Ultra Lite giữ Snapshot/Deal/Top Notes/Write Note và bỏ shadow/ký hiệu không thiết yếu.
 
-Search, save port, xem note, confirm, action tiles và topic actions có phản hồi placeholder rõ ràng. Route có loading, retry/error và not-found state; Port Klang dùng để kiểm tra notes mâu thuẫn theo terminal. Emergency/Return shortcuts chỉ hiển thị logistics, liên hệ và cảnh báo xác nhận.
+Search, save port và các topic actions giữ phản hồi rõ ràng. Topic panel tải ghi chú theo yêu cầu, hiển thị 3 note đầu rồi phân trang cursor; ghi chú public phải qua admin moderation trước khi vào aggregate. Route có loading, retry/error và not-found state; Port Klang dùng để kiểm tra notes mâu thuẫn theo terminal.
 
 ## Mock scenarios
 
@@ -117,7 +117,18 @@ Search, save port, xem note, confirm, action tiles và topic actions có phản 
 
 Tên cảng vẫn là sample của prototype; Decision D-506 chưa chuyển sang `LOCKED`.
 
-Ngưỡng `MIN_COMMUNITY_CONFIRMATIONS = 2` chỉ là giả định hiển thị có tên, có reason code và có test trong prototype; nó không khóa policy trust của sản phẩm. Notes hiện là mock public notes đã approved; write/moderation backend chưa có. Terminal/gate access vẫn dùng `TerminalPlaceAccess` thay vì nhồi vào `Place`.
+Ngưỡng `MIN_COMMUNITY_CONFIRMATIONS = 2` được dùng cho accuracy confirmation của F6. Public notes mới pending trước admin; private notes chỉ tác giả thấy. Terminal/gate access vẫn dùng `TerminalPlaceAccess` thay vì nhồi vào `Place`.
+
+## F6 Supabase setup
+
+Frontend chỉ đọc hai biến public khi có cấu hình thật:
+
+```text
+VITE_SUPABASE_URL=
+VITE_SUPABASE_PUBLISHABLE_KEY=
+```
+
+Chạy migration `supabase/migrations/202608250001_f6_auth_notes.sql` trong Supabase project. Bật Google provider và thêm callback `/auth/callback` cho localhost cùng production origin; Google client secret chỉ nằm trong Supabase settings, không đưa vào repository. Khi chưa có biến môi trường, local vẫn hiển thị dữ liệu prototype nhưng không giả nhận đăng nhập hoặc lưu note.
 
 ## Performance budget
 
@@ -132,4 +143,4 @@ Production build Port Notes hiện tại:
 
 ## Phạm vi chưa triển khai
 
-Branch pivot không triển khai Home/Search Results F2, backend/auth, real note submission/moderation, eSIM purchase, booking, payment, marketplace, full social feed/chat, map SDK, image gallery hoặc medical advice. Các hành động tương lai trả trạng thái placeholder thay vì giả vờ chức năng đã tồn tại.
+Branch pivot chưa triển khai eSIM purchase, booking, payment, marketplace, full social feed/chat, map SDK, image gallery hoặc medical advice. Các phần này tiếp tục trả trạng thái placeholder thay vì giả vờ chức năng đã tồn tại.

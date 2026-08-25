@@ -53,7 +53,7 @@ describe("Application shell and demo routing", () => {
     expect(
       document.querySelector('[data-navigation="desktop"]')?.querySelectorAll("a, button"),
     ).toHaveLength(5);
-    expect(screen.getByRole("button", { name: "Đăng nhập" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Đăng nhập bằng Google" })).toBeVisible();
     expect(screen.getByRole("combobox", { name: /Tìm cảng/ })).toBeVisible();
     expect(screen.getByRole("button", { name: "Busan" })).toBeVisible();
     expect(screen.getByRole("button", { name: "Busan New Port" })).toBeVisible();

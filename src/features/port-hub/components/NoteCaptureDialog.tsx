@@ -126,6 +126,7 @@ export interface NoteCaptureDialogProps {
   readonly terminal: string;
   readonly gate: string;
   readonly onClose: () => void;
+  readonly onSubmit?: (preview: NoteCapturePreview) => Promise<void>;
 }
 
 export function NoteCaptureDialog({
@@ -134,6 +135,7 @@ export function NoteCaptureDialog({
   terminal,
   gate,
   onClose,
+  onSubmit,
 }: NoteCaptureDialogProps) {
   const { t } = useI18n();
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -153,6 +155,7 @@ export function NoteCaptureDialog({
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [preview, setPreview] = useState<NoteCapturePreview>();
   const [error, setError] = useState<TranslationKey>();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (!open) {
@@ -174,6 +177,7 @@ export function NoteCaptureDialog({
     setDetailsOpen(false);
     setPreview(undefined);
     setError(undefined);
+    setIsSubmitting(false);
     closeButtonRef.current?.focus();
 
     return () => previousFocusRef.current?.focus();
@@ -258,9 +262,10 @@ export function NoteCaptureDialog({
     const suggestionContact = activeSuggestions.includes("contact")
       ? fieldValues.contact?.trim() ?? ""
       : "";
+    const contactValue = contact.trim() || suggestionContact;
     if (
       visibility === "public" &&
-      (contact.trim() || suggestionContact) &&
+      contactValue &&
       !contactPermission
     ) {
       setError("portNotes.capture.contactPermissionRequired");
@@ -286,14 +291,34 @@ export function NoteCaptureDialog({
       takeaway: takeaway.trim(),
       details,
       contact:
-        contact.trim() && (visibility === "private" || contactPermission)
-          ? contact.trim()
+        contactValue && (visibility === "private" || contactPermission)
+          ? contactValue
           : undefined,
     });
     setError(undefined);
   }
 
   const selectedTopic = topicOptions.find((candidate) => candidate.id === topic);
+
+  async function commitPreview() {
+    if (!preview) {
+      return;
+    }
+    if (!onSubmit) {
+      onClose();
+      return;
+    }
+    setIsSubmitting(true);
+    setError(undefined);
+    try {
+      await onSubmit(preview);
+      onClose();
+    } catch {
+      setError("portNotes.capture.submitError");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   if (!open) {
     return null;
@@ -393,8 +418,24 @@ export function NoteCaptureDialog({
               >
                 {t("portNotes.capture.edit")}
               </button>
-              <button className={styles.primaryButton} type="button" onClick={onClose}>
+              <button
+                className={styles.textButton}
+                type="button"
+                onClick={onClose}
+              >
                 {t("portNotes.capture.closePreview")}
+              </button>
+              <button
+                className={styles.primaryButton}
+                type="button"
+                disabled={isSubmitting}
+                onClick={() => void commitPreview()}
+              >
+                {isSubmitting
+                  ? t("portNotes.capture.submitting")
+                  : preview.visibility === "private"
+                    ? t("portNotes.capture.savePrivate")
+                    : t("portNotes.capture.submit")}
               </button>
             </div>
           </section>

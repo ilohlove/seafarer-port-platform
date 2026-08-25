@@ -1,0 +1,189 @@
+.page {
+  display: grid;
+  min-block-size: min(70vh, 42rem);
+  place-items: start center;
+  padding: clamp(1rem, 4vw, 3rem) 0;
+}
+
+.card {
+  inline-size: min(100%, 30rem);
+  padding: clamp(1.25rem, 4vw, 2rem);
+  border: 1px solid var(--color-border);
+  border-radius: 1.25rem;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-raised);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-block-end: 1.5rem;
+}
+
+.avatar {
+  display: grid;
+  flex: 0 0 4rem;
+  inline-size: 4rem;
+  block-size: 4rem;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 1rem;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.avatar img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.eyebrow {
+  margin: 0 0 0.125rem;
+  color: var(--color-primary);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.header h1 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: clamp(1.35rem, 2vw, 1.75rem);
+  line-height: 1.1;
+}
+
+.email,
+.avatarHelp {
+  margin: 0.25rem 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.avatarHelp {
+  font-size: 0.8rem;
+}
+
+.form {
+  display: grid;
+  gap: 1.15rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.45rem;
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.field input,
+.nicknameInput {
+  min-block-size: 3.125rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 0.9rem;
+  background: var(--color-surface-subtle);
+  color: var(--color-text);
+  font: inherit;
+}
+
+.field input {
+  inline-size: 100%;
+  padding: 0.75rem 0.9rem;
+  font-weight: 500;
+}
+
+.field input:focus-visible,
+.nicknameInput:focus-within {
+  outline: 0.18rem solid color-mix(in srgb, var(--color-primary) 45%, transparent);
+  outline-offset: 0.1rem;
+}
+
+.nicknameInput {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.nicknameInput > span {
+  display: grid;
+  align-self: stretch;
+  min-inline-size: 3rem;
+  place-items: center;
+  border-inline-end: 1px solid var(--color-border);
+  color: var(--color-primary);
+  font-size: 1.25rem;
+}
+
+.nicknameInput input {
+  min-block-size: 3rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.field small {
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.success,
+.error {
+  margin: 0;
+  padding: 0.7rem 0.8rem;
+  border-radius: 0.7rem;
+  font-size: 0.9rem;
+}
+
+.success {
+  background: var(--color-status-community-bg);
+  color: var(--color-status-community-text);
+}
+
+.error {
+  background: var(--color-status-warning-bg);
+  color: var(--color-status-warning-text);
+}
+
+.submit {
+  min-block-size: 2.875rem;
+  border: 0;
+  border-radius: 0.9rem;
+  background: var(--color-primary);
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+}
+
+.submit:hover {
+  background: var(--color-primary-hover);
+}
+
+.submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.submit:focus-visible {
+  outline: 0.18rem solid var(--color-accent);
+  outline-offset: 0.15rem;
+}
+
+@media (max-width: 30rem) {
+  .page {
+    padding-block-start: 0.75rem;
+  }
+
+  .card {
+    border-radius: 1rem;
+  }
+
+  .header {
+    align-items: flex-start;
+  }
+}
