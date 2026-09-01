@@ -2174,7 +2174,8 @@
 .topicNotesPanel {
   display: grid;
   gap: 1rem;
-  padding: clamp(1rem, 3vw, 1.5rem);
+  padding-block: clamp(1rem, 3vw, 1.5rem);
+  padding-inline: 0;
   margin-block-start: 1rem;
   border-block-start: 1px solid var(--color-border);
   background: transparent;

@@ -51,4 +51,12 @@ describe("Port Note author identity", () => {
     expect(styles).toMatch(/\.noteAuthorIdentity[\s\S]*?inline-size: 4rem;[\s\S]*?block-size: 4rem;/u);
     expect(styles).not.toContain('.noteAuthorIdentity :global([data-frame-kind="staff"]');
   });
+
+  test("aligns the featured notes section with the page content edges", () => {
+    const styles = readFileSync(
+      resolve(process.cwd(), "src/features/port-hub/port-notes.module.css"),
+      "utf8",
+    );
+    expect(styles).toMatch(/\.topicNotesPanel\s*\{[\s\S]*?padding-inline: 0;/u);
+  });
 });
