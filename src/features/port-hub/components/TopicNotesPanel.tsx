@@ -9,6 +9,7 @@ import type {
   PortNoteTopic,
 } from "../../../types";
 import type { PortNoteCardModel } from "../port-notes-view-model";
+import { DEFAULT_USER_RANK, UserRankIdentity } from "../../user-rank";
 import styles from "../port-notes.module.css";
 
 const topicKeys: Readonly<Record<PortNoteTopic, TranslationKey>> = {
@@ -43,9 +44,10 @@ function legacyNotes(
   notes: readonly PortNoteCardModel[],
   topic: PortNoteTopic,
 ): readonly PortNoteRecord[] {
-  return notes
-    .filter((note) => mapLegacyTopic(note) === topic)
-    .slice(0, 3)
+  const matchingNotes = notes.filter((note) => mapLegacyTopic(note) === topic);
+  const visibleNotes = matchingNotes.slice(0, 3);
+
+  return visibleNotes
     .map((note) => {
       const details: Record<string, string> = {};
       if (note.context) details.context = note.context;
@@ -59,6 +61,7 @@ function legacyNotes(
         details,
         contactIsPublicBusiness: false,
         publicAlias: note.authorLabel,
+        authorRank: note.authorRank,
         createdAt: "",
         accuracy: {
           state:
@@ -67,7 +70,7 @@ function legacyNotes(
               : note.trust.status === "conflictingReports"
                 ? "needsReview" as const
                 : "needsConfirmation" as const,
-          stillCorrect: 0,
+          stillCorrect: note.confirmationCount,
           changed: 0,
           notSure: 0,
         },
@@ -101,18 +104,30 @@ function NoteCard({
 }) {
   const { t } = useI18n();
   const trust = trustForNote(note, t);
+  const context = note.details.context ?? note.contextKey;
+  const visibleDetails = Object.entries(note.details).filter(
+    ([key]) => key !== "context",
+  );
 
   return (
-    <article className={styles.topicNoteCard} data-featured={featured ? "true" : undefined}>
-      <div className={styles.topicNoteMeta}>
-        <span>{note.publicAlias || t("profile.defaultAlias")}</span>
+    <article
+      className={styles.topicNoteCard}
+      data-featured={featured ? "true" : undefined}
+      data-rank-level={note.authorRank?.level}
+    >
+      <div className={styles.featuredNoteHeader}>
+        <UserRankIdentity
+          alias={note.publicAlias || t("profile.defaultAlias")}
+          rank={note.authorRank ?? DEFAULT_USER_RANK}
+          context={context}
+        />
         <TrustStatus {...trust} compact />
       </div>
       <p className={styles.topicNoteSummary}>{note.summary}</p>
-      {Object.keys(note.details).length > 0 ? (
+      {visibleDetails.length > 0 ? (
         <dl className={styles.topicNoteDetails}>
           <dt>{t("portNotes.topicPanel.details")}</dt>
-          {Object.entries(note.details).map(([key, value]) => (
+          {visibleDetails.map(([key, value]) => (
             <dd key={key}>{value}</dd>
           ))}
         </dl>
@@ -150,6 +165,18 @@ function NoteCard({
         </fieldset>
       ) : null}
     </article>
+  );
+}
+
+function sortFeaturedNotes(
+  notes: readonly PortNoteRecord[],
+): readonly PortNoteRecord[] {
+  return [...notes].sort(
+    (left, right) =>
+      right.accuracy.stillCorrect - left.accuracy.stillCorrect ||
+      left.accuracy.changed - right.accuracy.changed ||
+      Number(Boolean(right.contextKey)) - Number(Boolean(left.contextKey)) ||
+      right.createdAt.localeCompare(left.createdAt),
   );
 }
 
@@ -197,7 +224,7 @@ export function TopicNotesPanel({
       })
       .then((page) => {
         if (!controller.signal.aborted) {
-          setNotes(page.items);
+          setNotes(sortFeaturedNotes(page.items));
           setNextCursor(page.nextCursor);
         }
       })
@@ -253,7 +280,7 @@ export function TopicNotesPanel({
         cursor: nextCursor,
         limit: 5,
       });
-      setNotes((current) => [...current, ...page.items]);
+      setNotes((current) => sortFeaturedNotes([...current, ...page.items]));
       setNextCursor(page.nextCursor);
     } catch {
       setError(true);

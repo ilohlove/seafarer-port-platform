@@ -72,6 +72,22 @@
   gap: 1.15rem;
 }
 
+.rankPanel {
+  display: grid;
+  gap: 0.8rem;
+  padding: 1rem;
+  margin-block-end: 1.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-subtle);
+}
+
+.rankPanel h2 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 1rem;
+}
+
 .field {
   display: grid;
   gap: 0.45rem;

@@ -30,3 +30,9 @@
 - [2026-08-25 01:03] Làm sạch Port Directory bằng xác nhận NGA WPI, cách ly UN-only candidates và thêm release gate fail-closed.
 - [2026-08-25 11:19] Triển khai nền F6 với Google Auth, hồ sơ riêng tư, note moderation, accuracy panel và khóa khu vực Cộng đồng.
 - [2026-08-25 12:18] Apply migration F6 lên Supabase Cloud và cấu hình môi trường local cùng GitHub Actions cho CrewPort.
+- [2026-08-31 18:10] Hoàn thiện Ghi chú nổi bật và hệ thống rank CrewPort tự động, kèm badge uy tín có kiểm soát.
+- [2026-08-31 19:27] Hoàn thiện nhận diện màu, emblem và hiệu ứng riêng cho chín cấp rank CrewPort.
+- [2026-09-01 00:45] Hoàn thiện demo Lv0–Lv9, Staff Identity và Supporter Badge mobile-first bằng dữ liệu giả tách biệt production.
+- [2026-09-01 10:10] Nâng cấp CrewPort Identity theo thiết kế duyệt với khung avatar kim loại, Staff riêng và Supporter plaque tối ưu mobile.
+- [2026-09-01 12:55] Chuẩn hóa geometry Identity Frame và tải WebP thích ứng theo Standard, Data Saver, Ultra Lite.
+- [2026-09-01 14:48] Hoàn thiện hiệu ứng username theo Rank và bản địa hóa tên hạng VI/EN trên toàn bộ CrewPort Identity.

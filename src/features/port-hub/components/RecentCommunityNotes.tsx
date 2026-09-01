@@ -2,6 +2,7 @@ import { TrustStatus } from "../../../components";
 import { useI18n } from "../../../i18n";
 import type { PortNoteCardModel } from "../port-notes-view-model";
 import styles from "../port-notes.module.css";
+import { UserRankIdentity } from "../../user-rank";
 
 export interface RecentCommunityNotesProps {
   readonly notes: readonly PortNoteCardModel[];
@@ -36,7 +37,11 @@ export function RecentCommunityNotes({
             <span className={styles.topicTag}>{note.topic}</span>
             <div className={styles.recentNoteBody}>
               <strong>{note.title}</strong>
-              <span>{note.authorLabel}</span>
+              <UserRankIdentity
+                alias={note.authorLabel}
+                rank={note.authorRank}
+                context={note.context}
+              />
               <small>
                 {note.usefulness} · {note.confirmations}
               </small>

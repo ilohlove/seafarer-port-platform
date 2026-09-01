@@ -11,7 +11,9 @@ import {
   type TrustDisplayStatus,
   type TrustEvidence,
   type WelfareCapability,
+  type UserRankReadModel,
 } from "../../types";
+import { resolveUserRank } from "../user-rank";
 
 type Translate = I18nContextValue["t"];
 type FormatMoney = I18nContextValue["formatMoney"];
@@ -111,7 +113,10 @@ export interface PortNoteCardModel {
   readonly context?: string;
   readonly confirmations: string;
   readonly usefulness: string;
+  readonly confirmationCount: number;
+  readonly usefulnessCount: number;
   readonly trust: TrustStatusPresentation;
+  readonly authorRank: UserRankReadModel;
 }
 
 export interface TopicPreviewModel {
@@ -416,13 +421,16 @@ function toNoteCardModel(
     title: note.title,
     summary: note.summary,
     authorLabel: note.publicAlias ?? t("portNotes.notes.defaultAuthor"),
+    authorRank: resolveUserRank(note.authorRankScore ?? 0),
     context: context || undefined,
     confirmations: t("portNotes.note.confirmations", {
       count: note.confirmationCount,
     }),
+    confirmationCount: note.confirmationCount,
     usefulness: t("portNotes.note.usefulness", {
       count: note.usefulnessCount,
     }),
+    usefulnessCount: note.usefulnessCount,
     trust: trustPresentation(note.trust, t),
   };
 }

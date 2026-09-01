@@ -30,6 +30,15 @@
   color: var(--color-text-muted);
 }
 
+.rankSummary {
+  max-inline-size: 34rem;
+  padding: 0.8rem;
+  margin-block-start: 0.8rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
 .list {
   display: grid;
   gap: 0.75rem;

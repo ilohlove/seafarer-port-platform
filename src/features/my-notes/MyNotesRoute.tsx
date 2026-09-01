@@ -4,6 +4,7 @@ import { EmptyState, Skeleton } from "../../components";
 import { useServices, useSession } from "../../app/providers";
 import { useI18n, type TranslationKey } from "../../i18n";
 import type { PortNoteModerationState, PortNoteRecord } from "../../types";
+import { DEFAULT_USER_RANK, UserRankIdentity } from "../user-rank";
 import styles from "./my-notes.module.css";
 
 const topicLabels: Readonly<Record<PortNoteRecord["topic"], TranslationKey>> = {
@@ -75,6 +76,15 @@ export function MyNotesRoute() {
         <p className={styles.eyebrow}>CrewPort</p>
         <h1>{t("myNotes.heading")}</h1>
         <p>{t("myNotes.description")}</p>
+        {session.profile ? (
+          <div className={styles.rankSummary}>
+            <UserRankIdentity
+              alias={session.profile.nickname ?? session.profile.fullName}
+              rank={session.profile.rank ?? DEFAULT_USER_RANK}
+              avatarUrl={session.profile.avatarUrl}
+            />
+          </div>
+        ) : null}
       </header>
       {notes.length === 0 ? <p className={styles.empty}>{t("myNotes.empty")}</p> : null}
       <div className={styles.list}>

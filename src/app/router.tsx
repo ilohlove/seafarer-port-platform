@@ -49,6 +49,12 @@ const MyNotesRoute = lazy(() =>
   })),
 );
 
+const IdentityGalleryRoute = lazy(() =>
+  import("../features/user-rank/IdentityGalleryRoute").then((module) => ({
+    default: module.IdentityGalleryRoute,
+  })),
+);
+
 function RouteFallback() {
   const { t } = useI18n();
   return <Skeleton label={t("portNotes.loading")} lines={6} variant="card" />;
@@ -82,6 +88,7 @@ export function AppRouter() {
             <Route path="/auth/callback" element={<AuthCallbackRoute />} />
             <Route path="/my-notes" element={<MyNotesRoute />} />
             <Route path="/foundation" element={<FoundationRoute />} />
+            <Route path="/design/ranks" element={<IdentityGalleryRoute />} />
             <Route path="/ports/:portSlug" element={<PortNotesRoute />} />
             <Route path="*" element={<NotImplementedRoute />} />
           </Routes>

@@ -666,6 +666,8 @@ export const busanScenario = {
           gateName: "Crew Gate",
           confirmationCount: 6,
           usefulnessCount: 9,
+          publicAlias: "songbien_85",
+          authorRankScore: 165,
         },
       ),
       note(
@@ -680,7 +682,12 @@ export const busanScenario = {
           whereToBuy: "Chưa rõ",
         },
         needsConfirmationTrust,
-        { terminalId: busanNewPortTerminalId, confirmationCount: 1 },
+        {
+          terminalId: busanNewPortTerminalId,
+          confirmationCount: 1,
+          publicAlias: "rookie_deck",
+          authorRankScore: 0,
+        },
       ),
       note(
         "note-busan-taxi",
@@ -695,7 +702,12 @@ export const busanScenario = {
           priceAgreedBeforeRide: true,
         },
         needsConfirmationTrust,
-        { terminalId: busanNewPortTerminalId, gateName: "Crew Gate" },
+        {
+          terminalId: busanNewPortTerminalId,
+          gateName: "Crew Gate",
+          publicAlias: "wave_tamer",
+          authorRankScore: 35,
+        },
       ),
       note(
         "note-busan-food",
@@ -710,7 +722,12 @@ export const busanScenario = {
           paymentMethod: "Chưa rõ",
         },
         needsConfirmationTrust,
-        { terminalId: busanNewPortTerminalId, gateName: "Crew Gate" },
+        {
+          terminalId: busanNewPortTerminalId,
+          gateName: "Crew Gate",
+          publicAlias: "watch_keeper",
+          authorRankScore: 105,
+        },
       ),
       note(
         "note-busan-supplies",
@@ -724,7 +741,12 @@ export const busanScenario = {
           internationalCardWorked: false,
         },
         unknownTrust,
-        { terminalId: busanNewPortTerminalId, confirmationCount: 0 },
+        {
+          terminalId: busanNewPortTerminalId,
+          confirmationCount: 0,
+          publicAlias: "deck_hand",
+          authorRankScore: 10,
+        },
       ),
       note(
         "note-busan-north-taxi",
@@ -742,6 +764,8 @@ export const busanScenario = {
         {
           terminalId: busanNorthPortTerminalId,
           gateName: "Gamman Crew Gate (demo)",
+          publicAlias: "horizon_seeker",
+          authorRankScore: 250,
         },
       ),
       note(
@@ -759,6 +783,8 @@ export const busanScenario = {
         {
           terminalId: busanYeongdoTerminalId,
           gateName: "Crew pickup point (demo)",
+          publicAlias: "ocean_vanguard",
+          authorRankScore: 400,
         },
       ),
       note(
@@ -776,6 +802,8 @@ export const busanScenario = {
         {
           terminalId: busanGamcheonTerminalId,
           gateName: "Crew Gate (demo)",
+          publicAlias: "lighthouse_crew",
+          authorRankScore: 650,
         },
       ),
     ],

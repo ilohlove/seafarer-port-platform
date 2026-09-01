@@ -419,6 +419,11 @@ export function useBandwidthMode(): BandwidthContextValue {
   return value;
 }
 
+/** Standard is a safe default for reusable visual primitives rendered in isolation. */
+export function useBandwidthModeValue(): BandwidthMode {
+  return useContext(BandwidthContext)?.mode ?? "standard";
+}
+
 export function useAppearanceMode(): AppearanceContextValue {
   const value = useContext(AppearanceContext);
   if (!value) {

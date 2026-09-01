@@ -155,6 +155,7 @@ export function note(
     readonly usefulnessCount?: number;
     readonly publicAlias?: string;
     readonly createdAt?: string;
+    readonly authorRankScore?: number;
   } = {},
 ): PortNote {
   return {
@@ -173,5 +174,8 @@ export function note(
     ...(options.terminalId ? { terminalId: options.terminalId } : {}),
     ...(options.gateName ? { gateName: options.gateName } : {}),
     ...(options.publicAlias ? { publicAlias: options.publicAlias } : {}),
+    ...(options.authorRankScore === undefined
+      ? {}
+      : { authorRankScore: options.authorRankScore }),
   };
 }

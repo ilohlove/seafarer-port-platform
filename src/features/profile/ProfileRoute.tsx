@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { EmptyState, Skeleton } from "../../components";
 import { useBandwidthMode, useServices, useSession } from "../../app/providers";
 import { useI18n } from "../../i18n";
+import { DEFAULT_USER_RANK, UserRankIdentity } from "../user-rank";
 import styles from "./profile.module.css";
 
 function Avatar({
@@ -154,6 +155,16 @@ export function ProfileRoute() {
             <p className={styles.avatarHelp}>{t("profile.avatarFromGoogle")}</p>
           </div>
         </header>
+
+        <section className={styles.rankPanel} aria-labelledby="profile-rank-heading">
+          <h2 id="profile-rank-heading">{t("rank.profileHeading")}</h2>
+          <UserRankIdentity
+            alias={session.profile.nickname ?? fullName}
+            rank={session.profile.rank ?? DEFAULT_USER_RANK}
+            avatarUrl={session.profile.avatarUrl}
+            showProgress
+          />
+        </section>
 
         <form className={styles.form} onSubmit={(event) => void saveProfile(event)}>
           <label className={styles.field}>

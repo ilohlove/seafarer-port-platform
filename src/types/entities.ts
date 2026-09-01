@@ -294,6 +294,8 @@ export interface PortNote {
   readonly summary: string;
   readonly payload: PortNotePayload;
   readonly publicAlias?: string;
+  /** Prototype-only author reputation input; production rank is computed server-side. */
+  readonly authorRankScore?: number;
   readonly moderationState: ReviewModerationState;
   readonly confirmationCount: number;
   readonly usefulnessCount: number;

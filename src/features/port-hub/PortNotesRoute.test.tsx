@@ -167,6 +167,15 @@ describe("CrewPort compact Port Notes route", () => {
     ).toBeVisible();
     expect(screen.getAllByRole("region", { name: "Thông tin thiết yếu" })).toHaveLength(1);
     expect(screen.getByRole("button", { name: "Viết ghi chú cho mục này" })).toBeVisible();
+    const panel = screen.getByRole("heading", { name: "Ghi chú về eSIM" }).closest("section")!;
+    expect(within(panel).getByText("songbien_85")).toHaveAttribute("data-rank-level", "1");
+    expect(within(panel).getByText(/Nhà thám hiểm boong tàu ·/)).toBeVisible();
+    expect(panel).not.toHaveTextContent(/Lv\.|DECK EXPLORER/);
+    expect(within(panel).getAllByText(/Busan New Port · Cổng Crew Gate/).length).toBeGreaterThan(0);
+    expect(within(panel).getAllByText("Cộng đồng xác nhận").length).toBeGreaterThan(0);
+    const identityArtwork = Array.from(panel.querySelectorAll('[data-identity-artwork="frame"]'));
+    expect(identityArtwork.length).toBeGreaterThan(0);
+    expect(identityArtwork.every((image) => image.getAttribute("src")?.includes("rank-lv"))).toBe(true);
     expect(screen.queryByRole("heading", { name: "Ghi chú về SIM vật lý" })).toBeNull();
   });
 

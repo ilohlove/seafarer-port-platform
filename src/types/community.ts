@@ -1,3 +1,5 @@
+import type { UserRankReadModel } from "./user-rank";
+
 export type SessionStatus =
   | "loading"
   | "anonymous"
@@ -38,6 +40,7 @@ export interface ProfileReadModel {
   readonly nickname?: string;
   readonly avatarUrl?: string;
   readonly role: UserRole;
+  readonly rank?: UserRankReadModel;
 }
 
 export interface PortNoteRecord {
@@ -52,6 +55,7 @@ export interface PortNoteRecord {
   readonly contact?: string;
   readonly contactIsPublicBusiness: boolean;
   readonly publicAlias: string;
+  readonly authorRank?: UserRankReadModel;
   readonly createdAt: string;
   readonly authorId?: string;
   readonly accuracy: {

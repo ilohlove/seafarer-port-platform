@@ -2,6 +2,7 @@ import { TrustStatus } from "../../../components";
 import { useI18n } from "../../../i18n";
 import type { PortNoteCardModel } from "../port-notes-view-model";
 import styles from "../port-notes.module.css";
+import { UserRankIdentity } from "../../user-rank";
 
 export interface TopSeafarerNotesProps {
   readonly notes: readonly PortNoteCardModel[];
@@ -45,10 +46,11 @@ export function TopSeafarerNotes({
               </div>
               <h3>{note.title}</h3>
               <p>{note.summary}</p>
-              <span className={styles.noteAuthor}>{note.authorLabel}</span>
-              {note.context ? (
-                <span className={styles.noteContext}>{note.context}</span>
-              ) : null}
+              <UserRankIdentity
+                alias={note.authorLabel}
+                rank={note.authorRank}
+                context={note.context}
+              />
               <div className={styles.noteEvidence}>
                 <span>{note.confirmations}</span>
                 <span>{note.usefulness}</span>
