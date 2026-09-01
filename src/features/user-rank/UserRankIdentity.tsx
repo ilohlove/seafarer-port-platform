@@ -5,7 +5,7 @@ import { useI18n } from "../../i18n";
 import type { BandwidthMode, StaffTitle, SupporterTier, UserRankReadModel } from "../../types";
 import { type FrameArtwork, type PlaqueArtwork, RANK_ARTWORK, STAFF_ARTWORK, SUPPORTER_ARTWORK } from "./identity-artwork";
 import { IdentityIcon } from "./IdentityIcon";
-import { STAFF_TITLES, SUPPORTER_TIERS, USER_RANKS, formatXp, getLocalizedRankName } from "./user-rank";
+import { STAFF_TITLES, SUPPORTER_TIERS, USER_RANKS, formatXp, getLocalizedRankName, getLocalizedStaffName } from "./user-rank";
 import styles from "./user-rank.module.css";
 
 interface AvatarProps {
@@ -95,12 +95,13 @@ export function UserIdentity({ alias, avatarUrl, rank, staffTitle, supporterTier
   const mode = bandwidthMode ?? contextMode;
   const { locale } = useI18n();
   const staff = staffTitle ? STAFF_TITLES[staffTitle] : undefined;
+  const staffName = staff ? getLocalizedStaffName(staff, locale) : undefined;
   return (
     <div className={styles.identity} data-identity-kind={staff ? "staff" : "member"}>
       {staff ? <StaffAvatarFrame alias={alias} avatarUrl={avatarUrl} bandwidthMode={mode} staffTitle={staffTitle!} size={compact ? "compact" : "profile"} /> : rank ? <RankAvatarFrame alias={alias} avatarUrl={avatarUrl} bandwidthMode={mode} rank={rank} size={compact ? "compact" : "profile"} /> : <span className={styles.plainAvatar}><Avatar alias={alias} avatarUrl={avatarUrl} bandwidthMode={mode} /></span>}
       <div className={styles.identityBody}>
         <strong className={rank && !staff ? styles.rankUsername : undefined} data-rank-level={rank && !staff ? rank.level : undefined} data-rank-username={rank && !staff ? true : undefined}>{alias}</strong>
-        {staff ? <><span className={styles.staffName}>{staff.name}</span><span className={styles.staffTag} data-staff-title={staffTitle}>{staff.tag}</span></> : rank ? <><span className={styles.rankName}>{getLocalizedRankName(rank, locale)}{context ? ` · ${context}` : ""}</span>{supporterTier ? <SupporterBadge tier={supporterTier} compact={compact} bandwidthMode={mode} /> : null}{showProgress ? <RankProgress rank={rank} /> : null}</> : null}
+        {staff ? <><span className={styles.staffName}>{staffName}</span><span className={styles.staffTag} data-staff-title={staffTitle}>{staff.tag}</span></> : rank ? <><span className={styles.rankName}>{getLocalizedRankName(rank, locale)}{context ? ` · ${context}` : ""}</span>{supporterTier ? <SupporterBadge tier={supporterTier} compact={compact} bandwidthMode={mode} /> : null}{showProgress ? <RankProgress rank={rank} /> : null}</> : null}
       </div>
     </div>
   );
@@ -110,6 +111,7 @@ export function RankPopover({ alias, avatarUrl, rank, staffTitle, supporterTier 
   const { locale } = useI18n();
   const rankName = getLocalizedRankName(rank, locale);
   const staff = staffTitle ? STAFF_TITLES[staffTitle] : undefined;
+  const staffName = staff ? getLocalizedStaffName(staff, locale) : undefined;
   const [open, setOpen] = useState(false);
   const id = useId();
   const root = useRef<HTMLDivElement>(null);
@@ -122,7 +124,7 @@ export function RankPopover({ alias, avatarUrl, rank, staffTitle, supporterTier 
     return () => { document.removeEventListener("keydown", closeOnEscape); document.removeEventListener("pointerdown", closeOutside); };
   }, [open]);
   const detailLabel = staff
-    ? `${staff.name} Staff details`
+    ? locale === "vi" ? `Chi tiết nhân sự ${staffName}` : `${staffName} Staff details`
     : locale === "vi" ? `Chi tiết hạng ${rankName}` : `${rankName} rank details`;
   return (
     <div className={styles.popoverRoot} ref={root}>
@@ -132,7 +134,7 @@ export function RankPopover({ alias, avatarUrl, rank, staffTitle, supporterTier 
           : <RankAvatarFrame alias={alias} avatarUrl={avatarUrl} rank={rank} />}
         <span className={styles.popoverLabel}>
           <strong className={!staff ? styles.rankUsername : undefined} data-rank-level={!staff ? rank.level : undefined} data-rank-username={!staff ? true : undefined}>{alias}</strong>
-          <span>{staff?.name ?? rankName}</span>
+          <span>{staffName ?? rankName}</span>
         </span>
       </button>
       {open ? <dialog className={styles.popover} id={id} aria-label={detailLabel} open><UserIdentity alias={alias} avatarUrl={avatarUrl} rank={rank} staffTitle={staffTitle} supporterTier={supporterTier} compact={false} showProgress={!staff} /></dialog> : null}

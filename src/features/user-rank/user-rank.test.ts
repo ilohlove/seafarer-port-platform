@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { USER_RANKS, getLocalizedRankName, getRankFromXP, getRankProgress, getStaffTitleForRole, getXpToNextRank, resolveUserRank } from "./user-rank";
+import { STAFF_TITLES, USER_RANKS, getLocalizedRankName, getLocalizedStaffName, getRankFromXP, getRankProgress, getStaffTitleForRole, getXpToNextRank, resolveUserRank } from "./user-rank";
 
 describe("CrewPort user rank resolver", () => {
   test.each([
@@ -38,5 +38,11 @@ describe("CrewPort user rank resolver", () => {
     expect(getStaffTitleForRole("admin")).toBe("admin");
     expect(getStaffTitleForRole("moderator")).toBe("moderator");
     expect(getStaffTitleForRole("member")).toBeUndefined();
+  });
+
+  test("localizes Staff titles without changing permission tags", () => {
+    expect(getLocalizedStaffName(STAFF_TITLES.admin, "vi")).toBe("Tư lệnh Hạm đội");
+    expect(getLocalizedStaffName(STAFF_TITLES.admin, "en")).toBe("Fleet Commander");
+    expect(STAFF_TITLES.admin.tag).toBe("ADMIN");
   });
 });

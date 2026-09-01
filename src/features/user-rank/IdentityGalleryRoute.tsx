@@ -1,11 +1,12 @@
 import { DEMO_MEMBERS, DEMO_STAFF, DEMO_SUPPORTERS } from "./identity-demo-data";
+import { useI18n } from "../../i18n";
 import {
   RankCard,
   StaffAvatarFrame,
   SupporterBadge,
   UserIdentity,
 } from "./UserRankIdentity";
-import { STAFF_TITLES } from "./user-rank";
+import { getLocalizedStaffName, STAFF_TITLES } from "./user-rank";
 import styles from "./user-rank.module.css";
 
 const sections = [
@@ -17,6 +18,7 @@ const sections = [
 ] as const;
 
 export function IdentityGalleryRoute() {
+  const { locale } = useI18n();
   return (
     <main className={styles.gallery}>
       <header className={styles.galleryHeader}>
@@ -105,7 +107,7 @@ export function IdentityGalleryRoute() {
                   staffTitle={staff.id}
                   size="profile"
                 />
-                <h3>{staff.name}</h3>
+                <h3>{getLocalizedStaffName(staff, locale)}</h3>
                 <span>{staff.tag}</span>
                 <UserIdentity alias={member.alias} avatarUrl={member.avatarUrl} staffTitle={staff.id} />
               </article>

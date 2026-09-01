@@ -14,10 +14,10 @@ export const USER_RANKS: readonly UserRankDefinition[] = [
 ] as const;
 
 export const STAFF_TITLES: Readonly<Record<StaffTitle, StaffTitleDefinition>> = {
-  founder: { id: "founder", name: "Fleet Admiral", tag: "FOUNDER", icon: "helm" },
-  admin: { id: "admin", name: "Fleet Commander", tag: "ADMIN", icon: "command" },
-  moderator: { id: "moderator", name: "Port Authority", tag: "MODERATOR", icon: "harbor" },
-  ops: { id: "ops", name: "CrewPort Operations", tag: "OPS", icon: "operations" },
+  founder: { id: "founder", name: "Fleet Admiral", nameVi: "Đô đốc Hạm đội", tag: "FOUNDER", icon: "helm" },
+  admin: { id: "admin", name: "Fleet Commander", nameVi: "Tư lệnh Hạm đội", tag: "ADMIN", icon: "command" },
+  moderator: { id: "moderator", name: "Port Authority", nameVi: "Cảng vụ", tag: "MODERATOR", icon: "harbor" },
+  ops: { id: "ops", name: "CrewPort Operations", nameVi: "Ban Vận hành CrewPort", tag: "OPS", icon: "operations" },
 };
 
 export const SUPPORTER_TIERS: Readonly<Record<SupporterTier, SupporterDefinition>> = {
@@ -28,6 +28,13 @@ export const SUPPORTER_TIERS: Readonly<Record<SupporterTier, SupporterDefinition
 
 export function getStaffTitleForRole(role: UserRole): StaffRoleTitle | undefined {
   return role === "admin" || role === "moderator" ? role : undefined;
+}
+
+export function getLocalizedStaffName(
+  staff: Pick<StaffTitleDefinition, "name" | "nameVi">,
+  locale: "vi" | "en",
+): string {
+  return locale === "vi" ? staff.nameVi : staff.name;
 }
 
 function normalizeXp(rawXp: number): number {

@@ -32,6 +32,7 @@ export type StaffRoleTitle = Extract<StaffTitle, "admin" | "moderator">;
 export interface StaffTitleDefinition {
   readonly id: StaffTitle;
   readonly name: string;
+  readonly nameVi: string;
   readonly tag: "FOUNDER" | "ADMIN" | "MODERATOR" | "OPS";
   readonly icon: "helm" | "command" | "harbor" | "operations";
 }

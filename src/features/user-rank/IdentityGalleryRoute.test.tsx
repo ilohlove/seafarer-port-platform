@@ -54,6 +54,11 @@ describe("IdentityGalleryRoute", () => {
     expect(screen.getAllByText("Tân binh cập cảng").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Thợ săn tín hiệu").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Huyền thoại đại dương").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Đô đốc Hạm đội").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Tư lệnh Hạm đội").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Cảng vụ").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Ban Vận hành CrewPort").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Fleet Commander")).toBeNull();
     expect(screen.queryByText(/Lv\./)).toBeNull();
   });
 });

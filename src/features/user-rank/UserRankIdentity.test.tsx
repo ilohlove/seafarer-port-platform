@@ -3,7 +3,7 @@ import { afterEach, describe, expect, test } from "vitest";
 import { I18nProvider } from "../../i18n";
 import { RANK_ARTWORK, RANK_AVATAR_GEOMETRY, STAFF_ARTWORK, STAFF_AVATAR_GEOMETRY, SUPPORTER_ARTWORK } from "./identity-artwork";
 import { RankAvatarFrame, RankCard, RankPopover, StaffAvatarFrame, SupporterBadge, UserIdentity, UserRankIdentity } from "./UserRankIdentity";
-import { STAFF_TITLES, USER_RANKS, resolveUserRank } from "./user-rank";
+import { STAFF_TITLES, USER_RANKS, getLocalizedStaffName, resolveUserRank } from "./user-rank";
 
 describe("CrewPort identity components", () => {
   afterEach(cleanup);
@@ -25,7 +25,7 @@ describe("CrewPort identity components", () => {
 
   test.each(Object.keys(STAFF_TITLES) as (keyof typeof STAFF_TITLES)[])("renders %s staff identity without Level or XP", (staffTitle) => {
     const { container } = render(<I18nProvider initialLocale="vi"><UserIdentity alias="CrewPort staff" staffTitle={staffTitle} rank={resolveUserRank(18_420)} /></I18nProvider>);
-    expect(screen.getByText(STAFF_TITLES[staffTitle].name)).toBeVisible();
+    expect(screen.getByText(getLocalizedStaffName(STAFF_TITLES[staffTitle], "vi"))).toBeVisible();
     expect(screen.queryByText(/Lv\./)).toBeNull();
     expect(screen.queryByText(/XP/)).toBeNull();
     expect(container.querySelector(`[data-staff-title="${staffTitle}"]`)).toBeVisible();
@@ -68,7 +68,7 @@ describe("CrewPort identity components", () => {
     const rank = resolveUserRank(18_420);
     const card = render(<I18nProvider initialLocale="en"><UserRankIdentity alias="HarborChief" rank={rank} staffTitle="admin" showProgress /></I18nProvider>);
     expect(card.container.querySelector('[data-frame-kind="staff"]')).toHaveAttribute("data-staff-title", "admin");
-    expect(screen.getByText("Fleet Commander")).toBeVisible();
+    expect(await screen.findByText("Fleet Commander")).toBeVisible();
     expect(card.container).not.toHaveTextContent(/XP|Ocean Vanguard/);
     card.unmount();
 
