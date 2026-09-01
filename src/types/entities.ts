@@ -296,6 +296,8 @@ export interface PortNote {
   readonly publicAlias?: string;
   /** Prototype-only author reputation input; production rank is computed server-side. */
   readonly authorRankScore?: number;
+  /** Presentation-only Staff identity for trusted mock/read-model data. */
+  readonly authorStaffTitle?: "admin" | "moderator";
   readonly moderationState: ReviewModerationState;
   readonly confirmationCount: number;
   readonly usefulnessCount: number;

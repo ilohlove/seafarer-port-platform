@@ -169,13 +169,15 @@ describe("CrewPort compact Port Notes route", () => {
     expect(screen.getByRole("button", { name: "Viết ghi chú cho mục này" })).toBeVisible();
     const panel = screen.getByRole("heading", { name: "Ghi chú về eSIM" }).closest("section")!;
     expect(within(panel).getByText("songbien_85")).toHaveAttribute("data-rank-level", "1");
-    expect(within(panel).getByText(/Nhà thám hiểm boong tàu ·/)).toBeVisible();
+    expect(within(panel).getByText("Nhà thám hiểm boong tàu")).toBeVisible();
+    expect(panel).not.toHaveTextContent("busan-context-new-port");
     expect(panel).not.toHaveTextContent(/Lv\.|DECK EXPLORER/);
-    expect(within(panel).getAllByText(/Busan New Port · Cổng Crew Gate/).length).toBeGreaterThan(0);
     expect(within(panel).getAllByText("Cộng đồng xác nhận").length).toBeGreaterThan(0);
     const identityArtwork = Array.from(panel.querySelectorAll('[data-identity-artwork="frame"]'));
     expect(identityArtwork.length).toBeGreaterThan(0);
     expect(identityArtwork.every((image) => image.getAttribute("src")?.includes("rank-lv"))).toBe(true);
+    const noteAuthorIdentity = panel.querySelector('[data-note-author-identity]');
+    expect(noteAuthorIdentity?.querySelector('[data-frame-kind="rank"]')).toHaveAttribute("data-size", "compact");
     expect(screen.queryByRole("heading", { name: "Ghi chú về SIM vật lý" })).toBeNull();
   });
 

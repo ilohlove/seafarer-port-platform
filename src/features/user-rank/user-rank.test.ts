@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { USER_RANKS, getLocalizedRankName, getRankFromXP, getRankProgress, getXpToNextRank, resolveUserRank } from "./user-rank";
+import { USER_RANKS, getLocalizedRankName, getRankFromXP, getRankProgress, getStaffTitleForRole, getXpToNextRank, resolveUserRank } from "./user-rank";
 
 describe("CrewPort user rank resolver", () => {
   test.each([
@@ -32,5 +32,11 @@ describe("CrewPort user rank resolver", () => {
     expect(getLocalizedRankName(signalHunter, "vi")).toBe("Thợ săn tín hiệu");
     expect(getLocalizedRankName(signalHunter, "en")).toBe("Signal Hunter");
     expect(signalHunter.shortTag).toBe("SIGNAL HUNTER");
+  });
+
+  test("maps only privileged application roles to public Staff identities", () => {
+    expect(getStaffTitleForRole("admin")).toBe("admin");
+    expect(getStaffTitleForRole("moderator")).toBe("moderator");
+    expect(getStaffTitleForRole("member")).toBeUndefined();
   });
 });

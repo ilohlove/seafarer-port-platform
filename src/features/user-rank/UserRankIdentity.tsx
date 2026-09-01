@@ -106,9 +106,10 @@ export function UserIdentity({ alias, avatarUrl, rank, staffTitle, supporterTier
   );
 }
 
-export function RankPopover({ alias, avatarUrl, rank, supporterTier }: AvatarProps & { readonly rank: UserRankReadModel; readonly supporterTier?: SupporterTier }) {
+export function RankPopover({ alias, avatarUrl, rank, staffTitle, supporterTier }: AvatarProps & { readonly rank: UserRankReadModel; readonly staffTitle?: StaffTitle; readonly supporterTier?: SupporterTier }) {
   const { locale } = useI18n();
   const rankName = getLocalizedRankName(rank, locale);
+  const staff = staffTitle ? STAFF_TITLES[staffTitle] : undefined;
   const [open, setOpen] = useState(false);
   const id = useId();
   const root = useRef<HTMLDivElement>(null);
@@ -120,7 +121,23 @@ export function RankPopover({ alias, avatarUrl, rank, supporterTier }: AvatarPro
     document.addEventListener("pointerdown", closeOutside);
     return () => { document.removeEventListener("keydown", closeOnEscape); document.removeEventListener("pointerdown", closeOutside); };
   }, [open]);
-  return <div className={styles.popoverRoot} ref={root}><button type="button" className={styles.popoverTrigger} aria-expanded={open} aria-controls={id} onClick={() => setOpen((value) => !value)}><RankAvatarFrame alias={alias} avatarUrl={avatarUrl} rank={rank} /><span className={styles.popoverLabel}><strong className={styles.rankUsername} data-rank-level={rank.level} data-rank-username>{alias}</strong><span>{rankName}</span></span></button>{open ? <dialog className={styles.popover} id={id} aria-label={locale === "vi" ? `Chi tiết hạng ${rankName}` : `${rankName} rank details`} open><UserIdentity alias={alias} avatarUrl={avatarUrl} rank={rank} supporterTier={supporterTier} compact={false} showProgress /></dialog> : null}</div>;
+  const detailLabel = staff
+    ? `${staff.name} Staff details`
+    : locale === "vi" ? `Chi tiết hạng ${rankName}` : `${rankName} rank details`;
+  return (
+    <div className={styles.popoverRoot} ref={root}>
+      <button type="button" className={styles.popoverTrigger} aria-expanded={open} aria-controls={id} onClick={() => setOpen((value) => !value)}>
+        {staffTitle
+          ? <StaffAvatarFrame alias={alias} avatarUrl={avatarUrl} staffTitle={staffTitle} />
+          : <RankAvatarFrame alias={alias} avatarUrl={avatarUrl} rank={rank} />}
+        <span className={styles.popoverLabel}>
+          <strong className={!staff ? styles.rankUsername : undefined} data-rank-level={!staff ? rank.level : undefined} data-rank-username={!staff ? true : undefined}>{alias}</strong>
+          <span>{staff?.name ?? rankName}</span>
+        </span>
+      </button>
+      {open ? <dialog className={styles.popover} id={id} aria-label={detailLabel} open><UserIdentity alias={alias} avatarUrl={avatarUrl} rank={rank} staffTitle={staffTitle} supporterTier={supporterTier} compact={false} showProgress={!staff} /></dialog> : null}
+    </div>
+  );
 }
 
 export function RankCard({ rank, alias = rank.name, avatarUrl, bandwidthMode }: { readonly rank: UserRankReadModel; readonly alias?: string; readonly avatarUrl?: string; readonly bandwidthMode?: BandwidthMode }) {
@@ -131,6 +148,6 @@ export function RankCard({ rank, alias = rank.name, avatarUrl, bandwidthMode }: 
 }
 
 /** Compatibility wrapper for existing Port Notes/Profile call sites. */
-export function UserRankIdentity(props: { readonly alias: string; readonly rank: UserRankReadModel; readonly context?: string; readonly showProgress?: boolean; readonly avatarUrl?: string }) {
+export function UserRankIdentity(props: { readonly alias: string; readonly rank: UserRankReadModel; readonly staffTitle?: StaffTitle; readonly context?: string; readonly showProgress?: boolean; readonly avatarUrl?: string }) {
   return <UserIdentity {...props} compact={!props.showProgress} />;
 }

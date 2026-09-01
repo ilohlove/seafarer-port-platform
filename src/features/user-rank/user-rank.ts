@@ -1,4 +1,4 @@
-import type { StaffTitle, StaffTitleDefinition, SupporterDefinition, SupporterTier, UserRankDefinition, UserRankLevel, UserRankReadModel } from "../../types";
+import type { StaffRoleTitle, StaffTitle, StaffTitleDefinition, SupporterDefinition, SupporterTier, UserRankDefinition, UserRankLevel, UserRankReadModel, UserRole } from "../../types";
 
 export const USER_RANKS: readonly UserRankDefinition[] = [
   { level: 0, name: "Port Newcomer", shortTag: "NEW CREW", nameVi: "Tân binh cập cảng", minXp: 0, maxXp: 99, icon: "anchor", visualVariant: "graphite" },
@@ -25,6 +25,10 @@ export const SUPPORTER_TIERS: Readonly<Record<SupporterTier, SupporterDefinition
   silver: { tier: "silver", name: "Silver Supporter", tag: "SILVER SUPPORTER", icon: "heartCompass" },
   gold: { tier: "gold", name: "Gold Supporter", tag: "GOLD SUPPORTER", icon: "heartBeacon" },
 };
+
+export function getStaffTitleForRole(role: UserRole): StaffRoleTitle | undefined {
+  return role === "admin" || role === "moderator" ? role : undefined;
+}
 
 function normalizeXp(rawXp: number): number {
   return Math.max(0, Math.floor(Number.isFinite(rawXp) ? rawXp : 0));

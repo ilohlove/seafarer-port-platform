@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test } from "vitest";
 import { I18nProvider } from "../../i18n";
 import { RANK_ARTWORK, RANK_AVATAR_GEOMETRY, STAFF_ARTWORK, STAFF_AVATAR_GEOMETRY, SUPPORTER_ARTWORK } from "./identity-artwork";
-import { RankAvatarFrame, RankCard, RankPopover, StaffAvatarFrame, SupporterBadge, UserIdentity } from "./UserRankIdentity";
+import { RankAvatarFrame, RankCard, RankPopover, StaffAvatarFrame, SupporterBadge, UserIdentity, UserRankIdentity } from "./UserRankIdentity";
 import { STAFF_TITLES, USER_RANKS, resolveUserRank } from "./user-rank";
 
 describe("CrewPort identity components", () => {
@@ -64,6 +64,21 @@ describe("CrewPort identity components", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
+  test("keeps Staff identity ahead of rank in compatibility cards and popovers", async () => {
+    const rank = resolveUserRank(18_420);
+    const card = render(<I18nProvider initialLocale="en"><UserRankIdentity alias="HarborChief" rank={rank} staffTitle="admin" showProgress /></I18nProvider>);
+    expect(card.container.querySelector('[data-frame-kind="staff"]')).toHaveAttribute("data-staff-title", "admin");
+    expect(screen.getByText("Fleet Commander")).toBeVisible();
+    expect(card.container).not.toHaveTextContent(/XP|Ocean Vanguard/);
+    card.unmount();
+
+    render(<I18nProvider initialLocale="en"><RankPopover alias="PortWatch" rank={rank} staffTitle="moderator" /></I18nProvider>);
+    const trigger = await screen.findByRole("button", { name: /Port Authority/ });
+    expect(trigger.querySelector('[data-frame-kind="staff"]')).toHaveAttribute("data-staff-title", "moderator");
+    fireEvent.click(trigger);
+    expect(screen.getByRole("dialog", { name: /Port Authority Staff details/ })).not.toHaveTextContent(/XP|Ocean Vanguard/);
+  });
+
   test("exposes all staff and supporter icons as decorative SVG", () => {
     const { container } = render(<div>{Object.keys(STAFF_TITLES).map((title) => <StaffAvatarFrame key={title} alias={title} staffTitle={title as keyof typeof STAFF_TITLES} />)}<SupporterBadge tier="bronze"/><SupporterBadge tier="silver"/><SupporterBadge tier="gold"/></div>);
     expect(container.querySelectorAll("svg[aria-hidden=true]")).toHaveLength(7);
@@ -93,5 +108,10 @@ describe("CrewPort identity components", () => {
     const ultra = render(<RankAvatarFrame alias="CaptainSea" avatarUrl="avatar.webp" rank={rank} bandwidthMode="ultraLite" />);
     expect(ultra.container.querySelectorAll("img")).toHaveLength(0);
     expect(ultra.container.querySelector('[data-artwork="false"] svg')).toBeInTheDocument();
+    ultra.unmount();
+
+    const ultraStaff = render(<StaffAvatarFrame alias="HarborChief" avatarUrl="avatar.webp" staffTitle="admin" bandwidthMode="ultraLite" />);
+    expect(ultraStaff.container.querySelectorAll("img")).toHaveLength(0);
+    expect(ultraStaff.container.querySelector('[data-frame-kind="staff"]')).toHaveAttribute("data-artwork", "false");
   });
 });

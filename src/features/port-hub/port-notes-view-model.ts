@@ -8,6 +8,7 @@ import {
   type NoteTopic,
   type PortHubReadModel,
   type PortNote,
+  type StaffRoleTitle,
   type TrustDisplayStatus,
   type TrustEvidence,
   type WelfareCapability,
@@ -117,6 +118,7 @@ export interface PortNoteCardModel {
   readonly usefulnessCount: number;
   readonly trust: TrustStatusPresentation;
   readonly authorRank: UserRankReadModel;
+  readonly authorStaffTitle?: StaffRoleTitle;
 }
 
 export interface TopicPreviewModel {
@@ -422,6 +424,7 @@ function toNoteCardModel(
     summary: note.summary,
     authorLabel: note.publicAlias ?? t("portNotes.notes.defaultAuthor"),
     authorRank: resolveUserRank(note.authorRankScore ?? 0),
+    authorStaffTitle: note.authorStaffTitle,
     context: context || undefined,
     confirmations: t("portNotes.note.confirmations", {
       count: note.confirmationCount,

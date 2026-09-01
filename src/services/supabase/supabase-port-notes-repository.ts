@@ -22,13 +22,14 @@ function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
 }
 
-function mapNote(value: unknown): PortNoteRecord {
+export function mapPortNote(value: unknown): PortNoteRecord {
   const row = asRecord(Array.isArray(value) ? value[0] : value);
   const accuracy = asRecord(row.accuracy);
   const state = accuracy.state;
   const moderationState = row.moderation_state;
   const topic = row.topic;
   const visibility = row.visibility;
+  const authorStaffTitle = row.author_staff_title;
   const safeAccuracyState: PortNoteAccuracyState =
     state === "communityConfirmed" || state === "needsReview"
       ? state
@@ -66,6 +67,10 @@ function mapNote(value: unknown): PortNoteRecord {
       typeof row.public_alias === "string" && row.public_alias.length > 0
         ? row.public_alias
         : "Thuyền viên CrewPort",
+    authorStaffTitle:
+      authorStaffTitle === "admin" || authorStaffTitle === "moderator"
+        ? authorStaffTitle
+        : undefined,
     createdAt: typeof row.created_at === "string" ? row.created_at : "",
     authorId: typeof row.author_id === "string" ? row.author_id : undefined,
     accuracy: {
@@ -184,7 +189,7 @@ export class SupabasePortNotesRepository implements PortNotesRepository {
     }
     const row = asRecord(data);
     return {
-      items: Array.isArray(row.items) ? row.items.map(mapNote) : [],
+      items: Array.isArray(row.items) ? row.items.map(mapPortNote) : [],
       nextCursor: typeof row.next_cursor === "string" ? row.next_cursor : undefined,
     };
   }
@@ -208,7 +213,7 @@ export class SupabasePortNotesRepository implements PortNotesRepository {
     if (error) {
       throw error;
     }
-    return Array.isArray(data) ? data.map(mapNote) : [];
+    return Array.isArray(data) ? data.map(mapPortNote) : [];
   }
 
   async listAllMyNotes(options: RequestOptions = {}): Promise<readonly PortNoteRecord[]> {
@@ -219,7 +224,7 @@ export class SupabasePortNotesRepository implements PortNotesRepository {
     }
     const { data, error } = await client.rpc("list_all_my_port_notes");
     if (error) throw error;
-    return Array.isArray(data) ? data.map(mapNote) : [];
+    return Array.isArray(data) ? data.map(mapPortNote) : [];
   }
 
   async submitNote(submission: PortNoteSubmission): Promise<PortNoteRecord> {
@@ -241,7 +246,7 @@ export class SupabasePortNotesRepository implements PortNotesRepository {
     if (error) {
       throw error;
     }
-    return mapNote(data);
+    return mapPortNote(data);
   }
 
   async assessAccuracy(noteId: string, answer: AccuracyAnswer): Promise<void> {
@@ -273,7 +278,7 @@ export class SupabasePortNotesRepository implements PortNotesRepository {
     if (error) {
       throw error;
     }
-    return Array.isArray(data) ? data.map(mapNote) : [];
+    return Array.isArray(data) ? data.map(mapPortNote) : [];
   }
 
   async moderateNote(action: ModerationAction): Promise<void> {

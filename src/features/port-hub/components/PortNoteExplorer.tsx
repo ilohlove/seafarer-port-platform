@@ -73,7 +73,7 @@ export function PortNoteExplorer({
         <UserRankIdentity
           alias={note.authorLabel}
           rank={note.authorRank}
-          context={note.context}
+          staffTitle={note.authorStaffTitle}
         />
         <div className={styles.noteEvidence}>
           <span>{note.confirmations}</span>

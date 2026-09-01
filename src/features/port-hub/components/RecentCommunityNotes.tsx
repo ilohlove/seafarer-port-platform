@@ -40,7 +40,7 @@ export function RecentCommunityNotes({
               <UserRankIdentity
                 alias={note.authorLabel}
                 rank={note.authorRank}
-                context={note.context}
+                staffTitle={note.authorStaffTitle}
               />
               <small>
                 {note.usefulness} · {note.confirmations}

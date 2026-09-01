@@ -36,3 +36,4 @@
 - [2026-09-01 10:10] Nâng cấp CrewPort Identity theo thiết kế duyệt với khung avatar kim loại, Staff riêng và Supporter plaque tối ưu mobile.
 - [2026-09-01 12:55] Chuẩn hóa geometry Identity Frame và tải WebP thích ứng theo Standard, Data Saver, Ultra Lite.
 - [2026-09-01 14:48] Hoàn thiện hiệu ứng username theo Rank và bản địa hóa tên hạng VI/EN trên toàn bộ CrewPort Identity.
+- [2026-09-01 18:05] Tự động gắn Staff Frame cho Admin và Moderator trên profile, Port Notes và các dạng identity công khai.

@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { EmptyState, Skeleton } from "../../components";
 import { useBandwidthMode, useServices, useSession } from "../../app/providers";
 import { useI18n } from "../../i18n";
-import { DEFAULT_USER_RANK, UserRankIdentity } from "../user-rank";
+import { DEFAULT_USER_RANK, getStaffTitleForRole, UserRankIdentity } from "../user-rank";
 import styles from "./profile.module.css";
 
 function Avatar({
@@ -161,6 +161,7 @@ export function ProfileRoute() {
           <UserRankIdentity
             alias={session.profile.nickname ?? fullName}
             rank={session.profile.rank ?? DEFAULT_USER_RANK}
+            staffTitle={getStaffTitleForRole(session.profile.role)}
             avatarUrl={session.profile.avatarUrl}
             showProgress
           />

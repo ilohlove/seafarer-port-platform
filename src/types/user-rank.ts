@@ -28,6 +28,7 @@ export interface UserRankReadModel {
 }
 
 export type StaffTitle = "founder" | "admin" | "moderator" | "ops";
+export type StaffRoleTitle = Extract<StaffTitle, "admin" | "moderator">;
 export interface StaffTitleDefinition {
   readonly id: StaffTitle;
   readonly name: string;

@@ -156,6 +156,7 @@ export function note(
     readonly publicAlias?: string;
     readonly createdAt?: string;
     readonly authorRankScore?: number;
+    readonly authorStaffTitle?: "admin" | "moderator";
   } = {},
 ): PortNote {
   return {
@@ -177,5 +178,8 @@ export function note(
     ...(options.authorRankScore === undefined
       ? {}
       : { authorRankScore: options.authorRankScore }),
+    ...(options.authorStaffTitle
+      ? { authorStaffTitle: options.authorStaffTitle }
+      : {}),
   };
 }

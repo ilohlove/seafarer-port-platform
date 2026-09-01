@@ -1,4 +1,4 @@
-import type { UserRankReadModel } from "./user-rank";
+import type { StaffRoleTitle, UserRankReadModel } from "./user-rank";
 
 export type SessionStatus =
   | "loading"
@@ -56,6 +56,7 @@ export interface PortNoteRecord {
   readonly contactIsPublicBusiness: boolean;
   readonly publicAlias: string;
   readonly authorRank?: UserRankReadModel;
+  readonly authorStaffTitle?: StaffRoleTitle;
   readonly createdAt: string;
   readonly authorId?: string;
   readonly accuracy: {

@@ -62,6 +62,7 @@ function legacyNotes(
         contactIsPublicBusiness: false,
         publicAlias: note.authorLabel,
         authorRank: note.authorRank,
+        authorStaffTitle: note.authorStaffTitle,
         createdAt: "",
         accuracy: {
           state:
@@ -104,7 +105,6 @@ function NoteCard({
 }) {
   const { t } = useI18n();
   const trust = trustForNote(note, t);
-  const context = note.details.context ?? note.contextKey;
   const visibleDetails = Object.entries(note.details).filter(
     ([key]) => key !== "context",
   );
@@ -113,14 +113,16 @@ function NoteCard({
     <article
       className={styles.topicNoteCard}
       data-featured={featured ? "true" : undefined}
-      data-rank-level={note.authorRank?.level}
+      data-rank-level={note.authorStaffTitle ? undefined : note.authorRank?.level}
     >
       <div className={styles.featuredNoteHeader}>
-        <UserRankIdentity
-          alias={note.publicAlias || t("profile.defaultAlias")}
-          rank={note.authorRank ?? DEFAULT_USER_RANK}
-          context={context}
-        />
+        <div className={styles.noteAuthorIdentity} data-note-author-identity>
+          <UserRankIdentity
+            alias={note.publicAlias || t("profile.defaultAlias")}
+            rank={note.authorRank ?? DEFAULT_USER_RANK}
+            staffTitle={note.authorStaffTitle}
+          />
+        </div>
         <TrustStatus {...trust} compact />
       </div>
       <p className={styles.topicNoteSummary}>{note.summary}</p>

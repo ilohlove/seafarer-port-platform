@@ -4,7 +4,7 @@ import { EmptyState, Skeleton } from "../../components";
 import { useServices, useSession } from "../../app/providers";
 import { useI18n, type TranslationKey } from "../../i18n";
 import type { PortNoteModerationState, PortNoteRecord } from "../../types";
-import { DEFAULT_USER_RANK, UserRankIdentity } from "../user-rank";
+import { DEFAULT_USER_RANK, getStaffTitleForRole, UserRankIdentity } from "../user-rank";
 import styles from "./my-notes.module.css";
 
 const topicLabels: Readonly<Record<PortNoteRecord["topic"], TranslationKey>> = {
@@ -81,6 +81,7 @@ export function MyNotesRoute() {
             <UserRankIdentity
               alias={session.profile.nickname ?? session.profile.fullName}
               rank={session.profile.rank ?? DEFAULT_USER_RANK}
+              staffTitle={getStaffTitleForRole(session.profile.role)}
               avatarUrl={session.profile.avatarUrl}
             />
           </div>
