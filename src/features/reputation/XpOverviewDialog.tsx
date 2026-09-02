@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { Skeleton } from "../../components";
 import { useServices } from "../../app/providers";
@@ -6,6 +6,7 @@ import { useI18n } from "../../i18n";
 import type { XpSummaryReadModel } from "../../types";
 import { RankAvatarFrame, formatXp, getLocalizedRankName } from "../user-rank";
 import { XpActivityList } from "./XpActivityList";
+import { DEFAULT_XP_RULES } from "./xp-rules";
 import styles from "./reputation.module.css";
 
 const ruleKeys = {
@@ -23,6 +24,19 @@ export function XpOverviewDialog({ alias, initialRank }: { readonly alias: strin
   const [open, setOpen] = useState(false);
   const [summary, setSummary] = useState<XpSummaryReadModel>();
   const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const loadSummary = useCallback(async () => {
+    setError(false);
+    setLoading(true);
+    try {
+      setSummary(await services.reputation.getMySummary());
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  }, [services]);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -32,13 +46,13 @@ export function XpOverviewDialog({ alias, initialRank }: { readonly alias: strin
   }, [open]);
 
   useEffect(() => {
-    if (!open || summary) return;
-    setError(false);
-    void services.reputation.getMySummary().then(setSummary).catch(() => setError(true));
-  }, [open, services, summary]);
+    if (!open || summary || error || loading) return;
+    void loadSummary();
+  }, [error, loadSummary, loading, open, summary]);
 
   const rank = summary?.rank ?? initialRank;
   const nextRank = rank.nextRank;
+  const rules = summary?.rules.length ? summary.rules : DEFAULT_XP_RULES;
   return <>
     <button type="button" className={styles.infoTrigger} onClick={() => setOpen(true)}>ⓘ {t("xp.howToEarn")}</button>
     <dialog ref={dialogRef} className={styles.sheet} aria-label={t("xp.dialogLabel")} onClose={() => setOpen(false)}>
@@ -54,10 +68,10 @@ export function XpOverviewDialog({ alias, initialRank }: { readonly alias: strin
         <progress max={100} value={rank.progressPercent} aria-label={t("rank.progress")} />
         <span>{nextRank ? t("xp.toNext", { xp: formatXp(rank.xpToNextRank ?? 0, locale), rank: getLocalizedRankName(nextRank, locale) }) : t("xp.maximum")}</span>
       </div>
-      {error ? <p role="alert" className={styles.error}>{t("xp.error")}</p> : !summary ? <Skeleton label={t("xp.loading")} lines={4} variant="list" /> : <>
-        <section className={styles.sheetSection}><h3>{t("xp.recent")}</h3><XpActivityList events={summary.recent} /><Link className={styles.historyLink} to="/profile/xp-history" onClick={() => dialogRef.current?.close()}>{t("xp.historyLink")} →</Link></section>
-        <section className={styles.sheetSection}><h3>{t("xp.rules")}</h3><ul className={styles.rules}>{summary.rules.map((rule) => <li key={rule.eventType}><span>{t(ruleKeys[rule.eventType])}{rule.eventType === "verified_confirmation" && rule.rewardedLimit && rule.windowHours ? <small>{t("xp.rule.confirmationLimit", { limit: rule.rewardedLimit, hours: rule.windowHours })}</small> : null}</span><strong>+{rule.amount} XP</strong></li>)}</ul></section>
-      </>}
+      <section className={styles.sheetSection}><h3>{t("xp.recent")}</h3>
+        {loading ? <Skeleton label={t("xp.loading")} lines={3} variant="list" /> : error ? <div className={styles.fallbackNotice} role="alert"><p>{t("xp.liveUnavailable")}</p><button type="button" onClick={() => void loadSummary()}>{t("xp.retry")}</button></div> : summary ? <><XpActivityList events={summary.recent} /><Link className={styles.historyLink} to="/profile/xp-history" onClick={() => dialogRef.current?.close()}>{t("xp.historyLink")} →</Link></> : null}
+      </section>
+      <section className={styles.sheetSection}><h3>{t("xp.rules")}</h3><ul className={styles.rules}>{rules.map((rule) => <li key={rule.eventType}><span>{t(ruleKeys[rule.eventType])}{rule.eventType === "verified_confirmation" && rule.rewardedLimit && rule.windowHours ? <small>{t("xp.rule.confirmationLimit", { limit: rule.rewardedLimit, hours: rule.windowHours })}</small> : null}</span><strong>+{rule.amount} XP</strong></li>)}</ul></section>
     </dialog>
   </>;
 }

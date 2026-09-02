@@ -13,6 +13,8 @@ import type {
   XpHistoryFilter,
   XpHistoryPage,
   XpSummaryReadModel,
+  XpSystemStatus,
+  XpLaunchResult,
 } from "../../types";
 import type { RequestOptions } from "./request-context";
 
@@ -28,6 +30,8 @@ export interface ReputationRepository {
   reviewCorrection(action: CorrectionReviewAction): Promise<void>;
   setHighlyUseful(noteId: string, enabled: boolean, reason: HighlyUsefulReason, note?: string): Promise<void>;
   listAdminLedger(userId?: string, cursor?: string): Promise<AdminXpLedgerPage>;
+  getSystemStatus(): Promise<XpSystemStatus>;
+  launchSystem(): Promise<XpLaunchResult>;
   previewReputationAction(input: Omit<ReputationActionInput, "reason" | "idempotencyKey">): Promise<ReputationActionPreview>;
   applyReputationAction(input: ReputationActionInput): Promise<void>;
   uploadEvidence(file: File, purpose: EvidencePurpose): Promise<string>;

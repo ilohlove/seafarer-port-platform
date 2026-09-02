@@ -1,4 +1,5 @@
 import { resolveUserRank } from "../../features/user-rank/user-rank";
+import { DEFAULT_XP_RULES } from "../../features/reputation/xp-rules";
 import type {
   ConfirmationResult,
   AdminXpLedgerPage,
@@ -16,19 +17,13 @@ import type {
   XpHistoryPage,
   XpRuleReadModel,
   XpSummaryReadModel,
+  XpSystemStatus,
+  XpLaunchResult,
 } from "../../types";
 import type { ReputationRepository } from "../contracts/reputation-repository";
 import type { RequestOptions } from "../contracts/request-context";
 import { ServiceError } from "../service-errors";
 import { getSupabaseClient, hasSupabaseConfig } from "./supabase-client";
-
-const fallbackRules: readonly XpRuleReadModel[] = [
-  { eventType: "approved_note", amount: 100 },
-  { eventType: "community_confirmed", amount: 50 },
-  { eventType: "accepted_correction", amount: 30 },
-  { eventType: "verified_confirmation", amount: 10, rewardedLimit: 3, windowHours: 24 },
-  { eventType: "highly_useful", amount: 50 },
-];
 
 function recordOf(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" ? value as Record<string, unknown> : {};
@@ -53,6 +48,22 @@ export function mapXpEvent(value: unknown): XpEventReadModel {
   };
 }
 
+export function mapXpSystemStatus(value: unknown): XpSystemStatus {
+  const row = recordOf(value);
+  return { launchAt: typeof row.launch_at === "string" ? row.launch_at : undefined };
+}
+
+export function mapXpLaunchResult(value: unknown): XpLaunchResult {
+  const row = recordOf(value);
+  return {
+    launchAt: typeof row.launch_at === "string" ? row.launch_at : "",
+    alreadyLaunched: row.already_launched === true,
+    notes: Number(row.notes ?? 0),
+    communityConfirmed: Number(row.community_confirmed ?? 0),
+    foundingContributors: Number(row.founding_contributors ?? 0),
+  };
+}
+
 function mapRule(value: unknown): XpRuleReadModel | undefined {
   const row = recordOf(value);
   const eventType = row.event_type;
@@ -68,7 +79,7 @@ function mapRule(value: unknown): XpRuleReadModel | undefined {
 export class UnavailableReputationRepository implements ReputationRepository {
   isConfigured(): boolean { return false; }
   async getMySummary(): Promise<XpSummaryReadModel> {
-    return { rank: resolveUserRank(0), recent: [], rules: fallbackRules };
+    return { rank: resolveUserRank(0), recent: [], rules: DEFAULT_XP_RULES };
   }
   async listMyEvents(): Promise<XpHistoryPage> { return { items: [] }; }
   async getMyEvent(): Promise<XpEventReadModel> { throw new ServiceError("auth-required", "Sign-in is required."); }
@@ -79,6 +90,8 @@ export class UnavailableReputationRepository implements ReputationRepository {
   async reviewCorrection(): Promise<void> { throw new ServiceError("notes-not-configured", "Reputation is not configured."); }
   async setHighlyUseful(): Promise<void> { throw new ServiceError("notes-not-configured", "Reputation is not configured."); }
   async listAdminLedger(): Promise<AdminXpLedgerPage> { return { items: [] }; }
+  async getSystemStatus(): Promise<XpSystemStatus> { throw new ServiceError("auth-required", "Admin access is required."); }
+  async launchSystem(): Promise<XpLaunchResult> { throw new ServiceError("auth-required", "Admin access is required."); }
   async previewReputationAction(): Promise<ReputationActionPreview> { throw new ServiceError("auth-required", "Admin access is required."); }
   async applyReputationAction(): Promise<void> { throw new ServiceError("auth-required", "Admin access is required."); }
   async uploadEvidence(): Promise<string> { throw new ServiceError("notes-not-configured", "Evidence upload is not configured."); }
@@ -96,7 +109,7 @@ export class SupabaseReputationRepository implements ReputationRepository {
     if (error) throw error;
     const row = recordOf(data);
     const rank = recordOf(row.rank);
-    const rules = Array.isArray(row.rules) ? row.rules.map(mapRule).filter((item): item is XpRuleReadModel => Boolean(item)) : fallbackRules;
+    const rules = Array.isArray(row.rules) ? row.rules.map(mapRule).filter((item): item is XpRuleReadModel => Boolean(item)) : DEFAULT_XP_RULES;
     return {
       rank: resolveUserRank(Number(rank.xp ?? 0)),
       recent: Array.isArray(row.recent) ? row.recent.map(mapXpEvent) : [],
@@ -222,6 +235,22 @@ export class SupabaseReputationRepository implements ReputationRepository {
       }) : [],
       nextCursor: typeof row.next_cursor === "string" ? row.next_cursor : undefined,
     };
+  }
+
+  async getSystemStatus(): Promise<XpSystemStatus> {
+    const client = await getSupabaseClient();
+    if (!client) throw new ServiceError("auth-required", "Admin access is required.");
+    const { data, error } = await client.rpc("get_xp_system_status");
+    if (error) throw error;
+    return mapXpSystemStatus(data);
+  }
+
+  async launchSystem(): Promise<XpLaunchResult> {
+    const client = await getSupabaseClient();
+    if (!client) throw new ServiceError("auth-required", "Admin access is required.");
+    const { data, error } = await client.rpc("launch_xp_system");
+    if (error) throw error;
+    return mapXpLaunchResult(data);
   }
 
   async previewReputationAction(input: Omit<ReputationActionInput, "reason" | "idempotencyKey">): Promise<ReputationActionPreview> {

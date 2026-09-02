@@ -120,6 +120,18 @@ export interface AdminXpLedgerPage {
   readonly nextCursor?: string;
 }
 
+export interface XpSystemStatus {
+  readonly launchAt?: string;
+}
+
+export interface XpLaunchResult {
+  readonly launchAt: string;
+  readonly alreadyLaunched: boolean;
+  readonly notes: number;
+  readonly communityConfirmed: number;
+  readonly foundingContributors: number;
+}
+
 export type ReputationActionType = "invalid_contribution" | "spam" | "false_information" | "confirmation_farming" | "coordinated_farming" | "serious_fraud";
 
 export interface ReputationActionInput {

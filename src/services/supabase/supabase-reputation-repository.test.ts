@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { mapXpEvent } from "./supabase-reputation-repository";
+import { mapXpEvent, mapXpLaunchResult, mapXpSystemStatus } from "./supabase-reputation-repository";
 
 describe("Supabase reputation mapping", () => {
   test("maps presentation-safe XP activity", () => {
@@ -19,5 +19,17 @@ describe("Supabase reputation mapping", () => {
     const event = mapXpEvent({ actor_id: "moderator", dedupe_key: "secret", amount: -50 });
     expect(event).not.toHaveProperty("actorId");
     expect(event).not.toHaveProperty("dedupeKey");
+  });
+
+  test("maps the one-time launch state and backfill result", () => {
+    expect(mapXpSystemStatus({ launch_at: "2026-09-02T10:00:00Z" })).toEqual({ launchAt: "2026-09-02T10:00:00Z" });
+    expect(mapXpSystemStatus({ launch_at: null })).toEqual({ launchAt: undefined });
+    expect(mapXpLaunchResult({
+      launch_at: "2026-09-02T10:00:00Z", already_launched: false,
+      notes: 4, community_confirmed: 2, founding_contributors: 3,
+    })).toEqual({
+      launchAt: "2026-09-02T10:00:00Z", alreadyLaunched: false,
+      notes: 4, communityConfirmed: 2, foundingContributors: 3,
+    });
   });
 });
