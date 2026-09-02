@@ -204,7 +204,11 @@ function NoteCard({
             onClick={onConfirm}
           >
             <NoteActionIcon kind="confirm" />
-            <span className={styles.noteActionLabel}>{t("portNotes.topicPanel.confirmInformation")}</span>
+            <span className={styles.noteActionLabel}>
+              {note.accuracy.viewerAnswer === "stillCorrect"
+                ? t("portNotes.topicPanel.confirmedAction")
+                : t("portNotes.topicPanel.confirmInformation")}
+            </span>
           </button>
           <button
             type="button"
@@ -215,7 +219,7 @@ function NoteCard({
             onClick={toggleFeedback}
           >
             <NoteActionIcon kind="feedback" />
-            <span className={styles.noteActionLabel}>{feedbackCount > 0 ? t("noteFeedback.count", { count: feedbackCount }) : t("noteFeedback.addAction")}</span>
+            <span className={styles.noteActionLabel}>{feedbackCount > 0 ? t("noteFeedback.actionCount", { count: feedbackCount }) : t("noteFeedback.addAction")}</span>
           </button>
           <button
             type="button"

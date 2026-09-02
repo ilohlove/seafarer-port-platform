@@ -188,10 +188,14 @@ describe("CrewPort compact Port Notes route", () => {
       "feedback",
       "changed",
     ]);
+    expect(actions[0]).toHaveTextContent("Xác nhận");
+    expect(actions[1]).toHaveTextContent("Phản hồi");
+    expect(actions[1]).not.toHaveTextContent("Thêm phản hồi");
+    expect(actions[2]).toHaveTextContent("Báo thay đổi");
     expect(actions.every((action) => !action.disabled)).toBe(true);
     expect(within(firstNote).queryByText("Chờ xác nhận")).toBeNull();
     expect(within(panel).getAllByText("Điều anh em cần nhớ").length).toBeGreaterThan(0);
-    expect(within(panel).getAllByRole("button", { name: /phản hồi/ }).length).toBeGreaterThan(0);
+    expect(within(panel).getAllByRole("button", { name: /phản hồi/i }).length).toBeGreaterThan(0);
     expect(within(panel).queryByRole("button", { name: "Hữu ích" })).toBeNull();
     await user.click(actions[0]);
     expect(

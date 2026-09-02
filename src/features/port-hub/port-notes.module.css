@@ -2300,12 +2300,9 @@
   min-inline-size: 0;
   gap: var(--space-3);
   padding: clamp(0.75rem, 2.5vw, 1.1rem);
-  border: 1px solid var(--color-service-border);
+  border: 1px solid color-mix(in srgb, var(--color-service-border) 72%, transparent);
   border-radius: var(--radius-lg);
-  background:
-    linear-gradient(135deg, var(--color-primary-soft), transparent 58%),
-    var(--color-surface-elevated);
-  box-shadow: inset 0 0 1.5rem color-mix(in srgb, var(--color-sea) 7%, transparent);
+  background: color-mix(in srgb, var(--color-primary-soft) 30%, var(--color-surface-elevated));
 }
 
 .topicNoteEvidence {
@@ -2314,13 +2311,13 @@
   align-items: center;
   gap: var(--space-3);
   padding-block-end: var(--space-3);
-  border-block-end: 1px solid var(--color-service-border);
+  border-block-end: 1px solid color-mix(in srgb, var(--color-service-border) 55%, transparent);
   font-weight: 700;
 }
 
 .topicNoteEvidence strong {
   display: block;
-  color: var(--color-service-text);
+  color: var(--color-text);
   font-size: var(--font-size-sm);
 }
 
@@ -2337,20 +2334,19 @@
 
 .noteTrustIcon {
   display: grid;
-  flex: 0 0 3.25rem;
-  inline-size: 3.25rem;
-  block-size: 3.25rem;
+  flex: 0 0 2.875rem;
+  inline-size: 2.875rem;
+  block-size: 2.875rem;
   place-items: center;
-  border: 1px solid var(--color-service-border);
+  border: 1px solid color-mix(in srgb, var(--color-border-strong) 55%, transparent);
   border-radius: 50%;
-  background: var(--color-service-bg);
-  color: var(--color-sea);
-  box-shadow: 0 0 1.25rem color-mix(in srgb, var(--color-sea) 16%, transparent);
+  background: color-mix(in srgb, var(--color-surface-subtle) 65%, transparent);
+  color: var(--color-text-muted);
 }
 
 .noteTrustIcon svg {
-  inline-size: 2rem;
-  block-size: 2rem;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
   fill: none;
   stroke: currentColor;
   stroke-linecap: round;
@@ -2457,7 +2453,7 @@
 
 .noteActionStack {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.625rem;
   inline-size: 100%;
   min-inline-size: 0;
@@ -2466,33 +2462,37 @@
 .noteActionStack button {
   display: inline-flex;
   inline-size: 100%;
-  min-block-size: 4.75rem;
+  min-block-size: 3.125rem;
   align-items: center;
-  flex-direction: column;
+  flex-direction: row;
   justify-content: center;
   gap: var(--space-2);
-  padding: var(--space-2) var(--space-1);
-  border: 1px solid transparent;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-pill);
   color: var(--color-text);
   cursor: pointer;
   font: inherit;
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   line-height: var(--line-height-tight);
+  transition:
+    background-color 170ms ease,
+    border-color 170ms ease,
+    color 170ms ease,
+    transform 170ms ease;
 }
 
 .noteActionStack .confirmAction {
-  border: 0.1rem solid var(--color-sea);
-  background: linear-gradient(180deg, var(--color-sea), var(--color-primary));
-  color: var(--color-on-primary);
-  box-shadow: inset 0 1px 0 color-mix(in srgb, white 30%, transparent);
+  border-color: color-mix(in srgb, var(--color-sea) 78%, var(--color-border));
+  background: color-mix(in srgb, var(--color-sea) 6%, var(--color-surface));
+  color: var(--color-sea);
 }
 
 .noteActionStack .feedbackToggle {
-  border: 1px solid var(--color-border-strong);
-  background: var(--color-surface);
-  color: var(--color-text);
+  border-color: color-mix(in srgb, var(--color-border-strong) 82%, var(--color-sea));
+  background: color-mix(in srgb, var(--color-border-strong) 4%, var(--color-surface));
+  color: var(--color-text-muted);
 }
 
 .noteActionIcon {
@@ -2513,29 +2513,44 @@
 }
 
 .noteActionStack .changedAction {
-  min-block-size: 4.75rem;
-  border: 1px solid var(--color-cta);
-  background: var(--color-cta-soft);
-  color: var(--color-cta);
+  grid-column: 1 / -1;
+  border-color: color-mix(in srgb, var(--color-cta) 68%, var(--color-border));
+  background: color-mix(in srgb, var(--color-cta) 4%, var(--color-surface));
+  color: color-mix(in srgb, var(--color-cta) 88%, var(--color-text-muted));
 }
 
-.noteActionStack .confirmAction:hover,
 .noteActionStack .confirmAction[aria-pressed="true"] {
-  border-color: var(--color-sea-hover);
-  background: linear-gradient(180deg, var(--color-sea-hover), var(--color-primary-hover));
+  background: color-mix(in srgb, var(--color-sea) 12%, var(--color-surface));
+  color: var(--color-sea-hover);
 }
 
-.noteActionStack .feedbackToggle:hover,
 .noteActionStack .feedbackToggle[aria-expanded="true"] {
   border-color: var(--color-sea);
-  background: var(--color-primary-soft);
+  background: color-mix(in srgb, var(--color-sea) 9%, var(--color-surface));
   color: var(--color-sea);
 }
 
-.noteActionStack .changedAction:hover {
-  border-color: var(--color-cta-hover);
-  background: var(--color-cta);
-  color: var(--color-on-primary);
+@media (hover: hover) {
+  .noteActionStack button:hover {
+    transform: translateY(-1px);
+  }
+
+  .noteActionStack .confirmAction:hover {
+    border-color: var(--color-sea);
+    background: color-mix(in srgb, var(--color-sea) 10%, var(--color-surface));
+  }
+
+  .noteActionStack .feedbackToggle:hover {
+    border-color: color-mix(in srgb, var(--color-border-strong) 62%, var(--color-sea));
+    background: color-mix(in srgb, var(--color-border-strong) 9%, var(--color-surface));
+    color: var(--color-text);
+  }
+
+  .noteActionStack .changedAction:hover {
+    border-color: color-mix(in srgb, var(--color-cta) 82%, var(--color-border));
+    background: color-mix(in srgb, var(--color-cta) 9%, var(--color-surface));
+    color: var(--color-cta);
+  }
 }
 
 .noteActionStack button:focus-visible {
@@ -2544,7 +2559,7 @@
 }
 
 .noteActionStack button:active {
-  transform: translateY(1px);
+  transform: translateY(0);
 }
 
 .noteActionStack button:disabled {
@@ -2621,9 +2636,9 @@
 
 @media (min-width: 48rem) {
   .noteTrustActions {
-    grid-template-columns: minmax(14rem, 0.85fr) minmax(0, 2.4fr);
+    grid-template-columns: minmax(13rem, 0.72fr) minmax(0, 2.8fr);
     align-items: center;
-    gap: clamp(1rem, 2.5vw, 2rem);
+    gap: clamp(0.75rem, 1.75vw, 1.25rem);
   }
 
   .topicNoteEvidence {
@@ -2631,19 +2646,26 @@
     padding-block-end: 0;
     padding-inline-end: clamp(1rem, 2.5vw, 2rem);
     border-block-end: 0;
-    border-inline-end: 1px solid var(--color-service-border);
+    border-inline-end: 1px solid color-mix(in srgb, var(--color-service-border) 48%, transparent);
+  }
+
+  .noteActionStack {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .noteActionStack button {
-    min-block-size: 3.75rem;
-    flex-direction: row;
-    padding: 0 var(--space-3);
-    font-size: var(--font-size-sm);
+    min-block-size: 3.125rem;
     line-height: var(--line-height-normal);
   }
 
   .noteActionStack .changedAction {
-    min-block-size: 3.75rem;
+    grid-column: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .noteActionStack button {
+    transition: none;
   }
 }
 
