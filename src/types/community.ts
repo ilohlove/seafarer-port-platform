@@ -1,4 +1,5 @@
 import type { StaffRoleTitle, UserRankReadModel } from "./user-rank";
+import type { UserAchievementReadModel } from "./reputation";
 
 export type SessionStatus =
   | "loading"
@@ -41,6 +42,7 @@ export interface ProfileReadModel {
   readonly avatarUrl?: string;
   readonly role: UserRole;
   readonly rank?: UserRankReadModel;
+  readonly achievements?: readonly UserAchievementReadModel[];
 }
 
 export interface PortNoteRecord {
@@ -57,6 +59,9 @@ export interface PortNoteRecord {
   readonly publicAlias: string;
   readonly authorRank?: UserRankReadModel;
   readonly authorStaffTitle?: StaffRoleTitle;
+  readonly highlyUseful?: boolean;
+  readonly updatedAt?: string;
+  readonly lastVerifiedAt?: string;
   readonly createdAt: string;
   readonly authorId?: string;
   readonly accuracy: {

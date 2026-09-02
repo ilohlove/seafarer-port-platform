@@ -37,3 +37,4 @@
 - [2026-09-01 12:55] Chuẩn hóa geometry Identity Frame và tải WebP thích ứng theo Standard, Data Saver, Ultra Lite.
 - [2026-09-01 14:48] Hoàn thiện hiệu ứng username theo Rank và bản địa hóa tên hạng VI/EN trên toàn bộ CrewPort Identity.
 - [2026-09-01 18:05] Tự động gắn Staff Frame cho Admin và Moderator trên profile, Port Notes và các dạng identity công khai.
+- [2026-09-02 10:31] Hoàn thiện Reputation V1 với XP Ledger, correction revision, xác nhận trực tiếp, lịch sử XP và moderation audit.

@@ -477,7 +477,7 @@ export function AppShell({ children }: { readonly children: ReactNode }) {
                   >
                     {t("settings.myNotes")}
                   </Link>
-                  {session.profile.role === "admin" ? (
+                  {session.profile.role !== "member" ? (
                     <Link to="/admin/notes" onClick={() => setIsAccountMenuOpen(false)}>
                       {t("settings.adminNotes")}
                     </Link>

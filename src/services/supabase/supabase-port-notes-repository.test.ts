@@ -28,4 +28,11 @@ describe("Supabase Port Note identity mapping", () => {
   test("falls back safely when an older backend omits Staff identity", () => {
     expect(mapPortNote(note).authorStaffTitle).toBeUndefined();
   });
+
+  test("maps live author XP and note quality metadata", () => {
+    const mapped = mapPortNote({ ...note, author_rank: { level: 5, xp: 3_240 }, highly_useful: true, last_verified_at: "2026-09-02T00:00:00Z" });
+    expect(mapped.authorRank).toMatchObject({ level: 5, xp: 3_240 });
+    expect(mapped.highlyUseful).toBe(true);
+    expect(mapped.lastVerifiedAt).toBe("2026-09-02T00:00:00Z");
+  });
 });

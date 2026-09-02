@@ -88,6 +88,52 @@
   font-size: 1rem;
 }
 
+.achievements {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  margin-block-end: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-subtle);
+}
+
+.achievements h2 {
+  font-size: var(--font-size-md);
+}
+
+.foundingAchievement {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.foundingAchievement div {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--space-1);
+}
+
+.foundingAchievement span,
+.foundingAchievement p {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.foundingCrest {
+  display: grid;
+  flex: 0 0 3.25rem;
+  inline-size: 3.25rem;
+  block-size: 3.25rem;
+  place-items: center;
+  border: 2px solid #8f6747;
+  border-radius: 50%;
+  background: #33261f;
+  color: #d49a65 !important;
+  box-shadow: inset 0 0 0 2px #15181c;
+  font-size: var(--font-size-xl) !important;
+}
+
 .field {
   display: grid;
   gap: 0.45rem;

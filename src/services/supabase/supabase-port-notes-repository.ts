@@ -17,6 +17,7 @@ import type { PortNotesRepository } from "../contracts/port-notes-repository";
 import type { RequestOptions } from "../contracts/request-context";
 import { ServiceError } from "../service-errors";
 import { getSupabaseClient, hasSupabaseConfig } from "./supabase-client";
+import { resolveUserRank } from "../../features/user-rank/user-rank";
 
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
@@ -30,6 +31,7 @@ export function mapPortNote(value: unknown): PortNoteRecord {
   const topic = row.topic;
   const visibility = row.visibility;
   const authorStaffTitle = row.author_staff_title;
+  const authorRank = asRecord(row.author_rank);
   const safeAccuracyState: PortNoteAccuracyState =
     state === "communityConfirmed" || state === "needsReview"
       ? state
@@ -71,6 +73,10 @@ export function mapPortNote(value: unknown): PortNoteRecord {
       authorStaffTitle === "admin" || authorStaffTitle === "moderator"
         ? authorStaffTitle
         : undefined,
+    authorRank: Object.keys(authorRank).length > 0 ? resolveUserRank(Number(authorRank.xp ?? 0)) : undefined,
+    highlyUseful: row.highly_useful === true,
+    updatedAt: typeof row.updated_at === "string" ? row.updated_at : undefined,
+    lastVerifiedAt: typeof row.last_verified_at === "string" ? row.last_verified_at : undefined,
     createdAt: typeof row.created_at === "string" ? row.created_at : "",
     authorId: typeof row.author_id === "string" ? row.author_id : undefined,
     accuracy: {

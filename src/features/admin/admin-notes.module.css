@@ -13,6 +13,9 @@
   padding-block: 1rem;
 }
 
+.adminLinks { display:flex; flex-wrap:wrap; gap:var(--space-2); inline-size:100%; }
+.adminLinks a { color:var(--color-link); font-size:var(--font-size-sm); font-weight:var(--font-weight-medium); }
+
 .eyebrow {
   margin: 0;
   color: var(--color-primary);

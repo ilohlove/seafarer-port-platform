@@ -4,6 +4,7 @@ import { EmptyState, Skeleton } from "../../components";
 import { useBandwidthMode, useServices, useSession } from "../../app/providers";
 import { useI18n } from "../../i18n";
 import { DEFAULT_USER_RANK, getStaffTitleForRole, UserRankIdentity } from "../user-rank";
+import { XpOverviewDialog } from "../reputation";
 import styles from "./profile.module.css";
 
 function Avatar({
@@ -165,7 +166,21 @@ export function ProfileRoute() {
             avatarUrl={session.profile.avatarUrl}
             showProgress
           />
+          <XpOverviewDialog
+            alias={session.profile.nickname ?? fullName}
+            initialRank={session.profile.rank ?? DEFAULT_USER_RANK}
+          />
         </section>
+
+        {session.profile.achievements?.some((item) => item.key === "FOUNDING_CONTRIBUTOR") ? (
+          <section className={styles.achievements} aria-labelledby="profile-achievements-heading">
+            <h2 id="profile-achievements-heading">{t("achievement.heading")}</h2>
+            <article className={styles.foundingAchievement}>
+              <span className={styles.foundingCrest} aria-hidden="true">⚓</span>
+              <div><strong>{t("achievement.founding.name")}</strong><span>{t("achievement.founding.tag")} · {t("achievement.legacy")}</span><p>{t("achievement.founding.description")}</p></div>
+            </article>
+          </section>
+        ) : null}
 
         <form className={styles.form} onSubmit={(event) => void saveProfile(event)}>
           <label className={styles.field}>

@@ -3,13 +3,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { TrustStatus, type TrustStatusPresentation } from "../../../components";
 import { useServices, useSession } from "../../../app/providers";
 import { useI18n, type TranslationKey } from "../../../i18n";
-import type {
-  AccuracyAnswer,
-  PortNoteRecord,
-  PortNoteTopic,
-} from "../../../types";
+import type { PortNoteRecord, PortNoteTopic } from "../../../types";
 import type { PortNoteCardModel } from "../port-notes-view-model";
 import { DEFAULT_USER_RANK, UserRankIdentity } from "../../user-rank";
+import { CorrectionDialog, VerifiedConfirmationDialog } from "../../reputation";
 import styles from "../port-notes.module.css";
 
 const topicKeys: Readonly<Record<PortNoteTopic, TranslationKey>> = {
@@ -95,12 +92,16 @@ function trustForNote(
 function NoteCard({
   note,
   featured,
-  onAssess,
+  onConfirm,
+  onChanged,
+  onHelpful,
   canAssess,
 }: {
   readonly note: PortNoteRecord;
   readonly featured: boolean;
-  readonly onAssess: (answer: AccuracyAnswer) => void;
+  readonly onConfirm: () => void;
+  readonly onChanged: () => void;
+  readonly onHelpful: () => void;
   readonly canAssess: boolean;
 }) {
   const { t } = useI18n();
@@ -146,23 +147,19 @@ function NoteCard({
           <button
             type="button"
             aria-pressed={note.accuracy.viewerAnswer === "stillCorrect"}
-            onClick={() => onAssess("stillCorrect")}
+            onClick={onConfirm}
           >
             {t("portNotes.topicPanel.stillCorrect")}
           </button>
           <button
             type="button"
             aria-pressed={note.accuracy.viewerAnswer === "changed"}
-            onClick={() => onAssess("changed")}
+            onClick={onChanged}
           >
             {t("portNotes.topicPanel.changed")}
           </button>
-          <button
-            type="button"
-            aria-pressed={note.accuracy.viewerAnswer === "notSure"}
-            onClick={() => onAssess("notSure")}
-          >
-            {t("portNotes.topicPanel.notSure")}
+          <button type="button" onClick={onHelpful}>
+            {t("portNotes.topicPanel.helpful")}
           </button>
         </fieldset>
       ) : null}
@@ -199,6 +196,9 @@ export function TopicNotesPanel({
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState(false);
+  const [confirmationNote, setConfirmationNote] = useState<PortNoteRecord>();
+  const [correctionNote, setCorrectionNote] = useState<PortNoteRecord>();
+  const [actionNotice, setActionNotice] = useState<string>();
 
   const topicLabel = t(topicKeys[topic]);
 
@@ -256,21 +256,6 @@ export function TopicNotesPanel({
     [ownNotes],
   );
 
-  async function assess(noteId: string, answer: AccuracyAnswer) {
-    try {
-      await services.portNotes.assessAccuracy(noteId, answer);
-      setNotes((current) =>
-        current.map((note) =>
-          note.id === noteId
-            ? { ...note, accuracy: { ...note.accuracy, viewerAnswer: answer } }
-            : note,
-        ),
-      );
-    } catch {
-      setError(true);
-    }
-  }
-
   async function loadMore() {
     if (!nextCursor || isLoadingMore) return;
     setIsLoadingMore(true);
@@ -288,6 +273,15 @@ export function TopicNotesPanel({
       setError(true);
     } finally {
       setIsLoadingMore(false);
+    }
+  }
+
+  async function markHelpful(noteId: string) {
+    try {
+      await services.reputation.setHelpful(noteId, true);
+      setActionNotice(t("confirmation.successNoReward"));
+    } catch {
+      setError(true);
     }
   }
 
@@ -332,7 +326,9 @@ export function TopicNotesPanel({
             note={note}
             featured={index === 0}
             canAssess={session.status === "authenticated" && note.authorId !== session.profile?.userId}
-            onAssess={(answer) => void assess(note.id, answer)}
+            onConfirm={() => setConfirmationNote(note)}
+            onChanged={() => setCorrectionNote(note)}
+            onHelpful={() => void markHelpful(note.id)}
           />
         ))}
       </div>
@@ -344,6 +340,28 @@ export function TopicNotesPanel({
           {isLoadingMore ? t("portNotes.topicPanel.loading") : t("portNotes.topicPanel.more")}
         </button>
       ) : null}
+      {actionNotice ? <output className={styles.topicNotesState} aria-live="polite">{actionNotice}</output> : null}
+      <VerifiedConfirmationDialog
+        noteId={confirmationNote?.id}
+        open={Boolean(confirmationNote)}
+        onClose={() => setConfirmationNote(undefined)}
+        onSuccess={(rewardedXp) => {
+          setActionNotice(rewardedXp > 0 ? t("confirmation.successReward", { xp: rewardedXp }) : t("confirmation.successNoReward"));
+          if (confirmationNote) {
+            setNotes((current) => current.map((note) => note.id === confirmationNote.id ? {
+              ...note,
+              accuracy: { ...note.accuracy, viewerAnswer: "stillCorrect", stillCorrect: note.accuracy.stillCorrect + 1 },
+            } : note));
+          }
+        }}
+      />
+      <CorrectionDialog
+        noteId={correctionNote?.id}
+        currentInformation={correctionNote?.summary ?? ""}
+        open={Boolean(correctionNote)}
+        onClose={() => setCorrectionNote(undefined)}
+        onSuccess={() => setActionNotice(t("correction.success"))}
+      />
     </section>
   );
 }

@@ -8,6 +8,7 @@ import type {
 import type { RequestOptions } from "../contracts/request-context";
 import { ServiceError, ValidationError } from "../service-errors";
 import type { ProfileReadModel, UserRole } from "../../types";
+import { resolveUserRank } from "../../features/user-rank/user-rank";
 import { getSupabaseClient, hasSupabaseConfig } from "./supabase-client";
 
 function fallbackProfile(user: SupabaseUser): ProfileReadModel {
@@ -41,6 +42,17 @@ function mapProfile(user: SupabaseUser, value: unknown): ProfileReadModel {
   const role = record.role;
   const safeRole: UserRole =
     role === "admin" || role === "moderator" ? role : "member";
+  const rank = record.rank && typeof record.rank === "object"
+    ? resolveUserRank(Number((record.rank as Record<string, unknown>).xp ?? 0))
+    : undefined;
+  const achievements = Array.isArray(record.achievements)
+    ? record.achievements.flatMap((value) => {
+        const item = value && typeof value === "object" ? value as Record<string, unknown> : {};
+        return item.key === "FOUNDING_CONTRIBUTOR" && typeof item.earned_at === "string"
+          ? [{ key: "FOUNDING_CONTRIBUTOR" as const, earnedAt: item.earned_at }]
+          : [];
+      })
+    : undefined;
 
   return {
     ...fallback,
@@ -51,6 +63,8 @@ function mapProfile(user: SupabaseUser, value: unknown): ProfileReadModel {
         ? record.nickname
         : undefined,
     role: safeRole,
+    rank,
+    achievements,
   };
 }
 

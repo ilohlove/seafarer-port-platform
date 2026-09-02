@@ -36,6 +36,11 @@ const AdminNotesRoute = lazy(() =>
     default: module.AdminNotesRoute,
   })),
 );
+const AdminCorrectionsRoute = lazy(() =>
+  import("../features/admin/AdminCorrectionsRoute").then((module) => ({ default: module.AdminCorrectionsRoute })),
+);
+const AdminReputationLedgerRoute = lazy(() => import("../features/admin/AdminReputationLedgerRoute").then((module) => ({ default: module.AdminReputationLedgerRoute })));
+const AdminUserReputationRoute = lazy(() => import("../features/admin/AdminUserReputationRoute").then((module) => ({ default: module.AdminUserReputationRoute })));
 
 const AuthCallbackRoute = lazy(() =>
   import("../features/auth/AuthCallbackRoute").then((module) => ({
@@ -52,6 +57,12 @@ const MyNotesRoute = lazy(() =>
 const IdentityGalleryRoute = lazy(() =>
   import("../features/user-rank/IdentityGalleryRoute").then((module) => ({
     default: module.IdentityGalleryRoute,
+  })),
+);
+
+const XpHistoryRoute = lazy(() =>
+  import("../features/reputation/XpHistoryRoute").then((module) => ({
+    default: module.XpHistoryRoute,
   })),
 );
 
@@ -84,7 +95,11 @@ export function AppRouter() {
             <Route path="/search" element={<SearchRoute />} />
             <Route path="/community" element={<CommunityRoute />} />
             <Route path="/profile" element={<ProfileRoute />} />
+            <Route path="/profile/xp-history" element={<XpHistoryRoute />} />
             <Route path="/admin/notes" element={<AdminNotesRoute />} />
+            <Route path="/admin/moderation/corrections" element={<AdminCorrectionsRoute />} />
+            <Route path="/admin/reputation/ledger" element={<AdminReputationLedgerRoute />} />
+            <Route path="/admin/users/:userId/reputation" element={<AdminUserReputationRoute />} />
             <Route path="/auth/callback" element={<AuthCallbackRoute />} />
             <Route path="/my-notes" element={<MyNotesRoute />} />
             <Route path="/foundation" element={<FoundationRoute />} />

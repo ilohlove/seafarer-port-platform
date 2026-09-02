@@ -6,5 +6,6 @@ export * from "./planner-service";
 export * from "./port-media-repository";
 export * from "./port-repository";
 export * from "./port-notes-repository";
+export * from "./reputation-repository";
 export * from "./preferences-store";
 export * from "./request-context";

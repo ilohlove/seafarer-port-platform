@@ -8,6 +8,7 @@ import type {
   PortRepository,
   PortNotesRepository,
   PreferencesStore,
+  ReputationRepository,
 } from "./contracts";
 import { hasSupabaseConfig } from "./supabase/supabase-client";
 import {
@@ -28,6 +29,7 @@ import { StaticPortDirectoryRepository } from "./static/static-port-directory-re
 import { StaticPortMediaRepository } from "./static/static-port-media-repository";
 import { LocalStoragePreferencesStore } from "./storage/local-storage-preferences-store";
 import { resolveStorage } from "./storage/storage-utils";
+import { SupabaseReputationRepository, UnavailableReputationRepository } from "./supabase/supabase-reputation-repository";
 
 export interface AppServices {
   readonly ports: PortRepository;
@@ -37,6 +39,7 @@ export interface AppServices {
   readonly community: CommunityRepository;
   readonly auth: AuthRepository;
   readonly portNotes: PortNotesRepository;
+  readonly reputation: ReputationRepository;
   readonly offlinePacks: OfflinePackStore;
   readonly preferences: PreferencesStore;
 }
@@ -66,6 +69,9 @@ export function createServices(
   const portNotes: PortNotesRepository = hasSupabaseConfig()
     ? new SupabasePortNotesRepository()
     : new UnavailablePortNotesRepository();
+  const reputation: ReputationRepository = hasSupabaseConfig()
+    ? new SupabaseReputationRepository()
+    : new UnavailableReputationRepository();
 
   return {
     ports,
@@ -75,6 +81,7 @@ export function createServices(
     community: new MockCommunityRepository(latencyMs),
     auth,
     portNotes,
+    reputation,
     offlinePacks: new MockOfflinePackStore(),
     preferences: new LocalStoragePreferencesStore(storage),
   };
