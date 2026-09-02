@@ -409,6 +409,7 @@ div.eventButton {
 
 .historyPage {
   display: grid;
+  min-inline-size: 0;
   gap: var(--space-5);
   inline-size: min(100%, 46rem);
   padding-block: clamp(var(--space-4), 4vw, var(--space-7));
@@ -417,6 +418,7 @@ div.eventButton {
 
 .historyHeader {
   display: flex;
+  min-inline-size: 0;
   align-items: flex-start;
   gap: var(--space-3);
 }
@@ -433,10 +435,13 @@ div.eventButton {
 
 .historyHeader h1 {
   font-size: var(--font-size-2xl);
+  overflow-wrap: anywhere;
 }
 
 .historySummary {
-  display: grid;
+  display: flex;
+  min-inline-size: 0;
+  align-items: center;
   gap: var(--space-1);
   padding: var(--space-4);
   border: 1px solid var(--color-border);
@@ -444,8 +449,27 @@ div.eventButton {
   background: var(--color-surface-subtle);
 }
 
+.historySummary > span {
+  flex: 0 0 4rem;
+  inline-size: 4rem;
+  block-size: 4rem;
+  margin-inline-end: var(--space-2);
+}
+
+.historySummary > div {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--space-1);
+}
+
+.historySummary p {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
 .filters {
   display: flex;
+  min-inline-size: 0;
   gap: var(--space-2);
   overflow-x: auto;
   scrollbar-width: thin;
@@ -480,9 +504,13 @@ div.eventButton {
   font-weight: var(--font-weight-medium);
 }
 
-.detailSheet {
+.detailSheet[open] {
   display: grid;
   gap: var(--space-4);
+}
+
+.detailSheet:not([open]) {
+  display: none;
 }
 
 .detailSheet p {

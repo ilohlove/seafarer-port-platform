@@ -39,3 +39,4 @@
 - [2026-09-01 18:05] Tự động gắn Staff Frame cho Admin và Moderator trên profile, Port Notes và các dạng identity công khai.
 - [2026-09-02 10:31] Hoàn thiện Reputation V1 với XP Ledger, correction revision, xác nhận trực tiếp, lịch sử XP và moderation audit.
 - [2026-09-02 17:21] Triển khai Supabase Reputation, bổ sung fallback quy tắc XP và kiểm soát kích hoạt một lần cho Admin.
+- [2026-09-02 18:23] Hoàn thiện lịch sử XP không chồng lớp, bản địa hóa Reputation và ưu tiên Staff identity cho Admin, Moderator.

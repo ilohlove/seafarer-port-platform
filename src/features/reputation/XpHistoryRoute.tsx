@@ -4,7 +4,14 @@ import { EmptyState, Skeleton } from "../../components";
 import { useServices, useSession } from "../../app/providers";
 import { useI18n } from "../../i18n";
 import type { XpEventReadModel, XpHistoryFilter, XpSummaryReadModel } from "../../types";
-import { formatXp, getLocalizedRankName } from "../user-rank";
+import {
+  STAFF_TITLES,
+  StaffAvatarFrame,
+  formatXp,
+  getLocalizedRankName,
+  getLocalizedStaffName,
+  getStaffTitleForRole,
+} from "../user-rank";
 import { XpActivityList } from "./XpActivityList";
 import { formatEventTime, formatXpAmount, getEventContext, getXpEventLabelKey } from "./reputation-ui";
 import styles from "./reputation.module.css";
@@ -42,10 +49,20 @@ export function XpHistoryRoute() {
   }
 
   if (session.status === "loading") return <Skeleton label={t("state.loading")} lines={6} variant="card" />;
-  if (session.status !== "authenticated") return <EmptyState heading={t("profile.loginRequired")} description={t("settings.loginPlaceholder")} announce />;
+  if (session.status !== "authenticated" || !session.profile) return <EmptyState heading={t("profile.loginRequired")} description={t("settings.loginPlaceholder")} announce />;
+  const staffTitle = getStaffTitleForRole(session.profile.role);
+  const staff = staffTitle ? STAFF_TITLES[staffTitle] : undefined;
+  const alias = session.profile.nickname ?? session.profile.fullName;
   return <main className={styles.historyPage}>
     <header className={styles.historyHeader}><Link to="/profile" aria-label={t("profile.heading")}>←</Link><div><h1>{t("xp.historyTitle")}</h1><p>{t("xp.private")}</p></div></header>
-    {summary ? <section className={styles.historySummary}><h2>{t("xp.levelSummary", { rank: getLocalizedRankName(summary.rank, locale), level: summary.rank.level })}</h2><strong>{formatXp(summary.rank.xp, locale)} XP</strong></section> : null}
+    {summary ? <section className={styles.historySummary}>
+      {staffTitle ? <StaffAvatarFrame alias={alias} staffTitle={staffTitle} /> : null}
+      <div>
+        {staff ? <p>{t("xp.staffRole")}</p> : null}
+        <h2>{staff ? `${getLocalizedStaffName(staff, locale)} · ${staff.tag}` : t("xp.levelSummary", { rank: getLocalizedRankName(summary.rank, locale), level: summary.rank.level })}</h2>
+        <strong>{formatXp(summary.rank.xp, locale)} XP</strong>
+      </div>
+    </section> : null}
     <nav className={styles.filters} aria-label={t("xp.historyTitle")}>{(["all", "earned", "adjusted"] as const).map((value) => <button type="button" key={value} aria-pressed={filter === value} onClick={() => setFilter(value)}>{t(`xp.filter.${value}`)}</button>)}</nav>
     {error ? <p className={styles.error} role="alert">{t("xp.error")}</p> : null}
     {loading && events.length === 0 ? <Skeleton label={t("xp.loading")} lines={6} variant="list" /> : <XpActivityList events={events} onSelect={setSelected} />}

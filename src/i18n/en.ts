@@ -48,6 +48,7 @@ export const enDictionary = {
   "xp.dialogLabel": "XP and rank information",
   "xp.close": "Close",
   "xp.currentRank": "Current rank",
+  "xp.staffRole": "Staff role",
   "xp.recent": "Recent XP activity",
   "xp.rules": "How to earn XP",
   "xp.historyLink": "View full history",

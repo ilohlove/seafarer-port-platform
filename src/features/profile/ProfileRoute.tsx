@@ -140,6 +140,8 @@ export function ProfileRoute() {
     );
   }
 
+  const staffTitle = getStaffTitleForRole(session.profile.role);
+
   return (
     <div className={styles.page}>
       <section className={styles.card} aria-labelledby="profile-heading">
@@ -162,13 +164,14 @@ export function ProfileRoute() {
           <UserRankIdentity
             alias={session.profile.nickname ?? fullName}
             rank={session.profile.rank ?? DEFAULT_USER_RANK}
-            staffTitle={getStaffTitleForRole(session.profile.role)}
+            staffTitle={staffTitle}
             avatarUrl={session.profile.avatarUrl}
             showProgress
           />
           <XpOverviewDialog
             alias={session.profile.nickname ?? fullName}
             initialRank={session.profile.rank ?? DEFAULT_USER_RANK}
+            staffTitle={staffTitle}
           />
         </section>
 
