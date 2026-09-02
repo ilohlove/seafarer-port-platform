@@ -395,9 +395,7 @@ function firstTopicNote(
   return notes
     .filter((note) => topics.includes(note.topic))
     .sort(
-      (left, right) =>
-        right.usefulnessCount + right.confirmationCount -
-        (left.usefulnessCount + left.confirmationCount),
+      (left, right) => right.confirmationCount - left.confirmationCount,
     )[0];
 }
 
@@ -599,8 +597,7 @@ export function buildPortNotesViewModel(
     .sort(
       (left, right) =>
         notePriority(right.topic) - notePriority(left.topic) ||
-        right.usefulnessCount + right.confirmationCount -
-          (left.usefulnessCount + left.confirmationCount),
+        right.confirmationCount - left.confirmationCount,
     )
     .slice(0, 5)
     .map((note) => toNoteCardModel(note, hub, t));
@@ -814,7 +811,7 @@ export function buildPortNotesViewModel(
         ? t(videoTranslationKeys[esimPayload.videoCallQuality])
         : t("portNotes.internet.videoUnknown"),
       evidence: internetEvidenceNote
-        ? `${internetEvidenceNote.confirmationCount} ${t("portNotes.internet.seafarers")} · ${internetEvidenceNote.usefulnessCount} ${t("portNotes.internet.crewUseful")}`
+        ? `${internetEvidenceNote.confirmationCount} ${t("portNotes.internet.seafarers")}`
         : t("portNotes.internet.prototypeEvidence"),
       trust: internetTrust,
     },

@@ -2203,6 +2203,12 @@
   gap: 0.85rem;
 }
 
+.topicNoteGroup {
+  display: grid;
+  min-inline-size: 0;
+  gap: 0.75rem;
+}
+
 .topicNoteCard {
   display: grid;
   min-inline-size: 0;
@@ -2234,11 +2240,6 @@
   min-inline-size: 0;
 }
 
-.noteAuthorIdentity :global([data-frame-kind="rank"][data-size="compact"]) {
-  inline-size: 4rem;
-  block-size: 4rem;
-}
-
 .topicNoteSummary {
   margin: 0;
   padding: 0.85rem;
@@ -2249,6 +2250,18 @@
   font-size: 1rem;
   font-weight: 600;
   line-height: var(--line-height-normal);
+}
+
+.topicNoteSummary strong {
+  display: block;
+  margin-block-end: var(--space-1);
+  color: var(--color-primary);
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.02em;
+}
+
+.topicNoteSummary p {
+  margin: 0;
 }
 
 .topicNoteDetails {
@@ -2267,6 +2280,12 @@
   margin: 0;
 }
 
+.topicNoteDetails > div {
+  display: grid;
+  grid-template-columns: minmax(6.5rem, 0.35fr) minmax(0, 1fr);
+  gap: var(--space-2);
+}
+
 .topicNoteEvidence,
 .topicNotesLogin,
 .topicNotesState,
@@ -2276,10 +2295,356 @@
   font-size: 0.82rem;
 }
 
+.noteTrustActions {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--space-3);
+  padding: clamp(0.75rem, 2.5vw, 1.1rem);
+  border: 1px solid var(--color-service-border);
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(135deg, var(--color-primary-soft), transparent 58%),
+    var(--color-surface-elevated);
+  box-shadow: inset 0 0 1.5rem color-mix(in srgb, var(--color-sea) 7%, transparent);
+}
+
 .topicNoteEvidence {
+  display: flex;
+  min-inline-size: 0;
+  align-items: center;
+  gap: var(--space-3);
+  padding-block-end: var(--space-3);
+  border-block-end: 1px solid var(--color-service-border);
+  font-weight: 700;
+}
+
+.topicNoteEvidence strong {
+  display: block;
+  color: var(--color-service-text);
+  font-size: var(--font-size-sm);
+}
+
+.noteTrustCopy {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--space-1);
+}
+
+.noteTrustCopy > span {
+  overflow-wrap: anywhere;
+  font-weight: var(--font-weight-medium);
+}
+
+.noteTrustIcon {
+  display: grid;
+  flex: 0 0 3.25rem;
+  inline-size: 3.25rem;
+  block-size: 3.25rem;
+  place-items: center;
+  border: 1px solid var(--color-service-border);
+  border-radius: 50%;
+  background: var(--color-service-bg);
+  color: var(--color-sea);
+  box-shadow: 0 0 1.25rem color-mix(in srgb, var(--color-sea) 16%, transparent);
+}
+
+.noteTrustIcon svg {
+  inline-size: 2rem;
+  block-size: 2rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.6;
+}
+
+.noteActions,
+.feedbackActions,
+.feedbackForm > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.noteActions button,
+.feedbackActions button,
+.feedbackMore,
+.feedbackForm button {
+  min-block-size: var(--tap-target);
+  padding-inline: var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.noteActions button:first-child {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.feedbackPanel,
+.feedbackList,
+.feedbackForm {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--space-3);
+}
+
+.feedbackPanel > p,
+.feedbackForm small {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.feedbackItem {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-inline-start: 0.2rem solid var(--color-border-strong);
+  background: var(--color-surface-subtle);
+}
+
+.feedbackItem > p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.feedbackMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.feedbackActions button,
+.feedbackMore,
+.feedbackForm button {
+  min-block-size: 2.25rem;
+  font-size: var(--font-size-xs);
+}
+
+.feedbackForm {
   padding-block-start: var(--space-3);
   border-block-start: 1px solid var(--color-border);
-  font-weight: 700;
+}
+
+.feedbackForm label {
+  display: grid;
+  gap: var(--space-1);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.feedbackForm textarea {
+  inline-size: 100%;
+  min-block-size: 5.5rem;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-elevated);
+  color: var(--color-text);
+  font: inherit;
+  resize: vertical;
+}
+
+.noteActionStack {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.625rem;
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.noteActionStack button {
+  display: inline-flex;
+  inline-size: 100%;
+  min-block-size: 4.75rem;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-1);
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
+}
+
+.noteActionStack .confirmAction {
+  border: 0.1rem solid var(--color-sea);
+  background: linear-gradient(180deg, var(--color-sea), var(--color-primary));
+  color: var(--color-on-primary);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, white 30%, transparent);
+}
+
+.noteActionStack .feedbackToggle {
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.noteActionIcon {
+  flex: 0 0 1.5rem;
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.noteActionLabel {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.noteActionStack .changedAction {
+  min-block-size: 4.75rem;
+  border: 1px solid var(--color-cta);
+  background: var(--color-cta-soft);
+  color: var(--color-cta);
+}
+
+.noteActionStack .confirmAction:hover,
+.noteActionStack .confirmAction[aria-pressed="true"] {
+  border-color: var(--color-sea-hover);
+  background: linear-gradient(180deg, var(--color-sea-hover), var(--color-primary-hover));
+}
+
+.noteActionStack .feedbackToggle:hover,
+.noteActionStack .feedbackToggle[aria-expanded="true"] {
+  border-color: var(--color-sea);
+  background: var(--color-primary-soft);
+  color: var(--color-sea);
+}
+
+.noteActionStack .changedAction:hover {
+  border-color: var(--color-cta-hover);
+  background: var(--color-cta);
+  color: var(--color-on-primary);
+}
+
+.noteActionStack button:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.noteActionStack button:active {
+  transform: translateY(1px);
+}
+
+.noteActionStack button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.feedbackChangeAlert {
+  display: flex;
+  min-inline-size: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-inline-start: 0.2rem solid var(--color-cta);
+  background: var(--color-cta-soft);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+}
+
+.feedbackChangeAlert span {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.feedbackChangeAlert button,
+.feedbackHeader button {
+  flex: 0 0 auto;
+  min-block-size: 2.75rem;
+  padding-inline: var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-link);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.feedbackPanel {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--space-3);
+  padding: clamp(0.85rem, 3vw, 1.1rem);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-elevated);
+  box-shadow: var(--shadow-raised);
+}
+
+.feedbackHeader {
+  display: flex;
+  min-inline-size: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.feedbackHeader button {
+  padding-inline: var(--space-3);
+}
+
+.feedbackItem {
+  border-radius: var(--radius-md);
+}
+
+.feedbackItem[data-focused="true"] {
+  outline: 0.16rem solid var(--color-cta);
+  outline-offset: 0.12rem;
+}
+
+@media (min-width: 48rem) {
+  .noteTrustActions {
+    grid-template-columns: minmax(14rem, 0.85fr) minmax(0, 2.4fr);
+    align-items: center;
+    gap: clamp(1rem, 2.5vw, 2rem);
+  }
+
+  .topicNoteEvidence {
+    align-self: stretch;
+    padding-block-end: 0;
+    padding-inline-end: clamp(1rem, 2.5vw, 2rem);
+    border-block-end: 0;
+    border-inline-end: 1px solid var(--color-service-border);
+  }
+
+  .noteActionStack button {
+    min-block-size: 3.75rem;
+    flex-direction: row;
+    padding: 0 var(--space-3);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+  }
+
+  .noteActionStack .changedAction {
+    min-block-size: 3.75rem;
+  }
 }
 
 .accuracyFieldset {
@@ -2358,6 +2723,20 @@
   }
 
   .featuredNoteHeader {
+    flex-direction: column;
+  }
+
+  .topicNoteDetails > div {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .noteActions button {
+    flex: 1 1 10rem;
+  }
+
+  .feedbackChangeAlert {
+    align-items: flex-start;
     flex-direction: column;
   }
 

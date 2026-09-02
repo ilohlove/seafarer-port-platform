@@ -3,6 +3,9 @@ import type {
   ModerationAction,
   ModerationQueueQuery,
   PortNotePage,
+  NoteFeedbackPage,
+  NoteFeedbackRecord,
+  NoteFeedbackState,
   PortNoteQuery,
   PortNoteRecord,
   PortNoteSubmission,
@@ -27,6 +30,13 @@ export interface PortNotesRepository {
   listAllMyNotes(options?: RequestOptions): Promise<readonly PortNoteRecord[]>;
   submitNote(submission: PortNoteSubmission): Promise<PortNoteRecord>;
   assessAccuracy(noteId: string, answer: AccuracyAnswer): Promise<void>;
+  listFeedback(noteId: string, cursor?: string, limit?: number, options?: RequestOptions): Promise<NoteFeedbackPage>;
+  getFeedback(feedbackId: string, options?: RequestOptions): Promise<NoteFeedbackRecord>;
+  submitFeedback(noteId: string, body: string, idempotencyKey: string): Promise<NoteFeedbackRecord>;
+  updateFeedback(feedbackId: string, body: string): Promise<NoteFeedbackRecord>;
+  deleteFeedback(feedbackId: string): Promise<void>;
+  listFeedbackModerationQueue(state?: NoteFeedbackState): Promise<readonly NoteFeedbackRecord[]>;
+  moderateFeedback(feedbackId: string, decision: Exclude<NoteFeedbackState, "pending">, reason?: string): Promise<void>;
   listModerationQueue(
     query: ModerationQueueQuery,
   ): Promise<readonly PortNoteRecord[]>;

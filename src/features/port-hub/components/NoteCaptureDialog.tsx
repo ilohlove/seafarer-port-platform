@@ -26,6 +26,7 @@ interface CaptureTopicOption {
 }
 
 interface PreviewDetail {
+  readonly key: string;
   readonly label: string;
   readonly value: string;
 }
@@ -277,18 +278,19 @@ export function NoteCaptureDialog({
       ...(selectedTopic?.suggestions ?? [])
         .filter((suggestion) => activeSuggestions.includes(suggestion.id))
         .map((suggestion) => ({
+          key: `${topic}.${suggestion.id}`,
           label: t(suggestion.label),
           value: fieldValues[suggestion.id]?.trim() ?? "",
         })),
-      { label: t("portNotes.capture.price"), value: price.trim() },
-      { label: t("portNotes.capture.place"), value: place.trim() },
-      { label: t("portNotes.capture.extra"), value: extra.trim() },
+      { key: "common.price", label: t("portNotes.capture.price"), value: price.trim() },
+      { key: "common.place", label: t("portNotes.capture.place"), value: place.trim() },
+      { key: "common.extra", label: t("portNotes.capture.extra"), value: extra.trim() },
     ].filter((detail) => detail.value);
 
     setPreview({
       topic,
       visibility,
-      takeaway: takeaway.trim(),
+      takeaway: takeaway.trim() || details[0]?.value || "",
       details,
       contact:
         contactValue && (visibility === "private" || contactPermission)

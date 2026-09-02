@@ -39,6 +39,7 @@ const AdminNotesRoute = lazy(() =>
 const AdminCorrectionsRoute = lazy(() =>
   import("../features/admin/AdminCorrectionsRoute").then((module) => ({ default: module.AdminCorrectionsRoute })),
 );
+const AdminFeedbackRoute = lazy(() => import("../features/admin/AdminFeedbackRoute").then((module) => ({ default: module.AdminFeedbackRoute })));
 const AdminReputationLedgerRoute = lazy(() => import("../features/admin/AdminReputationLedgerRoute").then((module) => ({ default: module.AdminReputationLedgerRoute })));
 const AdminUserReputationRoute = lazy(() => import("../features/admin/AdminUserReputationRoute").then((module) => ({ default: module.AdminUserReputationRoute })));
 
@@ -98,6 +99,7 @@ export function AppRouter() {
             <Route path="/profile/xp-history" element={<XpHistoryRoute />} />
             <Route path="/admin/notes" element={<AdminNotesRoute />} />
             <Route path="/admin/moderation/corrections" element={<AdminCorrectionsRoute />} />
+            <Route path="/admin/moderation/feedback" element={<AdminFeedbackRoute />} />
             <Route path="/admin/reputation/ledger" element={<AdminReputationLedgerRoute />} />
             <Route path="/admin/users/:userId/reputation" element={<AdminUserReputationRoute />} />
             <Route path="/auth/callback" element={<AuthCallbackRoute />} />

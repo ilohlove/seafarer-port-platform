@@ -5,5 +5,4 @@ export const DEFAULT_XP_RULES: readonly XpRuleReadModel[] = [
   { eventType: "community_confirmed", amount: 50 },
   { eventType: "accepted_correction", amount: 30 },
   { eventType: "verified_confirmation", amount: 10, rewardedLimit: 3, windowHours: 24 },
-  { eventType: "highly_useful", amount: 50 },
 ];

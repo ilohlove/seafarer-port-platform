@@ -205,9 +205,7 @@ export function buildCommunityLibraryModel(
     const confirmations = t("community.note.confirmations", {
       count: note.confirmationCount,
     });
-    const usefulness = t("community.note.usefulness", {
-      count: note.usefulnessCount,
-    });
+    const usefulness = "";
 
     portOptions.set(port.id, {
       id: port.id,
@@ -228,7 +226,7 @@ export function buildCommunityLibraryModel(
       context,
       confirmations,
       usefulness,
-      evidence: `${confirmations} · ${usefulness}`,
+      evidence: confirmations,
       trust: { status, label: t(trustTranslationKeys[status]) },
       needsAttention:
         status !== "officialSource" && status !== "communityConfirmed",
@@ -239,7 +237,7 @@ export function buildCommunityLibraryModel(
       ),
       rank: featuredOrder.has(note.id)
         ? 10_000 - (featuredOrder.get(note.id) ?? 0)
-        : note.confirmationCount + note.usefulnessCount,
+        : note.confirmationCount,
     } satisfies CommunityNoteModel;
   });
 

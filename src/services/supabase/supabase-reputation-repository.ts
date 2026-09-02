@@ -5,7 +5,6 @@ import type {
   AdminXpLedgerPage,
   CorrectionQueueItem,
   CorrectionReviewAction,
-  HighlyUsefulReason,
   EvidencePurpose,
   ReputationActionInput,
   ReputationActionPreview,
@@ -67,7 +66,7 @@ export function mapXpLaunchResult(value: unknown): XpLaunchResult {
 function mapRule(value: unknown): XpRuleReadModel | undefined {
   const row = recordOf(value);
   const eventType = row.event_type;
-  if (eventType !== "approved_note" && eventType !== "community_confirmed" && eventType !== "accepted_correction" && eventType !== "verified_confirmation" && eventType !== "highly_useful") return undefined;
+  if (eventType !== "approved_note" && eventType !== "community_confirmed" && eventType !== "accepted_correction" && eventType !== "verified_confirmation") return undefined;
   return {
     eventType,
     amount: Number(row.amount ?? 0),
@@ -85,10 +84,8 @@ export class UnavailableReputationRepository implements ReputationRepository {
   async getMyEvent(): Promise<XpEventReadModel> { throw new ServiceError("auth-required", "Sign-in is required."); }
   async confirmNote(): Promise<ConfirmationResult> { throw new ServiceError("notes-not-configured", "Reputation is not configured."); }
   async submitCorrection(): Promise<void> { throw new ServiceError("notes-not-configured", "Reputation is not configured."); }
-  async setHelpful(): Promise<number> { throw new ServiceError("notes-not-configured", "Reputation is not configured."); }
   async listCorrections(): Promise<readonly CorrectionQueueItem[]> { return []; }
   async reviewCorrection(): Promise<void> { throw new ServiceError("notes-not-configured", "Reputation is not configured."); }
-  async setHighlyUseful(): Promise<void> { throw new ServiceError("notes-not-configured", "Reputation is not configured."); }
   async listAdminLedger(): Promise<AdminXpLedgerPage> { return { items: [] }; }
   async getSystemStatus(): Promise<XpSystemStatus> { throw new ServiceError("auth-required", "Admin access is required."); }
   async launchSystem(): Promise<XpLaunchResult> { throw new ServiceError("auth-required", "Admin access is required."); }
@@ -158,8 +155,11 @@ export class SupabaseReputationRepository implements ReputationRepository {
   async submitCorrection(submission: NoteCorrectionSubmission): Promise<void> {
     const client = await getSupabaseClient();
     if (!client) throw new ServiceError("notes-not-configured", "Reputation is not configured.");
-    const { error } = await client.rpc("submit_note_correction", {
-      p_note_id: submission.noteId,
+    const rpcName = submission.sourceFeedbackId ? "submit_note_correction_from_feedback" : "submit_note_correction";
+    const { error } = await client.rpc(rpcName, {
+      ...(submission.sourceFeedbackId
+        ? { p_feedback_id: submission.sourceFeedbackId }
+        : { p_note_id: submission.noteId }),
       p_action: submission.action,
       p_field_type: submission.fieldType,
       p_current_information: submission.currentInformation,
@@ -170,14 +170,6 @@ export class SupabaseReputationRepository implements ReputationRepository {
       p_idempotency_key: submission.idempotencyKey,
     });
     if (error) throw error;
-  }
-
-  async setHelpful(noteId: string, helpful: boolean): Promise<number> {
-    const client = await getSupabaseClient();
-    if (!client) throw new ServiceError("notes-not-configured", "Reputation is not configured.");
-    const { data, error } = await client.rpc("toggle_note_helpful", { p_note_id: noteId, p_helpful: helpful });
-    if (error) throw error;
-    return Number(data ?? 0);
   }
 
   async listCorrections(status: "pending" | "accepted" | "rejected" = "pending"): Promise<readonly CorrectionQueueItem[]> {
@@ -208,16 +200,6 @@ export class SupabaseReputationRepository implements ReputationRepository {
       p_correction_id: action.correctionId, p_decision: action.decision,
       p_impact: action.impact ?? null, p_reason: action.reason ?? null,
       p_idempotency_key: action.idempotencyKey,
-    });
-    if (error) throw error;
-  }
-
-  async setHighlyUseful(noteId: string, enabled: boolean, reason: HighlyUsefulReason, note?: string): Promise<void> {
-    const client = await getSupabaseClient();
-    if (!client) throw new ServiceError("notes-not-configured", "Reputation is not configured.");
-    const { error } = await client.rpc("set_note_highly_useful", {
-      p_note_id: noteId, p_enabled: enabled, p_reason_code: reason,
-      p_reason: note ?? null, p_idempotency_key: typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `useful-${Date.now()}`,
     });
     if (error) throw error;
   }

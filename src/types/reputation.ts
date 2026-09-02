@@ -13,7 +13,7 @@ export type XpEventType =
 export type XpHistoryFilter = "all" | "earned" | "adjusted";
 
 export interface XpRuleReadModel {
-  readonly eventType: "approved_note" | "community_confirmed" | "accepted_correction" | "verified_confirmation" | "highly_useful";
+  readonly eventType: "approved_note" | "community_confirmed" | "accepted_correction" | "verified_confirmation";
   readonly amount: number;
   readonly rewardedLimit?: number;
   readonly windowHours?: number;
@@ -42,7 +42,7 @@ export interface XpHistoryPage {
   readonly nextCursor?: string;
 }
 
-export type ConfirmationSource = "direct" | "companion" | "reference";
+export type ConfirmationSource = "direct";
 export type VerificationPeriod = "today" | "last7Days" | "last30Days" | "oneToThreeMonths" | "older";
 
 export interface VerifiedConfirmationSubmission {
@@ -60,7 +60,7 @@ export interface ConfirmationResult {
 }
 
 export type CorrectionAction = "UPDATE" | "ADD" | "INVALIDATE";
-export type CorrectionFieldType = "price" | "location" | "hours" | "contact" | "service" | "operatingStatus" | "other";
+export type CorrectionFieldType = "price" | "location" | "hours" | "contact" | "service" | "operatingStatus" | "transport" | "other";
 
 export interface NoteCorrectionSubmission {
   readonly noteId: string;
@@ -72,6 +72,7 @@ export interface NoteCorrectionSubmission {
   readonly note?: string;
   readonly evidencePath?: string;
   readonly idempotencyKey: string;
+  readonly sourceFeedbackId?: string;
 }
 
 export type EvidencePurpose = "confirmation" | "correction";
@@ -106,8 +107,6 @@ export interface CorrectionReviewAction {
   readonly reason?: string;
   readonly idempotencyKey: string;
 }
-
-export type HighlyUsefulReason = "detailed" | "missingData" | "practicalValue" | "actionable" | "other";
 
 export interface AdminXpLedgerEntry extends XpEventReadModel {
   readonly userId: string;

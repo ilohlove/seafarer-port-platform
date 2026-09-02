@@ -43,7 +43,7 @@ export function RecentCommunityNotes({
                 staffTitle={note.authorStaffTitle}
               />
               <small>
-                {note.usefulness} · {note.confirmations}
+                {note.confirmations}
               </small>
             </div>
             <TrustStatus {...note.trust} compact />

@@ -53,7 +53,6 @@ export function TopSeafarerNotes({
               />
               <div className={styles.noteEvidence}>
                 <span>{note.confirmations}</span>
-                <span>{note.usefulness}</span>
               </div>
               <div className={styles.noteActions}>
                 <button

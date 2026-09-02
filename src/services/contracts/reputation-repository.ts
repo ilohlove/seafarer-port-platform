@@ -3,7 +3,6 @@ import type {
   AdminXpLedgerPage,
   CorrectionQueueItem,
   CorrectionReviewAction,
-  HighlyUsefulReason,
   EvidencePurpose,
   ReputationActionInput,
   ReputationActionPreview,
@@ -25,10 +24,8 @@ export interface ReputationRepository {
   getMyEvent(eventId: string, options?: RequestOptions): Promise<XpEventReadModel>;
   confirmNote(submission: VerifiedConfirmationSubmission): Promise<ConfirmationResult>;
   submitCorrection(submission: NoteCorrectionSubmission): Promise<void>;
-  setHelpful(noteId: string, helpful: boolean): Promise<number>;
   listCorrections(status?: "pending" | "accepted" | "rejected"): Promise<readonly CorrectionQueueItem[]>;
   reviewCorrection(action: CorrectionReviewAction): Promise<void>;
-  setHighlyUseful(noteId: string, enabled: boolean, reason: HighlyUsefulReason, note?: string): Promise<void>;
   listAdminLedger(userId?: string, cursor?: string): Promise<AdminXpLedgerPage>;
   getSystemStatus(): Promise<XpSystemStatus>;
   launchSystem(): Promise<XpLaunchResult>;

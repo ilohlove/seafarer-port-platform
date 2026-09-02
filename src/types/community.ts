@@ -59,6 +59,10 @@ export interface PortNoteRecord {
   readonly publicAlias: string;
   readonly authorRank?: UserRankReadModel;
   readonly authorStaffTitle?: StaffRoleTitle;
+  readonly feedbackCount: number;
+  readonly feedbackChangeAlert?: {
+    readonly feedbackId: string;
+  };
   readonly highlyUseful?: boolean;
   readonly updatedAt?: string;
   readonly lastVerifiedAt?: string;
@@ -71,6 +75,30 @@ export interface PortNoteRecord {
     readonly notSure: number;
     readonly viewerAnswer?: AccuracyAnswer;
   };
+}
+
+export type NoteFeedbackState = "pending" | "approved" | "rejected";
+
+export interface NoteFeedbackRecord {
+  readonly id: string;
+  readonly noteId: string;
+  readonly body: string;
+  readonly status: NoteFeedbackState;
+  readonly publicAlias: string;
+  readonly authorRank?: UserRankReadModel;
+  readonly authorStaffTitle?: StaffRoleTitle;
+  readonly authorId?: string;
+  readonly usedForCorrection: boolean;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly noteSummary?: string;
+  readonly portKey?: string;
+  readonly moderationReason?: string;
+}
+
+export interface NoteFeedbackPage {
+  readonly items: readonly NoteFeedbackRecord[];
+  readonly nextCursor?: string;
 }
 
 export interface PortNotePage {

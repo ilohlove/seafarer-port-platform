@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, test } from "vitest";
 
 const sql = readFileSync(resolve(process.cwd(), "supabase/migrations/202609020001_reputation_xp_v1.sql"), "utf8");
+const trustV1Sql = readFileSync(resolve(process.cwd(), "supabase/migrations/202609030001_note_trust_feedback_v1.sql"), "utf8");
 
 describe("CrewPort reputation migration contract", () => {
   test("uses an append-only ledger and cached non-negative balance", () => {
@@ -18,7 +19,8 @@ describe("CrewPort reputation migration contract", () => {
     expect(sql).toContain("('community_confirmed', 50");
     expect(sql).toContain("('accepted_correction', 30");
     expect(sql).toContain("('verified_confirmation', 10, 3, 24");
-    expect(sql).toContain("('highly_useful', 50");
+    expect(trustV1Sql).toContain("where event_type = 'highly_useful'");
+    expect(trustV1Sql).toContain("set enabled = false");
   });
 
   test("requires three recent independent direct verifications", () => {

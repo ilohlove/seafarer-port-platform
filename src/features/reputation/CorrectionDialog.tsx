@@ -4,10 +4,10 @@ import { useI18n } from "../../i18n";
 import type { CorrectionFieldType, VerificationPeriod } from "../../types";
 import styles from "./reputation.module.css";
 
-const fields: readonly CorrectionFieldType[] = ["price", "location", "hours", "contact", "service", "operatingStatus", "other"];
+const fields: readonly CorrectionFieldType[] = ["price", "location", "hours", "contact", "service", "operatingStatus", "transport", "other"];
 const periods: readonly VerificationPeriod[] = ["today", "last7Days", "last30Days", "oneToThreeMonths", "older"];
 
-export function CorrectionDialog({ noteId, currentInformation, open, onClose, onSuccess }: { readonly noteId?: string; readonly currentInformation: string; readonly open: boolean; readonly onClose: () => void; readonly onSuccess: () => void }) {
+export function CorrectionDialog({ noteId, currentInformation, initialProposedInformation, sourceFeedbackId, open, onClose, onSuccess }: { readonly noteId?: string; readonly currentInformation: string; readonly initialProposedInformation?: string; readonly sourceFeedbackId?: string; readonly open: boolean; readonly onClose: () => void; readonly onSuccess: () => void }) {
   const services = useServices();
   const { t } = useI18n();
   const ref = useRef<HTMLDialogElement>(null);
@@ -18,7 +18,15 @@ export function CorrectionDialog({ noteId, currentInformation, open, onClose, on
   const [evidence, setEvidence] = useState<File>();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
-  useEffect(() => { const dialog = ref.current; if (!dialog) return; if (open && !dialog.open) dialog.showModal?.(); if (!open && dialog.open) dialog.close(); }, [open]);
+  useEffect(() => {
+    const dialog = ref.current;
+    if (!dialog) return;
+    if (open && !dialog.open) {
+      setProposed(initialProposedInformation ?? "");
+      dialog.showModal?.();
+    }
+    if (!open && dialog.open) dialog.close();
+  }, [initialProposedInformation, open]);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -26,7 +34,7 @@ export function CorrectionDialog({ noteId, currentInformation, open, onClose, on
     setBusy(true); setError(false);
     try {
       const evidencePath = evidence ? await services.reputation.uploadEvidence(evidence, "correction") : undefined;
-      await services.reputation.submitCorrection({ noteId, action: fieldType === "operatingStatus" && /đóng|closed|inactive/iu.test(proposed) ? "INVALIDATE" : "UPDATE", fieldType, currentInformation, proposedInformation: proposed.trim(), verificationPeriod: period, note: note.trim() || undefined, evidencePath, idempotencyKey: typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `correction-${Date.now()}` });
+      await services.reputation.submitCorrection({ noteId, action: fieldType === "operatingStatus" && /đóng|closed|inactive/iu.test(proposed) ? "INVALIDATE" : "UPDATE", fieldType, currentInformation, proposedInformation: proposed.trim(), verificationPeriod: period, note: note.trim() || undefined, evidencePath, idempotencyKey: typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `correction-${Date.now()}`, sourceFeedbackId });
       onSuccess(); ref.current?.close(); setProposed(""); setNote("");
     } catch { setError(true); } finally { setBusy(false); }
   }

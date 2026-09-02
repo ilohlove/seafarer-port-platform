@@ -56,13 +56,15 @@
 | D-303 | Tất cả đóng góp public qua moderation hoặc risk-based moderation | LOCKED |
 | D-304 | 8 nguyên tắc anti-abuse | LOCKED |
 | D-305 | Giữ review/note đã duyệt khi user xóa tài khoản, ẩn danh tác giả | LOCKED |
-| D-306 | Top Notes xếp theo usefulness, confirmation, topic priority, terminal specificity và moderation state | LOCKED |
+| D-306 | Top Notes xếp theo usefulness, confirmation, topic priority, terminal specificity và moderation state | SUPERSEDED |
 | D-307 | Free-form social feed không thuộc MVP | LOCKED |
-| D-308 | Reputation V1 chỉ cấp XP cho đóng góp dữ liệu: note duyệt, xác nhận trực tiếp, correction, Community Confirmed và Highly Useful | LOCKED |
+| D-308 | Reputation V1 chỉ cấp XP cho đóng góp dữ liệu: note duyệt, xác nhận trực tiếp, correction, Community Confirmed và Highly Useful | SUPERSEDED |
 | D-309 | XP dùng append-only ledger, chống cộng trùng theo nguồn; reversal và penalty là event riêng, số dư không dưới 0 | LOCKED |
 | D-310 | Correction được duyệt tạo revision; material change reset confirmation, không ghi đè hoặc xóa lịch sử note | LOCKED |
 | D-311 | Community Confirmed cần 3 xác nhận trực tiếp độc lập trong 3 tháng; bonus tác giả tối đa một lần mỗi note | LOCKED |
 | D-312 | Founding Contributor là Legacy Achievement không XP cho contribution hợp lệ trước ngày Reputation launch | LOCKED |
+| D-313 | Note Trust V1 chỉ có xác nhận trực tiếp, feedback một tầng và correction; Helpful được lưu lịch sử nhưng không hiển thị, xếp hạng hoặc cấp XP | LOCKED |
+| D-314 | Feedback public qua moderation, không nested và 0 XP; Top Notes ưu tiên confirmation hiện hành, freshness và topic relevance | LOCKED |
 
 ## Knowledge Dictionary
 | ID | Quyết định | Trạng thái |

@@ -97,15 +97,6 @@ export function AdminNotesRoute() {
     }
   }
 
-  async function toggleHighlyUseful(note: PortNoteRecord) {
-    setError(false);
-    try {
-      await services.reputation.setHighlyUseful(note.id, !note.highlyUseful, "practicalValue");
-      setNotes((current) => current.map((candidate) => candidate.id === note.id ? { ...candidate, highlyUseful: !candidate.highlyUseful } : candidate));
-      setNotice(true);
-    } catch { setError(true); }
-  }
-
   if (session.status === "loading") {
     return <Skeleton label={t("state.loading")} lines={6} variant="card" />;
   }
@@ -139,6 +130,7 @@ export function AdminNotesRoute() {
           </select>
         </label>
         <nav className={styles.adminLinks}>
+          <Link to="/admin/moderation/feedback">{t("admin.feedback.heading")}</Link>
           <Link to="/admin/moderation/corrections">{t("admin.notes.corrections")}</Link>
           {session.profile?.role === "admin" ? <Link to="/admin/reputation/ledger">{t("admin.notes.reputationLedger")}</Link> : null}
         </nav>
@@ -185,7 +177,6 @@ export function AdminNotesRoute() {
               <button type="button" onClick={() => void moderate(note, "quarantined")}>
                 {t("admin.notes.quarantine")}
               </button>
-              {note.moderationState === "approved" ? <button type="button" onClick={() => void toggleHighlyUseful(note)}>{note.highlyUseful ? t("admin.notes.removeHighlyUseful") : t("admin.notes.highlyUseful")}</button> : null}
             </div>
           </article>
         ))}

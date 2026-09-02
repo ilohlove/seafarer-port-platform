@@ -42,14 +42,12 @@ describe("Port Note author identity", () => {
     expect(screen.queryByText(hiddenContext)).toBeNull();
   });
 
-  test("scopes the approved 64px badge size to member Rank artwork", () => {
+  test("uses the approved 64px compact size for Rank and Staff artwork everywhere", () => {
     const styles = readFileSync(
-      resolve(process.cwd(), "src/features/port-hub/port-notes.module.css"),
+      resolve(process.cwd(), "src/features/user-rank/user-rank.module.css"),
       "utf8",
     );
-    expect(styles).toContain('.noteAuthorIdentity :global([data-frame-kind="rank"][data-size="compact"])');
-    expect(styles).toMatch(/\.noteAuthorIdentity[\s\S]*?inline-size: 4rem;[\s\S]*?block-size: 4rem;/u);
-    expect(styles).not.toContain('.noteAuthorIdentity :global([data-frame-kind="staff"]');
+    expect(styles).toMatch(/\.avatarFrame\[data-size="compact"\][\s\S]*?inline-size:4rem;[\s\S]*?block-size:4rem;/u);
   });
 
   test("aligns the featured notes section with the page content edges", () => {
@@ -58,5 +56,36 @@ describe("Port Note author identity", () => {
       "utf8",
     );
     expect(styles).toMatch(/\.topicNotesPanel\s*\{[\s\S]*?padding-inline: 0;/u);
+  });
+
+  test("keeps the Note actions image-led on mobile and balanced on desktop", () => {
+    const component = readFileSync(
+      resolve(process.cwd(), "src/features/port-hub/components/TopicNotesPanel.tsx"),
+      "utf8",
+    );
+    const styles = readFileSync(
+      resolve(process.cwd(), "src/features/port-hub/port-notes.module.css"),
+      "utf8",
+    );
+    const confirmIndex = component.indexOf('data-note-action="confirm"');
+    const feedbackIndex = component.indexOf('data-note-action="feedback"');
+    const changedIndex = component.indexOf('data-note-action="changed"');
+
+    expect(confirmIndex).toBeGreaterThan(-1);
+    expect(feedbackIndex).toBeGreaterThan(confirmIndex);
+    expect(changedIndex).toBeGreaterThan(feedbackIndex);
+    expect(component).toContain('<NoteActionIcon kind="confirm" />');
+    expect(component).toContain('<NoteActionIcon kind="feedback" />');
+    expect(component).toContain('<NoteActionIcon kind="changed" />');
+    expect(component).toContain("<NoteTrustIcon />");
+    expect(component).not.toContain("feedbackChevron");
+    expect(styles).toMatch(/\.noteTrustActions\s*\{[\s\S]*?border: 1px solid var\(--color-service-border\);[\s\S]*?background:/u);
+    expect(styles).toMatch(/\.noteActionStack\s*\{[\s\S]*?grid-template-columns: repeat\(3, minmax\(0, 1fr\)\);[\s\S]*?inline-size: 100%;/u);
+    expect(styles).toMatch(/\.noteActionStack button\s*\{[\s\S]*?min-block-size: 4\.75rem;[\s\S]*?flex-direction: column;/u);
+    expect(component).toContain('data-action-count="3"');
+    expect(component).toContain("confirmationDisabled");
+    expect(component).not.toContain("<TrustStatus");
+    expect(styles).toMatch(/@media \(min-width: 48rem\)[\s\S]*?\.noteTrustActions\s*\{[\s\S]*?grid-template-columns: minmax\(14rem, 0\.85fr\) minmax\(0, 2\.4fr\);[\s\S]*?\.noteActionStack button\s*\{[\s\S]*?min-block-size: 3\.75rem;[\s\S]*?flex-direction: row;/u);
+    expect(styles).not.toMatch(/\n\.feedbackToggle\s*\{/u);
   });
 });

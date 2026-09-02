@@ -10,7 +10,6 @@ describe("XP rule fallback", () => {
       { eventType: "community_confirmed", amount: 50 },
       { eventType: "accepted_correction", amount: 30 },
       { eventType: "verified_confirmation", amount: 10, rewardedLimit: 3, windowHours: 24 },
-      { eventType: "highly_useful", amount: 50 },
     ]);
 
     const sql = readFileSync(resolve(process.cwd(), "supabase/migrations/202609020001_reputation_xp_v1.sql"), "utf8");

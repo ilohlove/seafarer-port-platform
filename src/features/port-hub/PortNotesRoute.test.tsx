@@ -172,13 +172,49 @@ describe("CrewPort compact Port Notes route", () => {
     expect(within(panel).getByText("Nhà thám hiểm boong tàu")).toBeVisible();
     expect(panel).not.toHaveTextContent("busan-context-new-port");
     expect(panel).not.toHaveTextContent(/Lv\.|DECK EXPLORER/);
-    expect(within(panel).getAllByText("Cộng đồng xác nhận").length).toBeGreaterThan(0);
+    expect(
+      within(panel).getAllByText(/Đã được cộng đồng xác nhận/).length,
+    ).toBeGreaterThan(0);
     const identityArtwork = Array.from(panel.querySelectorAll('[data-identity-artwork="frame"]'));
     expect(identityArtwork.length).toBeGreaterThan(0);
     expect(identityArtwork.every((image) => image.getAttribute("src")?.includes("rank-lv"))).toBe(true);
     const noteAuthorIdentity = panel.querySelector('[data-note-author-identity]');
     expect(noteAuthorIdentity?.querySelector('[data-frame-kind="rank"]')).toHaveAttribute("data-size", "compact");
+    const firstNote = panel.querySelector<HTMLElement>("[data-topic-note-card]")!;
+    const actionGroup = firstNote.querySelector<HTMLElement>('[data-action-count="3"]')!;
+    const actions = Array.from(actionGroup.querySelectorAll<HTMLButtonElement>("[data-note-action]"));
+    expect(actions.map((action) => action.dataset.noteAction)).toEqual([
+      "confirm",
+      "feedback",
+      "changed",
+    ]);
+    expect(actions.every((action) => !action.disabled)).toBe(true);
+    expect(within(firstNote).queryByText("Chờ xác nhận")).toBeNull();
+    expect(within(panel).getAllByText("Điều anh em cần nhớ").length).toBeGreaterThan(0);
+    expect(within(panel).getAllByRole("button", { name: /phản hồi/ }).length).toBeGreaterThan(0);
+    expect(within(panel).queryByRole("button", { name: "Hữu ích" })).toBeNull();
+    await user.click(actions[0]);
+    expect(
+      screen.getByText("Đăng nhập Google chưa được cấu hình cho bản triển khai này."),
+    ).toBeVisible();
+    expect(screen.queryByRole("dialog", { name: "Xác nhận thông tin" })).toBeNull();
     expect(screen.queryByRole("heading", { name: "Ghi chú về SIM vật lý" })).toBeNull();
+  });
+
+  test("keeps feedback collapsed until requested and links its accessible panel", async () => {
+    render(<App />);
+    await screen.findByRole("heading", { name: "Busan New Port" });
+    fireEvent.click(document.getElementById("quick-action-compare-esim")!);
+    await waitFor(() => expect(document.getElementById("topic-notes-heading")).toBeInTheDocument());
+    const panel = document.getElementById("topic-notes-heading")!.closest("section")!;
+    const feedbackToggle = panel.querySelector<HTMLButtonElement>('button[aria-controls][aria-expanded="false"]')!;
+    const controlledPanelId = feedbackToggle.getAttribute("aria-controls")!;
+
+    expect(feedbackToggle).toBeVisible();
+    expect(document.getElementById(controlledPanelId)).toBeNull();
+    fireEvent.click(feedbackToggle);
+    expect(feedbackToggle).toHaveAttribute("aria-expanded", "true");
+    expect(document.getElementById(controlledPanelId)).toBeVisible();
   });
 
   test("shows only the selected Busan context without a context switcher", async () => {

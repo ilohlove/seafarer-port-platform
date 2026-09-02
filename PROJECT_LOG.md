@@ -40,3 +40,5 @@
 - [2026-09-02 10:31] Hoàn thiện Reputation V1 với XP Ledger, correction revision, xác nhận trực tiếp, lịch sử XP và moderation audit.
 - [2026-09-02 17:21] Triển khai Supabase Reputation, bổ sung fallback quy tắc XP và kiểm soát kích hoạt một lần cho Admin.
 - [2026-09-02 18:23] Hoàn thiện lịch sử XP không chồng lớp, bản địa hóa Reputation và ưu tiên Staff identity cho Admin, Moderator.
+- [2026-09-02 20:00] Hoàn thiện Note Trust V1 với xác nhận trực tiếp, feedback một tầng, correction revision và XP chống farm.
+- [2026-09-03 01:02] Chuẩn hóa hành động Note mobile, feedback tải theo nhu cầu và cảnh báo thông tin có thể đã thay đổi.

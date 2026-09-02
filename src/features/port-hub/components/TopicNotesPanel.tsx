@@ -1,12 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 
-import { TrustStatus, type TrustStatusPresentation } from "../../../components";
 import { useServices, useSession } from "../../../app/providers";
 import { useI18n, type TranslationKey } from "../../../i18n";
-import type { PortNoteRecord, PortNoteTopic } from "../../../types";
+import type { NoteFeedbackRecord, PortNoteRecord, PortNoteTopic } from "../../../types";
 import type { PortNoteCardModel } from "../port-notes-view-model";
 import { DEFAULT_USER_RANK, UserRankIdentity } from "../../user-rank";
 import { CorrectionDialog, VerifiedConfirmationDialog } from "../../reputation";
+import { NoteFeedbackPanel } from "./NoteFeedbackPanel";
 import styles from "../port-notes.module.css";
 
 const topicKeys: Readonly<Record<PortNoteTopic, TranslationKey>> = {
@@ -60,6 +60,7 @@ function legacyNotes(
         publicAlias: note.authorLabel,
         authorRank: note.authorRank,
         authorStaffTitle: note.authorStaffTitle,
+        feedbackCount: 0,
         createdAt: "",
         accuracy: {
           state:
@@ -76,17 +77,39 @@ function legacyNotes(
     });
 }
 
-function trustForNote(
-  note: PortNoteRecord,
-  t: (key: TranslationKey) => string,
-): TrustStatusPresentation {
-  if (note.accuracy.state === "communityConfirmed") {
-    return { status: "communityConfirmed", label: t("trust.communityConfirmed") };
+function NoteActionIcon({ kind }: { readonly kind: "confirm" | "feedback" | "changed" }) {
+  if (kind === "confirm") {
+    return (
+      <svg className={styles.noteActionIcon} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <circle cx="12" cy="12" r="9" />
+        <path d="m8.2 12.2 2.4 2.4 5.4-5.5" />
+      </svg>
+    );
   }
-  if (note.accuracy.state === "needsReview") {
-    return { status: "conflictingReports", label: t("portNotes.topicPanel.needsReview") };
+  if (kind === "feedback") {
+    return (
+      <svg className={styles.noteActionIcon} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 9 9 0 0 1-3.8-.9L4 20l1.3-3.7A7.5 7.5 0 1 1 20 11.5Z" />
+      </svg>
+    );
   }
-  return { status: "needsConfirmation", label: t("trust.needsConfirmation") };
+  return (
+    <svg className={styles.noteActionIcon} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M13.5 5.5H6.8A2.8 2.8 0 0 0 4 8.3v8.9A2.8 2.8 0 0 0 6.8 20h8.9a2.8 2.8 0 0 0 2.8-2.8v-6.7" />
+      <path d="m10 14 1.1-3.3L17.8 4a1.6 1.6 0 0 1 2.2 2.2l-6.7 6.7L10 14Z" />
+    </svg>
+  );
+}
+
+function NoteTrustIcon() {
+  return (
+    <span className={styles.noteTrustIcon} aria-hidden="true">
+      <svg viewBox="0 0 32 32" focusable="false">
+        <path d="M16 3.5c4.2 2.8 7.8 3.5 10.5 3.8v7.6c0 6.1-4 10.5-10.5 13.6C9.5 25.4 5.5 21 5.5 14.9V7.3C8.2 7 11.8 6.3 16 3.5Z" />
+        <path d="M16 9v11M12 14h8M12.5 21.5c1.2-1 2.3-1.5 3.5-1.5s2.3.5 3.5 1.5" />
+      </svg>
+    </span>
+  );
 }
 
 function NoteCard({
@@ -94,28 +117,40 @@ function NoteCard({
   featured,
   onConfirm,
   onChanged,
-  onHelpful,
-  canAssess,
+  onFeedbackCorrection,
+  confirmationDisabled,
 }: {
   readonly note: PortNoteRecord;
   readonly featured: boolean;
   readonly onConfirm: () => void;
   readonly onChanged: () => void;
-  readonly onHelpful: () => void;
-  readonly canAssess: boolean;
+  readonly onFeedbackCorrection: (feedback: NoteFeedbackRecord) => void;
+  readonly confirmationDisabled: boolean;
 }) {
-  const { t } = useI18n();
-  const trust = trustForNote(note, t);
+  const { t, formatDate } = useI18n();
+  const feedbackPanelId = useId();
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [feedbackCount, setFeedbackCount] = useState(note.feedbackCount);
+  const [focusFeedbackId, setFocusFeedbackId] = useState<string>();
   const visibleDetails = Object.entries(note.details).filter(
     ([key]) => key !== "context",
   );
 
+  useEffect(() => setFeedbackCount(note.feedbackCount), [note.feedbackCount]);
+
+  function toggleFeedback() {
+    setFocusFeedbackId(undefined);
+    setFeedbackOpen((current) => !current);
+  }
+
   return (
-    <article
-      className={styles.topicNoteCard}
-      data-featured={featured ? "true" : undefined}
-      data-rank-level={note.authorStaffTitle ? undefined : note.authorRank?.level}
-    >
+    <article className={styles.topicNoteGroup}>
+      <div
+        className={styles.topicNoteCard}
+        data-topic-note-card
+        data-featured={featured ? "true" : undefined}
+        data-rank-level={note.authorStaffTitle ? undefined : note.authorRank?.level}
+      >
       <div className={styles.featuredNoteHeader}>
         <div className={styles.noteAuthorIdentity} data-note-author-identity>
           <UserRankIdentity
@@ -124,47 +159,101 @@ function NoteCard({
             staffTitle={note.authorStaffTitle}
           />
         </div>
-        <TrustStatus {...trust} compact />
       </div>
-      <p className={styles.topicNoteSummary}>{note.summary}</p>
+      <div className={styles.topicNoteSummary}>
+        <strong>{t("portNotes.topicPanel.takeaway")}</strong>
+        <p>{note.summary}</p>
+      </div>
       {visibleDetails.length > 0 ? (
         <dl className={styles.topicNoteDetails}>
-          <dt>{t("portNotes.topicPanel.details")}</dt>
           {visibleDetails.map(([key, value]) => (
-            <dd key={key}>{value}</dd>
+            <div key={key}>
+              <dt>{detailLabel(key, t)}</dt>
+              <dd>{value}</dd>
+            </div>
           ))}
         </dl>
       ) : null}
-      <div className={styles.topicNoteEvidence}>
-        {t("portNotes.topicPanel.evidence", {
-          confirmed: note.accuracy.stillCorrect,
-          changed: note.accuracy.changed,
-        })}
-      </div>
-      {canAssess ? (
-        <fieldset className={styles.accuracyFieldset}>
-          <legend>{t("portNotes.topicPanel.accuracy")}</legend>
+      {note.feedbackChangeAlert ? (
+        <div className={styles.feedbackChangeAlert}>
+          <span>{t("noteFeedback.changeAlert")}</span>
+          <button type="button" onClick={() => { setFocusFeedbackId(note.feedbackChangeAlert?.feedbackId); setFeedbackOpen(true); }}>
+            {t("noteFeedback.viewChanged")}
+          </button>
+        </div>
+      ) : null}
+      <div className={styles.noteTrustActions}>
+        <div className={styles.topicNoteEvidence}>
+          <NoteTrustIcon />
+          <span className={styles.noteTrustCopy}>
+            <strong>{note.accuracy.state === "communityConfirmed" ? t("portNotes.topicPanel.communityConfirmed") : t("portNotes.topicPanel.confirmationCount", { count: note.accuracy.stillCorrect })}</strong>
+            <span>{note.lastVerifiedAt ? t("portNotes.topicPanel.lastVerified", { date: formatDate(note.lastVerifiedAt, { month: "short", year: "numeric" }) }) : t("portNotes.topicPanel.notVerified")}</span>
+          </span>
+        </div>
+        <div
+          className={styles.noteActionStack}
+          data-action-count="3"
+        >
           <button
             type="button"
+            className={styles.confirmAction}
+            data-note-action="confirm"
             aria-pressed={note.accuracy.viewerAnswer === "stillCorrect"}
+            disabled={confirmationDisabled}
+            title={confirmationDisabled ? t("confirmation.selfNotAllowed") : undefined}
             onClick={onConfirm}
           >
-            {t("portNotes.topicPanel.stillCorrect")}
+            <NoteActionIcon kind="confirm" />
+            <span className={styles.noteActionLabel}>{t("portNotes.topicPanel.confirmInformation")}</span>
           </button>
           <button
             type="button"
-            aria-pressed={note.accuracy.viewerAnswer === "changed"}
+            className={styles.feedbackToggle}
+            data-note-action="feedback"
+            aria-expanded={feedbackOpen}
+            aria-controls={feedbackPanelId}
+            onClick={toggleFeedback}
+          >
+            <NoteActionIcon kind="feedback" />
+            <span className={styles.noteActionLabel}>{feedbackCount > 0 ? t("noteFeedback.count", { count: feedbackCount }) : t("noteFeedback.addAction")}</span>
+          </button>
+          <button
+            type="button"
+            className={styles.changedAction}
+            data-note-action="changed"
             onClick={onChanged}
           >
-            {t("portNotes.topicPanel.changed")}
+            <NoteActionIcon kind="changed" />
+            <span className={styles.noteActionLabel}>{t("portNotes.topicPanel.reportChanged")}</span>
           </button>
-          <button type="button" onClick={onHelpful}>
-            {t("portNotes.topicPanel.helpful")}
-          </button>
-        </fieldset>
-      ) : null}
+        </div>
+      </div>
+      </div>
+      <NoteFeedbackPanel
+        noteId={note.id}
+        panelId={feedbackPanelId}
+        open={feedbackOpen}
+        initialCount={feedbackCount}
+        focusFeedbackId={focusFeedbackId}
+        onApprovedCountChange={setFeedbackCount}
+        onProposeCorrection={onFeedbackCorrection}
+      />
     </article>
   );
+}
+
+const detailKeys: Readonly<Record<string, TranslationKey>> = {
+  "common.price": "portNotes.capture.price",
+  "common.place": "portNotes.capture.place",
+  "common.extra": "portNotes.capture.extra",
+};
+
+function detailLabel(key: string, t: (key: TranslationKey) => string): string {
+  const direct = detailKeys[key];
+  if (direct) return t(direct);
+  const [topic, field] = key.split(".");
+  const candidate = `portNotes.capture.chip.${topic}.${field}` as TranslationKey;
+  return t(candidate) ?? key;
 }
 
 function sortFeaturedNotes(
@@ -198,6 +287,7 @@ export function TopicNotesPanel({
   const [error, setError] = useState(false);
   const [confirmationNote, setConfirmationNote] = useState<PortNoteRecord>();
   const [correctionNote, setCorrectionNote] = useState<PortNoteRecord>();
+  const [correctionFeedback, setCorrectionFeedback] = useState<NoteFeedbackRecord>();
   const [actionNotice, setActionNotice] = useState<string>();
 
   const topicLabel = t(topicKeys[topic]);
@@ -276,13 +366,15 @@ export function TopicNotesPanel({
     }
   }
 
-  async function markHelpful(noteId: string) {
-    try {
-      await services.reputation.setHelpful(noteId, true);
-      setActionNotice(t("confirmation.successNoReward"));
-    } catch {
-      setError(true);
+  function requestAuthentication() {
+    if (!session.isConfigured || session.status === "unavailable") {
+      setActionNotice(t("settings.loginPlaceholder"));
+      return;
     }
+
+    void services.auth
+      .signInWithGoogle(`${window.location.pathname}${window.location.search}`)
+      .catch(() => setActionNotice(t("settings.authError")));
   }
 
   return (
@@ -325,16 +417,22 @@ export function TopicNotesPanel({
             key={note.id}
             note={note}
             featured={index === 0}
-            canAssess={session.status === "authenticated" && note.authorId !== session.profile?.userId}
-            onConfirm={() => setConfirmationNote(note)}
-            onChanged={() => setCorrectionNote(note)}
-            onHelpful={() => void markHelpful(note.id)}
+            confirmationDisabled={session.status === "authenticated" && note.authorId === session.profile?.userId}
+            onConfirm={() => {
+              if (session.status === "authenticated") setConfirmationNote(note);
+              else requestAuthentication();
+            }}
+            onChanged={() => {
+              if (session.status === "authenticated") setCorrectionNote(note);
+              else requestAuthentication();
+            }}
+            onFeedbackCorrection={(feedback) => {
+              setCorrectionNote(note);
+              setCorrectionFeedback(feedback);
+            }}
           />
         ))}
       </div>
-      {session.status !== "authenticated" && notes.length > 0 ? (
-        <p className={styles.topicNotesLogin}>{t("portNotes.topicPanel.loginToAssess")}</p>
-      ) : null}
       {nextCursor ? (
         <button className={styles.secondaryButton} type="button" onClick={() => void loadMore()} disabled={isLoadingMore}>
           {isLoadingMore ? t("portNotes.topicPanel.loading") : t("portNotes.topicPanel.more")}
@@ -358,9 +456,11 @@ export function TopicNotesPanel({
       <CorrectionDialog
         noteId={correctionNote?.id}
         currentInformation={correctionNote?.summary ?? ""}
+        initialProposedInformation={correctionFeedback?.body}
+        sourceFeedbackId={correctionFeedback?.id}
         open={Boolean(correctionNote)}
-        onClose={() => setCorrectionNote(undefined)}
-        onSuccess={() => setActionNotice(t("correction.success"))}
+        onClose={() => { setCorrectionNote(undefined); setCorrectionFeedback(undefined); }}
+        onSuccess={() => { setActionNotice(t("correction.success")); setCorrectionFeedback(undefined); }}
       />
     </section>
   );

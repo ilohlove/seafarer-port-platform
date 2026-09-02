@@ -275,7 +275,7 @@ export function PortNotesRoute() {
       throw new Error("Port context is not loaded.");
     }
     const details = Object.fromEntries(
-      preview.details.map((detail) => [detail.label, detail.value]),
+      preview.details.map((detail) => [detail.key, detail.value]),
     );
     await services.portNotes.submitNote({
       portKey: state.data.port.unLocode ?? state.data.port.id,
