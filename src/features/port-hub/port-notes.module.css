@@ -2241,49 +2241,127 @@
 }
 
 .topicNoteSummary {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+  min-inline-size: 0;
   margin: 0;
-  padding: 0.85rem;
+  padding: clamp(0.85rem, 3vw, 1.15rem);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface-subtle);
   color: var(--color-text);
-  font-size: 1rem;
-  font-weight: 600;
   line-height: var(--line-height-normal);
 }
 
-.topicNoteSummary strong {
+.noteSummaryIcon {
+  display: grid;
+  inline-size: 3rem;
+  block-size: 3rem;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--color-sea) 55%, transparent);
+  border-radius: 50%;
+  color: var(--color-sea);
+}
+
+.noteSummaryIcon svg {
+  inline-size: 1.65rem;
+  block-size: 1.65rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.6;
+}
+
+.noteSummaryCopy {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--space-1);
+}
+
+.noteSummaryCopy strong {
   display: block;
-  margin-block-end: var(--space-1);
-  color: var(--color-primary);
-  font-size: var(--font-size-xs);
+  color: var(--color-sea);
+  font-size: var(--font-size-sm);
   letter-spacing: 0.02em;
 }
 
-.topicNoteSummary p {
+.noteSummaryCopy p {
   margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--color-text);
+  font-size: clamp(1rem, 2.2vw, 1.15rem);
+  font-weight: var(--font-weight-bold);
 }
 
 .topicNoteDetails {
   display: grid;
-  gap: 0.25rem;
   margin: 0;
   color: var(--color-text-muted);
-  font-size: 0.88rem;
+  font-size: var(--font-size-sm);
 }
 
 .topicNoteDetails dt {
-  font-weight: 800;
+  min-inline-size: 0;
+  grid-area: label;
+  overflow-wrap: anywhere;
+  font-weight: var(--font-weight-medium);
 }
 
 .topicNoteDetails dd {
+  min-inline-size: 0;
+  grid-area: value;
   margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--color-text);
+  font-weight: var(--font-weight-bold);
 }
 
 .topicNoteDetails > div {
   display: grid;
-  grid-template-columns: minmax(6.5rem, 0.35fr) minmax(0, 1fr);
-  gap: var(--space-2);
+  grid-template-areas:
+    "icon label"
+    "icon value";
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.1rem var(--space-2);
+  min-inline-size: 0;
+  min-block-size: 3.5rem;
+  padding-block: 0.35rem;
+  border-block-end: 1px solid var(--color-border);
+}
+
+.topicNoteDetails > div:first-child {
+  border-block-start: 1px solid var(--color-border);
+}
+
+.noteDetailIcon {
+  display: grid;
+  grid-area: icon;
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--color-sea) 16%, transparent);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-sea) 8%, var(--color-surface-subtle));
+  color: var(--color-sea);
+}
+
+.noteDetailIcon svg {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.65;
+}
+
+.noteDetailSeparator {
+  display: none;
+  grid-area: separator;
 }
 
 .topicNoteEvidence,
@@ -2635,6 +2713,33 @@
 }
 
 @media (min-width: 48rem) {
+  .topicNoteSummary {
+    grid-template-columns: 4.25rem minmax(0, 1fr);
+  }
+
+  .noteSummaryIcon {
+    inline-size: 3.5rem;
+    block-size: 3.5rem;
+    border-inline-end: 0;
+  }
+
+  .noteSummaryCopy {
+    padding-inline-start: var(--space-4);
+    border-inline-start: 2px solid color-mix(in srgb, var(--color-sea) 72%, transparent);
+  }
+
+  .topicNoteDetails > div {
+    grid-template-areas: "icon label separator value";
+    grid-template-columns: 3rem minmax(8rem, 0.32fr) auto minmax(0, 1fr);
+    gap: var(--space-2);
+    min-block-size: 3.75rem;
+    padding-inline: var(--space-2);
+  }
+
+  .noteDetailSeparator {
+    display: inline;
+  }
+
   .noteTrustActions {
     grid-template-columns: minmax(13rem, 0.72fr) minmax(0, 2.8fr);
     align-items: center;
@@ -2748,11 +2853,6 @@
     flex-direction: column;
   }
 
-  .topicNoteDetails > div {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
-
   .noteActions button {
     flex: 1 1 10rem;
   }
@@ -2770,4 +2870,31 @@
 :global([data-bandwidth-mode="ultraLite"]) .topicNoteCard {
   background: var(--color-surface);
   box-shadow: none;
+}
+
+:global([data-bandwidth-mode="dataSaver"]) .topicNoteCard {
+  box-shadow: none;
+}
+
+:global([data-bandwidth-mode="ultraLite"]) .topicNoteSummary {
+  grid-template-columns: minmax(0, 1fr);
+  padding: var(--space-3) 0;
+  border-inline: 0;
+  background: transparent;
+}
+
+:global([data-bandwidth-mode="ultraLite"]) :is(.noteSummaryIcon, .noteDetailIcon, .noteDetailSeparator) {
+  display: none;
+}
+
+:global([data-bandwidth-mode="ultraLite"]) .noteSummaryCopy {
+  padding-inline-start: 0;
+  border-inline-start: 0;
+}
+
+:global([data-bandwidth-mode="ultraLite"]) .topicNoteDetails > div {
+  grid-template-areas: "label value";
+  grid-template-columns: minmax(7rem, 0.35fr) minmax(0, 1fr);
+  min-block-size: 0;
+  padding: var(--space-2) 0;
 }

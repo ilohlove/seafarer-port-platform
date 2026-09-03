@@ -46,7 +46,16 @@ export function VerifiedConfirmationDialog({ noteId, open, onClose, onSuccess }:
     <div className={styles.sheetHandle} aria-hidden="true" />
     <header><h2 id="confirmation-dialog-title">{t("confirmation.title")}</h2><button type="button" aria-label={t("xp.close")} onClick={() => ref.current?.close()}>×</button></header>
     <form className={styles.actionForm} onSubmit={(event) => void submit(event)}>
-      <fieldset><legend>{t("confirmation.how")}</legend><label><input type="checkbox" checked={directlyVerified} onChange={(event) => setDirectlyVerified(event.currentTarget.checked)} /><span>{t("confirmation.source.direct")}</span><small>{t("confirmation.directHelp")}</small></label></fieldset>
+      <fieldset>
+        <legend>{t("confirmation.how")}</legend>
+        <label className={styles.verificationOption} aria-label={t("confirmation.source.direct")}>
+          <input type="checkbox" checked={directlyVerified} onChange={(event) => setDirectlyVerified(event.currentTarget.checked)} />
+          <span className={styles.verificationCopy}>
+            <span className={styles.verificationTitle}>{t("confirmation.source.direct")}</span>
+            <small>{t("confirmation.directHelp")}</small>
+          </span>
+        </label>
+      </fieldset>
       <fieldset><legend>{t("confirmation.when")}</legend><div className={styles.periods}>{periods.map((value) => <label key={value}><input className="visually-hidden" type="radio" name="verification-period" value={value} checked={period === value} onChange={() => setPeriod(value)} /><span>{t(`confirmation.period.${value}`)}</span></label>)}</div></fieldset>
       <label className={styles.commentField}><span>{t("confirmation.comment")}</span><textarea maxLength={1000} value={comment} placeholder={t("confirmation.commentPlaceholder")} onChange={(event) => setComment(event.currentTarget.value)} /></label>
       <label className={styles.fileField}><span>{t("confirmation.evidence")}</span><input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setEvidence(event.currentTarget.files?.[0])} /><small>{t("confirmation.evidenceHelp")}</small></label>

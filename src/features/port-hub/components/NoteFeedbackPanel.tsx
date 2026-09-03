@@ -127,6 +127,13 @@ export function NoteFeedbackPanel({
     }
   }
 
+  function submitOnEnter(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) return;
+    event.preventDefault();
+    if (!body.trim() || busy) return;
+    event.currentTarget.form?.requestSubmit();
+  }
+
   async function remove(feedback: NoteFeedbackRecord) {
     setBusy(true);
     setError(false);
@@ -195,7 +202,7 @@ export function NoteFeedbackPanel({
         <form className={styles.feedbackForm} onSubmit={(event) => void save(event)}>
           <label>
             <span>{editingId ? t("noteFeedback.editLabel") : t("noteFeedback.add")}</span>
-            <textarea ref={textareaRef} required maxLength={2000} value={body} onChange={(event) => setBody(event.currentTarget.value)} placeholder={t("noteFeedback.placeholder")} />
+            <textarea ref={textareaRef} required maxLength={2000} value={body} onChange={(event) => setBody(event.currentTarget.value)} onKeyDown={submitOnEnter} placeholder={t("noteFeedback.placeholder")} />
           </label>
           <div>
             {editingId ? <button type="button" onClick={() => { setEditingId(undefined); setBody(""); }}>{t("noteFeedback.cancel")}</button> : null}

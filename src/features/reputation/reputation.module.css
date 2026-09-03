@@ -90,11 +90,12 @@
   font-weight: var(--font-weight-medium);
 }
 
-.actionForm fieldset > label {
+.verificationOption {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
   gap: var(--space-2);
+  min-inline-size: 0;
   min-block-size: var(--tap-target);
   padding: var(--space-2);
   border: 1px solid transparent;
@@ -102,17 +103,36 @@
   font-size: var(--font-size-sm);
 }
 
-.actionForm fieldset > label:has(input:checked) {
+.verificationOption > input {
+  margin-block-start: 0.2rem;
+}
+
+.verificationCopy {
+  display: grid;
+  min-inline-size: 0;
+  gap: var(--space-1);
+}
+
+.verificationTitle,
+.verificationCopy small {
+  overflow-wrap: anywhere;
+}
+
+.verificationTitle {
+  font-weight: var(--font-weight-medium);
+}
+
+.verificationOption:has(input:checked) {
   border-color: var(--color-primary);
   background: var(--color-primary-soft);
 }
 
-.actionForm fieldset small {
+.verificationCopy small {
   color: var(--color-text-muted);
   font-size: var(--font-size-xs);
 }
 
-.actionForm fieldset label:has(input[value="direct"]:checked) small {
+.verificationOption:has(input:checked) small {
   color: var(--color-cta);
   font-weight: var(--font-weight-bold);
 }

@@ -42,3 +42,4 @@
 - [2026-09-02 18:23] Hoàn thiện lịch sử XP không chồng lớp, bản địa hóa Reputation và ưu tiên Staff identity cho Admin, Moderator.
 - [2026-09-02 20:00] Hoàn thiện Note Trust V1 với xác nhận trực tiếp, feedback một tầng, correction revision và XP chống farm.
 - [2026-09-03 01:02] Chuẩn hóa hành động Note mobile, feedback tải theo nhu cầu và cảnh báo thông tin có thể đã thay đổi.
+- [2026-09-03 09:03] Hoàn thiện nội dung Port Note có cấu trúc, responsive và tối ưu ba chế độ băng thông.

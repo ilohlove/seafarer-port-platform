@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
@@ -158,5 +158,38 @@ describe("Note feedback progressive disclosure", () => {
     expect(await screen.findByText("Body pending")).toBeVisible();
     expect(screen.getByLabelText("0 feedback")).toBeVisible();
     expect(mocks.submitFeedback).toHaveBeenCalledWith("note-1", "Fresh experience", expect.any(String));
+  });
+
+  test("submits with Enter and keeps Shift+Enter for a new line", async () => {
+    const user = userEvent.setup();
+    const published = feedback("keyboard", "2026-09-03T04:00:00Z");
+    mocks.listFeedback.mockResolvedValue({ items: [] });
+    mocks.submitFeedback.mockResolvedValue(published);
+    render(<NoteFeedbackPanel {...baseProps} initialCount={0} open />);
+
+    const textarea = await screen.findByRole("textbox", { name: "Add your experience" });
+    await user.type(textarea, "Line one{Shift>}{Enter}{/Shift}Line two");
+    expect(textarea).toHaveValue("Line one\nLine two");
+    expect(mocks.submitFeedback).not.toHaveBeenCalled();
+
+    await user.keyboard("{Enter}");
+    await waitFor(() => expect(mocks.submitFeedback).toHaveBeenCalledWith(
+      "note-1",
+      "Line one\nLine two",
+      expect.any(String),
+    ));
+    expect(await screen.findByText("Body keyboard")).toBeVisible();
+  });
+
+  test("does not submit Enter while an input method is composing text", async () => {
+    mocks.listFeedback.mockResolvedValue({ items: [] });
+    render(<NoteFeedbackPanel {...baseProps} initialCount={0} open />);
+
+    const textarea = await screen.findByRole("textbox", { name: "Add your experience" });
+    fireEvent.change(textarea, { target: { value: "Đang nhập tiếng Việt" } });
+    fireEvent.keyDown(textarea, { key: "Enter", isComposing: true });
+
+    expect(mocks.submitFeedback).not.toHaveBeenCalled();
+    expect(textarea).toHaveValue("Đang nhập tiếng Việt");
   });
 });
