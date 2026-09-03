@@ -32,8 +32,8 @@ describe("VerifiedConfirmationDialog", () => {
   afterEach(cleanup);
 
   test.each([
-    ["vi", "Chỉ xác nhận khi bạn đã trực tiếp kiểm chứng thông tin này.", "Nếu bạn chỉ nghe từ người khác hoặc nguồn khác, hãy dùng Phản hồi."],
-    ["en", "Confirm only when you have personally verified this information.", "If you only heard it from someone else or another source, use Feedback."],
+    ["vi", "Chỉ xác nhận khi bạn đã trực tiếp kiểm chứng thông tin này.", "Nếu bạn chỉ nghe từ người khác hoặc nguồn khác, hãy dùng Báo thay đổi."],
+    ["en", "Confirm only when you have personally verified this information.", "If you only heard it from someone else or another source, use Report changed."],
   ] as const)("uses concise %s guidance without a source-selection step", async (locale, guidance, feedbackHelp) => {
     const { container } = render(
       <I18nProvider initialLocale={locale}>

@@ -49,3 +49,4 @@
 - [2026-09-03 14:39] Hoàn thiện Confirmation Trust V1 với form tối giản và trạng thái cộng đồng động theo hiệu lực ba tháng.
 - [2026-09-03 15:02] Công khai Feedback đã xuất bản và bổ sung chống gửi nhanh, quá hạn mức, trùng nội dung cùng retry an toàn.
 - [2026-09-03 15:12] Triển khai Supabase cho giới hạn Note, Confirmation Trust và Feedback chống spam; đồng bộ toàn bộ migration remote.
+- [2026-09-03 15:26] Giới hạn hành động quản lý Feedback cho tác giả và Admin, đồng bộ quyền hiển thị với backend.

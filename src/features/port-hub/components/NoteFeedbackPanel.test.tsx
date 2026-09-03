@@ -19,6 +19,10 @@ const mocks = vi.hoisted(() => {
     submitFeedback,
     updateFeedback,
     deleteFeedback,
+    session: {
+      status: "authenticated",
+      profile: { userId: "viewer-1", role: "member" },
+    },
     services: {
       portNotes: {
         isConfigured: () => true,
@@ -34,10 +38,7 @@ const mocks = vi.hoisted(() => {
 
 vi.mock("../../../app/providers", () => ({
   useServices: () => mocks.services,
-  useSession: () => ({
-    status: "authenticated",
-    profile: { userId: "viewer-1", role: "member" },
-  }),
+  useSession: () => mocks.session,
 }));
 
 const messages: Readonly<Record<string, string>> = {
@@ -49,9 +50,10 @@ const messages: Readonly<Record<string, string>> = {
   "noteFeedback.add": "Add your experience",
   "noteFeedback.placeholder": "Share feedback",
   "noteFeedback.submit": "Send feedback",
-  "noteFeedback.noXp": "No XP",
   "noteFeedback.more": "View more feedback",
   "noteFeedback.signIn": "Sign in",
+  "noteFeedback.edit": "Edit",
+  "noteFeedback.delete": "Delete",
   "noteFeedback.error": "Generic feedback error",
   "noteFeedback.cooldownError": "Too fast",
   "noteFeedback.rateLimitError": "Too many",
@@ -92,7 +94,6 @@ const baseProps = {
   panelId: "feedback-panel-1",
   initialCount: 3,
   onApprovedCountChange: vi.fn<(count: number) => void>(),
-  onProposeCorrection: vi.fn<(feedback: NoteFeedbackRecord) => void>(),
 };
 
 describe("Note feedback progressive disclosure", () => {
@@ -103,6 +104,8 @@ describe("Note feedback progressive disclosure", () => {
     mocks.updateFeedback.mockReset();
     mocks.deleteFeedback.mockReset();
     mocks.getFeedback.mockRejectedValue(new Error("not requested"));
+    mocks.session.status = "authenticated";
+    mocks.session.profile.role = "member";
   });
 
   afterEach(cleanup);
@@ -231,5 +234,25 @@ describe("Note feedback progressive disclosure", () => {
 
     expect(mocks.submitFeedback).not.toHaveBeenCalled();
     expect(textarea).toHaveValue("Đang nhập tiếng Việt");
+  });
+
+  test.each([
+    ["member", "other-user", false],
+    ["moderator", "other-user", false],
+    ["member", "viewer-1", true],
+    ["admin", "other-user", true],
+  ] as const)("shows management actions for role %s and author %s: %s", async (role, authorId, visible) => {
+    mocks.session.profile.role = role;
+    mocks.listFeedback.mockResolvedValue({
+      items: [{ ...feedback("permissions", "2026-09-03T05:00:00Z"), authorId }],
+    });
+    render(<NoteFeedbackPanel {...baseProps} open />);
+
+    await screen.findByText("Body permissions");
+    const actions = ["Edit", "Delete"]
+      .map((name) => screen.queryByRole("button", { name }));
+    expect(actions.every(Boolean)).toBe(visible);
+    expect(screen.queryByText("noteFeedback.proposeCorrection")).toBeNull();
+    expect(screen.queryByText("noteFeedback.noXp")).toBeNull();
   });
 });

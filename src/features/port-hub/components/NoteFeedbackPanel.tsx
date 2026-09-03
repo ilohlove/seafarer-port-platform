@@ -38,7 +38,6 @@ interface NoteFeedbackPanelProps {
   readonly initialCount: number;
   readonly focusFeedbackId?: string;
   readonly onApprovedCountChange: (count: number) => void;
-  readonly onProposeCorrection: (feedback: NoteFeedbackRecord) => void;
 }
 
 export function NoteFeedbackPanel({
@@ -48,7 +47,6 @@ export function NoteFeedbackPanel({
   initialCount,
   focusFeedbackId,
   onApprovedCountChange,
-  onProposeCorrection,
 }: NoteFeedbackPanelProps) {
   const services = useServices();
   const session = useSession();
@@ -199,7 +197,7 @@ export function NoteFeedbackPanel({
       <div className={styles.feedbackList}>
         {items.map((item) => {
           const own = item.authorId === session.profile?.userId;
-          const canConvert = own || (session.status === "authenticated" && session.profile?.role !== "member");
+          const canManage = own || (session.status === "authenticated" && session.profile?.role === "admin");
           const focused = item.id === focusFeedbackId;
           return (
             <article className={styles.feedbackItem} data-focused={focused ? "true" : undefined} id={`note-feedback-${item.id}`} key={item.id} tabIndex={focused ? -1 : undefined}>
@@ -211,9 +209,8 @@ export function NoteFeedbackPanel({
                 {item.usedForCorrection ? <span>{t("noteFeedback.used")}</span> : null}
               </div>
               <div className={styles.feedbackActions}>
-                {canConvert ? <button type="button" onClick={() => onProposeCorrection(item)}>{t("noteFeedback.proposeCorrection")}</button> : null}
-                {own ? <button type="button" onClick={() => { setEditingId(item.id); setBody(item.body); textareaRef.current?.focus(); }}>{t("noteFeedback.edit")}</button> : null}
-                {own ? <button type="button" disabled={busy} onClick={() => void remove(item)}>{t("noteFeedback.delete")}</button> : null}
+                {canManage ? <button type="button" onClick={() => { setEditingId(item.id); setBody(item.body); textareaRef.current?.focus(); }}>{t("noteFeedback.edit")}</button> : null}
+                {canManage ? <button type="button" disabled={busy} onClick={() => void remove(item)}>{t("noteFeedback.delete")}</button> : null}
               </div>
             </article>
           );
@@ -230,7 +227,6 @@ export function NoteFeedbackPanel({
             {editingId ? <button type="button" onClick={() => { setEditingId(undefined); setBody(""); }}>{t("noteFeedback.cancel")}</button> : null}
             <button type="submit" disabled={busy || !body.trim()}>{busy ? t("noteFeedback.saving") : t("noteFeedback.submit")}</button>
           </div>
-          <small>{t("noteFeedback.noXp")}</small>
         </form>
       ) : <p>{t("noteFeedback.signIn")}</p>}
       {errorKey ? <p role="alert">{t(errorKey)}</p> : null}

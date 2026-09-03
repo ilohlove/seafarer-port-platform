@@ -2,7 +2,7 @@ import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSP
 
 import { useServices, useSession } from "../../../app/providers";
 import { useI18n, type TranslationKey } from "../../../i18n";
-import type { NoteFeedbackRecord, PortNoteRecord, PortNoteTopic } from "../../../types";
+import type { PortNoteRecord, PortNoteTopic } from "../../../types";
 import type { PortNoteCardModel } from "../port-notes-view-model";
 import { DEFAULT_USER_RANK, UserRankIdentity } from "../../user-rank";
 import { CancelConfirmationDialog, CorrectionDialog, VerifiedConfirmationDialog } from "../../reputation";
@@ -287,7 +287,6 @@ function NoteCard({
   featured,
   onConfirm,
   onChanged,
-  onFeedbackCorrection,
   confirmationDisabled,
   confirmationBusy,
 }: {
@@ -295,7 +294,6 @@ function NoteCard({
   readonly featured: boolean;
   readonly onConfirm: () => void;
   readonly onChanged: () => void;
-  readonly onFeedbackCorrection: (feedback: NoteFeedbackRecord) => void;
   readonly confirmationDisabled: boolean;
   readonly confirmationBusy: boolean;
 }) {
@@ -387,7 +385,6 @@ function NoteCard({
         initialCount={feedbackCount}
         focusFeedbackId={focusFeedbackId}
         onApprovedCountChange={setFeedbackCount}
-        onProposeCorrection={onFeedbackCorrection}
       />
     </article>
   );
@@ -440,7 +437,6 @@ export function TopicNotesPanel({
   const [revocationNote, setRevocationNote] = useState<PortNoteRecord>();
   const [busyConfirmationNoteId, setBusyConfirmationNoteId] = useState<string>();
   const [correctionNote, setCorrectionNote] = useState<PortNoteRecord>();
-  const [correctionFeedback, setCorrectionFeedback] = useState<NoteFeedbackRecord>();
   const [actionNotice, setActionNotice] = useState<string>();
 
   const topicLabel = t(topicKeys[topic]);
@@ -583,10 +579,6 @@ export function TopicNotesPanel({
               if (session.status === "authenticated") setCorrectionNote(note);
               else requestAuthentication();
             }}
-            onFeedbackCorrection={(feedback) => {
-              setCorrectionNote(note);
-              setCorrectionFeedback(feedback);
-            }}
           />
         ))}
       </div>
@@ -647,11 +639,9 @@ export function TopicNotesPanel({
       <CorrectionDialog
         noteId={correctionNote?.id}
         currentInformation={correctionNote?.summary ?? ""}
-        initialProposedInformation={correctionFeedback?.body}
-        sourceFeedbackId={correctionFeedback?.id}
         open={Boolean(correctionNote)}
-        onClose={() => { setCorrectionNote(undefined); setCorrectionFeedback(undefined); }}
-        onSuccess={() => { setActionNotice(t("correction.success")); setCorrectionFeedback(undefined); }}
+        onClose={() => setCorrectionNote(undefined)}
+        onSuccess={() => setActionNotice(t("correction.success"))}
       />
     </section>
   );
