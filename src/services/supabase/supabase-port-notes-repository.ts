@@ -92,12 +92,14 @@ export function mapPortNote(value: unknown): PortNoteRecord {
       stillCorrect: Number(accuracy.stillCorrect ?? accuracy.still_correct ?? 0),
       changed: Number(accuracy.changed ?? 0),
       notSure: Number(accuracy.notSure ?? accuracy.not_sure ?? 0),
-      viewerAnswer:
-        accuracy.viewerAnswer === "changed" ||
-        accuracy.viewerAnswer === "notSure" ||
-        accuracy.viewerAnswer === "stillCorrect"
-          ? accuracy.viewerAnswer
-          : undefined,
+      viewerAnswer: (() => {
+        const viewerAnswer = accuracy.viewerAnswer ?? accuracy.viewer_answer;
+        return viewerAnswer === "changed" ||
+          viewerAnswer === "notSure" ||
+          viewerAnswer === "stillCorrect"
+          ? viewerAnswer
+          : undefined;
+      })(),
     },
   };
 }

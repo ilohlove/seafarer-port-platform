@@ -43,3 +43,6 @@
 - [2026-09-02 20:00] Hoàn thiện Note Trust V1 với xác nhận trực tiếp, feedback một tầng, correction revision và XP chống farm.
 - [2026-09-03 01:02] Chuẩn hóa hành động Note mobile, feedback tải theo nhu cầu và cảnh báo thông tin có thể đã thay đổi.
 - [2026-09-03 09:03] Hoàn thiện nội dung Port Note có cấu trúc, responsive và tối ưu ba chế độ băng thông.
+- [2026-09-03 09:44] Thu gọn chi tiết phụ của Port Note theo nhu cầu, giữ nội dung chính nổi bật và nhẹ mạng.
+- [2026-09-03 10:00] Chuẩn hóa giới hạn Note, cảnh báo nhẹ và mở nội dung dài không cắt dữ liệu.
+- [2026-09-03 14:07] Hoàn thiện vòng đời xác nhận, hoàn/khôi phục XP chống trùng và loại upload ảnh khỏi Confirmation V1.

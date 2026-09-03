@@ -8,6 +8,9 @@ const eventKeys: Partial<Record<XpEventType, TranslationKey>> = {
   backfill_community_confirmed: "xp.event.backfill_community_confirmed",
   accepted_correction: "xp.event.accepted_correction",
   verified_confirmation: "xp.event.verified_confirmation",
+  note_confirmation_awarded: "xp.event.note_confirmation_awarded",
+  note_confirmation_revoked: "xp.event.note_confirmation_revoked",
+  note_confirmation_restored: "xp.event.note_confirmation_restored",
   highly_useful: "xp.event.highly_useful",
 };
 

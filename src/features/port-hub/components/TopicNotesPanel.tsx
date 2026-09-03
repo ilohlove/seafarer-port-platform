@@ -1,12 +1,13 @@
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 
 import { useServices, useSession } from "../../../app/providers";
 import { useI18n, type TranslationKey } from "../../../i18n";
 import type { NoteFeedbackRecord, PortNoteRecord, PortNoteTopic } from "../../../types";
 import type { PortNoteCardModel } from "../port-notes-view-model";
 import { DEFAULT_USER_RANK, UserRankIdentity } from "../../user-rank";
-import { CorrectionDialog, VerifiedConfirmationDialog } from "../../reputation";
+import { CancelConfirmationDialog, CorrectionDialog, VerifiedConfirmationDialog } from "../../reputation";
 import { NoteFeedbackPanel } from "./NoteFeedbackPanel";
+import { resolveNoteFieldDisplayRule, shouldOfferNoteFieldExpansion } from "../note-field-config";
 import styles from "../port-notes.module.css";
 
 const topicKeys: Readonly<Record<PortNoteTopic, TranslationKey>> = {
@@ -140,6 +141,147 @@ function NoteDetailIcon({ detailKey }: { readonly detailKey: string }) {
   );
 }
 
+function ExpandableNoteText({ value, fieldKey, label }: { readonly value: string; readonly fieldKey: string; readonly label: string }) {
+  const { t } = useI18n();
+  const contentId = useId();
+  const contentRef = useRef<HTMLSpanElement>(null);
+  const [expanded, setExpanded] = useState(false);
+  const rule = resolveNoteFieldDisplayRule(fieldKey);
+  const estimatedOverflow = shouldOfferNoteFieldExpansion(value, rule);
+  const [measuredOverflow, setMeasuredOverflow] = useState(estimatedOverflow);
+  const clampStyle = { "--note-collapsed-lines": rule.collapsedLines } as CSSProperties;
+
+  useLayoutEffect(() => {
+    if (expanded) return;
+    const measure = () => {
+      const element = contentRef.current;
+      setMeasuredOverflow(estimatedOverflow || Boolean(element && element.scrollHeight > element.clientHeight + 1));
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [estimatedOverflow, expanded, value]);
+
+  return (
+    <span className={styles.noteExpandableText}>
+      <span
+        id={contentId}
+        ref={contentRef}
+        className={styles.noteClampedText}
+        data-expanded={expanded ? "true" : undefined}
+        style={clampStyle}
+      >
+        {value}
+      </span>
+      {measuredOverflow ? (
+        <button
+          type="button"
+          className={styles.noteFieldExpand}
+          aria-expanded={expanded}
+          aria-controls={contentId}
+          aria-label={`${t(expanded ? "portNotes.topicPanel.fieldLess" : "portNotes.topicPanel.fieldMore")}: ${label}`}
+          onClick={() => setExpanded((current) => !current)}
+        >
+          {t(expanded ? "portNotes.topicPanel.fieldLess" : "portNotes.topicPanel.fieldMore")}
+        </button>
+      ) : null}
+    </span>
+  );
+}
+
+export function TopicNoteContent({ summary, details }: { readonly summary: string; readonly details: Readonly<Record<string, string>> }) {
+  const { t } = useI18n();
+  const detailsId = useId();
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const visibleDetails = useMemo(
+    () => Object.entries(details).filter(([key, value]) => key !== "context" && value.trim().length > 0),
+    [details],
+  );
+
+  return (
+    <>
+      <div className={styles.topicNoteSummary}>
+        <span className={styles.noteSummaryIcon} aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">
+            <path d="M6.5 3.5h11v17l-5.5-3.7-5.5 3.7v-17Z" />
+          </svg>
+        </span>
+        <span className={styles.noteSummaryCopy}>
+          <strong>{t("portNotes.topicPanel.takeaway")}</strong>
+          <span className={styles.noteSummaryValue}>
+            <ExpandableNoteText
+              value={summary}
+              fieldKey="mainNote"
+              label={t("portNotes.topicPanel.takeaway")}
+            />
+          </span>
+        </span>
+      </div>
+      {detailsOpen && visibleDetails.length > 0 ? (
+        <dl id={detailsId} className={styles.topicNoteDetails}>
+          {visibleDetails.map(([key, value]) => {
+            const label = detailLabel(key, t);
+            return (
+              <div key={key} data-note-detail-key={key}>
+                <NoteDetailIcon detailKey={key} />
+                <dt>{label}</dt>
+                <span className={styles.noteDetailSeparator} aria-hidden="true">:</span>
+                <dd><ExpandableNoteText value={value} fieldKey={key} label={label} /></dd>
+              </div>
+            );
+          })}
+        </dl>
+      ) : null}
+      {visibleDetails.length > 0 ? (
+        <button
+          type="button"
+          className={styles.noteDetailsToggle}
+          data-note-details-toggle
+          aria-expanded={detailsOpen}
+          aria-controls={detailsId}
+          onClick={() => setDetailsOpen((current) => !current)}
+        >
+          <span>{detailsOpen
+            ? t("portNotes.topicPanel.hideDetails")
+            : t("portNotes.topicPanel.viewDetails", { count: visibleDetails.length })}</span>
+          <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+            <path d={detailsOpen ? "m5 12 5-5 5 5" : "m5 8 5 5 5-5"} />
+          </svg>
+        </button>
+      ) : null}
+    </>
+  );
+}
+
+export function NoteConfirmationButton({ confirmed, disabled, busy, disabledTitle, onClick }: {
+  readonly confirmed: boolean;
+  readonly disabled: boolean;
+  readonly busy: boolean;
+  readonly disabledTitle?: string;
+  readonly onClick: () => void;
+}) {
+  const { t } = useI18n();
+  return (
+    <button
+      type="button"
+      className={styles.confirmAction}
+      data-note-action="confirm"
+      aria-pressed={confirmed}
+      aria-busy={busy || undefined}
+      disabled={disabled || busy}
+      title={disabled ? disabledTitle : undefined}
+      onClick={onClick}
+    >
+      <NoteActionIcon kind="confirm" />
+      <span className={styles.noteActionLabel}>
+        {confirmed
+          ? t("portNotes.topicPanel.confirmedAction")
+          : t("portNotes.topicPanel.confirmInformation")}
+      </span>
+    </button>
+  );
+}
+
 function NoteCard({
   note,
   featured,
@@ -147,6 +289,7 @@ function NoteCard({
   onChanged,
   onFeedbackCorrection,
   confirmationDisabled,
+  confirmationBusy,
 }: {
   readonly note: PortNoteRecord;
   readonly featured: boolean;
@@ -154,15 +297,13 @@ function NoteCard({
   readonly onChanged: () => void;
   readonly onFeedbackCorrection: (feedback: NoteFeedbackRecord) => void;
   readonly confirmationDisabled: boolean;
+  readonly confirmationBusy: boolean;
 }) {
   const { t, formatDate } = useI18n();
   const feedbackPanelId = useId();
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [feedbackCount, setFeedbackCount] = useState(note.feedbackCount);
   const [focusFeedbackId, setFocusFeedbackId] = useState<string>();
-  const visibleDetails = Object.entries(note.details).filter(
-    ([key]) => key !== "context",
-  );
 
   useEffect(() => setFeedbackCount(note.feedbackCount), [note.feedbackCount]);
 
@@ -188,29 +329,7 @@ function NoteCard({
           />
         </div>
       </div>
-      <div className={styles.topicNoteSummary}>
-        <span className={styles.noteSummaryIcon} aria-hidden="true">
-          <svg viewBox="0 0 24 24" focusable="false">
-            <path d="M6.5 3.5h11v17l-5.5-3.7-5.5 3.7v-17Z" />
-          </svg>
-        </span>
-        <span className={styles.noteSummaryCopy}>
-          <strong>{t("portNotes.topicPanel.takeaway")}</strong>
-          <p>{note.summary}</p>
-        </span>
-      </div>
-      {visibleDetails.length > 0 ? (
-        <dl className={styles.topicNoteDetails}>
-          {visibleDetails.map(([key, value]) => (
-            <div key={key} data-note-detail-key={key}>
-              <NoteDetailIcon detailKey={key} />
-              <dt>{detailLabel(key, t)}</dt>
-              <span className={styles.noteDetailSeparator} aria-hidden="true">:</span>
-              <dd>{value}</dd>
-            </div>
-          ))}
-        </dl>
-      ) : null}
+      <TopicNoteContent summary={note.summary} details={note.details} />
       {note.feedbackChangeAlert ? (
         <div className={styles.feedbackChangeAlert}>
           <span>{t("noteFeedback.changeAlert")}</span>
@@ -231,22 +350,13 @@ function NoteCard({
           className={styles.noteActionStack}
           data-action-count="3"
         >
-          <button
-            type="button"
-            className={styles.confirmAction}
-            data-note-action="confirm"
-            aria-pressed={note.accuracy.viewerAnswer === "stillCorrect"}
+          <NoteConfirmationButton
+            confirmed={note.accuracy.viewerAnswer === "stillCorrect"}
             disabled={confirmationDisabled}
-            title={confirmationDisabled ? t("confirmation.selfNotAllowed") : undefined}
+            busy={confirmationBusy}
+            disabledTitle={t("confirmation.selfNotAllowed")}
             onClick={onConfirm}
-          >
-            <NoteActionIcon kind="confirm" />
-            <span className={styles.noteActionLabel}>
-              {note.accuracy.viewerAnswer === "stillCorrect"
-                ? t("portNotes.topicPanel.confirmedAction")
-                : t("portNotes.topicPanel.confirmInformation")}
-            </span>
-          </button>
+          />
           <button
             type="button"
             className={styles.feedbackToggle}
@@ -327,6 +437,8 @@ export function TopicNotesPanel({
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState(false);
   const [confirmationNote, setConfirmationNote] = useState<PortNoteRecord>();
+  const [revocationNote, setRevocationNote] = useState<PortNoteRecord>();
+  const [busyConfirmationNoteId, setBusyConfirmationNoteId] = useState<string>();
   const [correctionNote, setCorrectionNote] = useState<PortNoteRecord>();
   const [correctionFeedback, setCorrectionFeedback] = useState<NoteFeedbackRecord>();
   const [actionNotice, setActionNotice] = useState<string>();
@@ -458,10 +570,14 @@ export function TopicNotesPanel({
             key={note.id}
             note={note}
             featured={index === 0}
-            confirmationDisabled={session.status === "authenticated" && note.authorId === session.profile?.userId}
-            onConfirm={() => {
-              if (session.status === "authenticated") setConfirmationNote(note);
-              else requestAuthentication();
+             confirmationDisabled={session.status === "authenticated" && note.authorId === session.profile?.userId}
+             confirmationBusy={busyConfirmationNoteId === note.id}
+             onConfirm={() => {
+               if (session.status === "authenticated") {
+                 if (note.accuracy.viewerAnswer === "stillCorrect") setRevocationNote(note);
+                 else setConfirmationNote(note);
+               }
+               else requestAuthentication();
             }}
             onChanged={() => {
               if (session.status === "authenticated") setCorrectionNote(note);
@@ -484,12 +600,30 @@ export function TopicNotesPanel({
         noteId={confirmationNote?.id}
         open={Boolean(confirmationNote)}
         onClose={() => setConfirmationNote(undefined)}
-        onSuccess={(rewardedXp) => {
-          setActionNotice(rewardedXp > 0 ? t("confirmation.successReward", { xp: rewardedXp }) : t("confirmation.successNoReward"));
+        onBusyChange={(busy) => setBusyConfirmationNoteId(busy ? confirmationNote?.id : undefined)}
+        onSuccess={(result) => {
+          setActionNotice(result.rewardedXp > 0 ? t("confirmation.successReward", { xp: result.rewardedXp }) : t("confirmation.successNoReward"));
           if (confirmationNote) {
             setNotes((current) => current.map((note) => note.id === confirmationNote.id ? {
               ...note,
-              accuracy: { ...note.accuracy, viewerAnswer: "stillCorrect", stillCorrect: note.accuracy.stillCorrect + 1 },
+              accuracy: { ...note.accuracy, viewerAnswer: "stillCorrect", stillCorrect: result.communityConfirmationCount },
+            } : note));
+          }
+        }}
+      />
+      <CancelConfirmationDialog
+        noteId={revocationNote?.id}
+        open={Boolean(revocationNote)}
+        onClose={() => setRevocationNote(undefined)}
+        onBusyChange={(busy) => setBusyConfirmationNoteId(busy ? revocationNote?.id : undefined)}
+        onSuccess={(result) => {
+          setActionNotice(result.revokedXp > 0
+            ? t("confirmation.cancelSuccess", { xp: result.revokedXp })
+            : t("confirmation.cancelSuccessNoXp"));
+          if (revocationNote) {
+            setNotes((current) => current.map((note) => note.id === revocationNote.id ? {
+              ...note,
+              accuracy: { ...note.accuracy, viewerAnswer: undefined, stillCorrect: result.communityConfirmationCount },
             } : note));
           }
         }}

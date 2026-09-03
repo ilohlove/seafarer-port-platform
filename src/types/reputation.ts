@@ -4,6 +4,7 @@ export type XpEventType =
   | "approved_note" | "backfill_approved_note"
   | "community_confirmed" | "backfill_community_confirmed"
   | "accepted_correction" | "verified_confirmation"
+  | "note_confirmation_awarded" | "note_confirmation_revoked" | "note_confirmation_restored"
   | "highly_useful" | "highly_useful_reversed"
   | "invalid_reward_reversed" | "spam_penalty"
   | "false_information_penalty" | "confirmation_farming_penalty"
@@ -50,12 +51,16 @@ export interface VerifiedConfirmationSubmission {
   readonly source: ConfirmationSource;
   readonly verificationPeriod: VerificationPeriod;
   readonly comment?: string;
-  readonly evidencePath?: string;
   readonly idempotencyKey: string;
 }
 
 export interface ConfirmationResult {
   readonly rewardedXp: number;
+  readonly communityConfirmationCount: number;
+}
+
+export interface ConfirmationRevocationResult {
+  readonly revokedXp: number;
   readonly communityConfirmationCount: number;
 }
 
@@ -75,7 +80,7 @@ export interface NoteCorrectionSubmission {
   readonly sourceFeedbackId?: string;
 }
 
-export type EvidencePurpose = "confirmation" | "correction";
+export type EvidencePurpose = "correction";
 
 export interface UserAchievementReadModel {
   readonly key: "FOUNDING_CONTRIBUTOR";

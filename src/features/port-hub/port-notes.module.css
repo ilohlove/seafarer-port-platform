@@ -1508,6 +1508,38 @@
   font-weight: var(--font-weight-regular);
 }
 
+.captureFields .captureCompactTextarea {
+  min-block-size: 4.25rem;
+  padding: var(--space-2) var(--space-3);
+}
+
+.captureFieldGuidance {
+  display: flex;
+  min-inline-size: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-regular);
+}
+
+.captureFieldGuidance[data-soft-limit-exceeded="true"] {
+  justify-content: space-between;
+  color: var(--color-status-warning-text);
+}
+
+.captureFieldGuidance > span {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.captureFieldGuidance output {
+  flex: 0 0 auto;
+  color: inherit;
+  font: inherit;
+}
+
 .captureDetailsSection {
   display: grid;
   gap: var(--space-3);
@@ -2288,12 +2320,51 @@
   letter-spacing: 0.02em;
 }
 
-.noteSummaryCopy p {
+.noteSummaryValue {
+  display: block;
   margin: 0;
-  overflow-wrap: anywhere;
   color: var(--color-text);
   font-size: clamp(1rem, 2.2vw, 1.15rem);
   font-weight: var(--font-weight-bold);
+}
+
+.noteExpandableText {
+  display: grid;
+  min-inline-size: 0;
+  justify-items: start;
+  gap: var(--space-1);
+}
+
+.noteClampedText {
+  display: -webkit-box;
+  min-inline-size: 0;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--note-collapsed-lines);
+}
+
+.noteClampedText[data-expanded="true"] {
+  display: block;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+}
+
+.noteFieldExpand {
+  min-block-size: 2rem;
+  padding: 0 var(--space-1);
+  border: 0;
+  background: transparent;
+  color: var(--color-link);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+}
+
+.noteFieldExpand:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .topicNoteDetails {
@@ -2364,6 +2435,47 @@
   grid-area: separator;
 }
 
+.noteDetailsToggle {
+  display: flex;
+  inline-size: 100%;
+  min-block-size: 2.75rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-surface-subtle) 45%, transparent);
+  color: var(--color-sea);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.noteDetailsToggle svg {
+  flex: 0 0 1.25rem;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.noteDetailsToggle:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+@media (hover: hover) {
+  .noteDetailsToggle:hover {
+    border-color: color-mix(in srgb, var(--color-sea) 68%, var(--color-border));
+    background: color-mix(in srgb, var(--color-sea) 6%, var(--color-surface));
+  }
+}
+
 .topicNoteEvidence,
 .topicNotesLogin,
 .topicNotesState,
@@ -2406,7 +2518,8 @@
 }
 
 .noteTrustCopy > span {
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  font-size: clamp(0.72rem, 3.2vw, 0.82rem);
   font-weight: var(--font-weight-medium);
 }
 
@@ -2897,4 +3010,10 @@
   grid-template-columns: minmax(7rem, 0.35fr) minmax(0, 1fr);
   min-block-size: 0;
   padding: var(--space-2) 0;
+}
+
+:global([data-bandwidth-mode="ultraLite"]) .noteDetailsToggle {
+  padding-inline: 0;
+  border-inline: 0;
+  background: transparent;
 }

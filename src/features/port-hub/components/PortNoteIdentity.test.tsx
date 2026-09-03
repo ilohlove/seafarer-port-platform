@@ -82,6 +82,7 @@ describe("Port Note author identity", () => {
     expect(styles).toMatch(/\.noteTrustActions\s*\{[\s\S]*?border: 1px solid color-mix\(in srgb, var\(--color-service-border\) 72%, transparent\);[\s\S]*?background:/u);
     expect(styles).toMatch(/\.noteActionStack\s*\{[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);[\s\S]*?inline-size: 100%;/u);
     expect(styles).toMatch(/\.noteActionStack button\s*\{[\s\S]*?min-block-size: 3\.125rem;[\s\S]*?flex-direction: row;/u);
+    expect(styles).toMatch(/\.noteTrustCopy > span\s*\{[\s\S]*?white-space: nowrap;[\s\S]*?font-size: clamp\(0\.72rem, 3\.2vw, 0\.82rem\);/u);
     expect(styles).toMatch(/\.noteActionStack \.changedAction\s*\{[\s\S]*?grid-column: 1 \/ -1;/u);
     expect(styles).toMatch(/\.noteActionStack \.confirmAction\s*\{[\s\S]*?background: color-mix\(in srgb, var\(--color-sea\) 6%, var\(--color-surface\)\);/u);
     expect(component).toContain('data-action-count="3"');

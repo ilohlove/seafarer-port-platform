@@ -47,6 +47,13 @@ describe("Supabase Port Note identity mapping", () => {
     expect(mapPortNote(note).feedbackChangeAlert).toBeUndefined();
   });
 
+  test("restores the viewer confirmation state from the note read model after reload", () => {
+    expect(mapPortNote({
+      ...note,
+      accuracy: { still_correct: 4, changed: 0, not_sure: 0, viewer_answer: "stillCorrect" },
+    }).accuracy).toMatchObject({ stillCorrect: 4, viewerAnswer: "stillCorrect" });
+  });
+
   test("maps feedback identity, ownership and correction usage", () => {
     expect(mapNoteFeedback({
       id: "feedback-1", note_id: "note-1", body: "Terminal 2 still has a bus.",

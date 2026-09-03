@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
 import { describe, expect, test } from "vitest";
 import { mapXpEvent, mapXpLaunchResult, mapXpSystemStatus } from "./supabase-reputation-repository";
 
@@ -31,5 +34,22 @@ describe("Supabase reputation mapping", () => {
       launchAt: "2026-09-02T10:00:00Z", alreadyLaunched: false,
       notes: 4, communityConfirmed: 2, foundingContributors: 3,
     });
+  });
+
+  test("keeps the active confirmation transport text-only", () => {
+    const source = readFileSync(
+      resolve(process.cwd(), "src/services/supabase/supabase-reputation-repository.ts"),
+      "utf8",
+    );
+    const confirmationMethods = source.slice(
+      source.indexOf("async confirmNote(submission"),
+      source.indexOf("async submitCorrection(submission"),
+    );
+
+    expect(confirmationMethods).toContain('client.rpc("submit_verified_confirmation"');
+    expect(confirmationMethods).toContain('client.rpc("revoke_verified_confirmation"');
+    expect(confirmationMethods).not.toContain("p_evidence_path");
+    expect(confirmationMethods).not.toContain("storage");
+    expect(confirmationMethods).not.toContain("File");
   });
 });

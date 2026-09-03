@@ -1,5 +1,6 @@
 import type {
   ConfirmationResult,
+  ConfirmationRevocationResult,
   AdminXpLedgerPage,
   CorrectionQueueItem,
   CorrectionReviewAction,
@@ -23,6 +24,7 @@ export interface ReputationRepository {
   listMyEvents(filter: XpHistoryFilter, cursor?: string, options?: RequestOptions): Promise<XpHistoryPage>;
   getMyEvent(eventId: string, options?: RequestOptions): Promise<XpEventReadModel>;
   confirmNote(submission: VerifiedConfirmationSubmission): Promise<ConfirmationResult>;
+  revokeNoteConfirmation(noteId: string, idempotencyKey: string): Promise<ConfirmationRevocationResult>;
   submitCorrection(submission: NoteCorrectionSubmission): Promise<void>;
   listCorrections(status?: "pending" | "accepted" | "rejected"): Promise<readonly CorrectionQueueItem[]>;
   reviewCorrection(action: CorrectionReviewAction): Promise<void>;

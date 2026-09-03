@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 
 import { useI18n, type TranslationKey } from "../../../i18n";
+import {
+  isNoteFieldWithinHardLimit,
+  noteFieldCharacterCount,
+  resolveNoteFieldDisplayRule,
+  shouldShowNoteFieldGuidance,
+} from "../note-field-config";
 import styles from "../port-notes.module.css";
 
 type CaptureTopic =
@@ -37,6 +43,47 @@ export interface NoteCapturePreview {
   readonly takeaway: string;
   readonly details: readonly PreviewDetail[];
   readonly contact?: string;
+}
+
+function FieldLimitGuidance({ value, fieldKey }: { readonly value: string; readonly fieldKey: string }) {
+  const { t } = useI18n();
+  const rule = resolveNoteFieldDisplayRule(fieldKey);
+  if (!shouldShowNoteFieldGuidance(value, rule)) return null;
+  const length = noteFieldCharacterCount(value);
+  return (
+    <span className={styles.captureFieldGuidance} data-soft-limit-exceeded={length > rule.softLimit ? "true" : undefined}>
+      {length > rule.softLimit ? <span>{t("portNotes.capture.conciseGuidance")}</span> : null}
+      <output>{length} / {rule.hardLimit}</output>
+    </span>
+  );
+}
+
+function SuggestedField({ fieldKey, label, value, placeholder, onChange }: { readonly fieldKey: string; readonly label: string; readonly value: string; readonly placeholder: string; readonly onChange: (value: string) => void }) {
+  const rule = resolveNoteFieldDisplayRule(fieldKey);
+  return (
+    <label className={styles.captureSuggestionField}>
+      {label}
+      {rule.inputControl === "textarea" ? (
+        <textarea
+          className={styles.captureCompactTextarea}
+          rows={2}
+          maxLength={rule.hardLimit}
+          value={value}
+          onChange={(event) => onChange(event.currentTarget.value)}
+          placeholder={placeholder}
+        />
+      ) : (
+        <input
+          type="text"
+          maxLength={rule.hardLimit}
+          value={value}
+          onChange={(event) => onChange(event.currentTarget.value)}
+          placeholder={placeholder}
+        />
+      )}
+      <FieldLimitGuidance value={value} fieldKey={fieldKey} />
+    </label>
+  );
 }
 
 const topicOptions: readonly CaptureTopicOption[] = [
@@ -246,6 +293,19 @@ export function NoteCaptureDialog({
     }
     if (!visibility) {
       setError("portNotes.capture.missingVisibility");
+      return;
+    }
+
+    const valuesToValidate = [
+      { key: "mainNote", value: takeaway },
+      ...Object.entries(fieldValues).map(([key, value]) => ({ key: `${topic}.${key}`, value })),
+      { key: "common.price", value: price },
+      { key: "common.place", value: place },
+      { key: "common.contact", value: contact },
+      { key: "common.extra", value: extra },
+    ];
+    if (valuesToValidate.some(({ key, value }) => !isNoteFieldWithinHardLimit(value, resolveNoteFieldDisplayRule(key)))) {
+      setError("portNotes.capture.fieldTooLong");
       return;
     }
 
@@ -489,11 +549,13 @@ export function NoteCaptureDialog({
                 {t("portNotes.capture.takeaway")}
                 <textarea
                   value={takeaway}
+                  maxLength={resolveNoteFieldDisplayRule("mainNote").hardLimit}
                   onChange={(event) => setTakeaway(event.currentTarget.value)}
                   placeholder={t("portNotes.capture.takeawayPlaceholder")}
                   rows={4}
                 />
                 <small>{t("portNotes.capture.takeawayHelp")}</small>
+                <FieldLimitGuidance value={takeaway} fieldKey="mainNote" />
               </label>
 
               {selectedTopic ? (
@@ -517,20 +579,19 @@ export function NoteCaptureDialog({
                   </div>
                   {selectedTopic.suggestions
                     .filter((suggestion) => activeSuggestions.includes(suggestion.id))
-                    .map((suggestion) => (
-      <label className={styles.captureSuggestionField} key={suggestion.id}>
-                        {t(suggestion.label)}
-                        <input
-                          id={`note-suggestion-${suggestion.id}`}
-                          type="text"
+                    .map((suggestion) => {
+                      const fieldKey = `${selectedTopic.id}.${suggestion.id}`;
+                      return (
+                        <SuggestedField
+                          key={suggestion.id}
+                          fieldKey={fieldKey}
+                          label={t(suggestion.label)}
                           value={fieldValues[suggestion.id] ?? ""}
-                          onChange={(event) =>
-                            updateField(suggestion.id, event.currentTarget.value)
-                          }
+                          onChange={(value) => updateField(suggestion.id, value)}
                           placeholder={t("portNotes.capture.suggestionPlaceholder")}
                         />
-                      </label>
-                    ))}
+                      );
+                    })}
                   {activeSuggestions.includes("contact") && fieldValues.contact?.trim() ? (
                     <label className={styles.captureCheckbox}>
                       <input
@@ -564,19 +625,24 @@ export function NoteCaptureDialog({
                           id="note-price"
                           type="text"
                           value={price}
+                          maxLength={resolveNoteFieldDisplayRule("common.price").hardLimit}
                           onChange={(event) => setPrice(event.currentTarget.value)}
                           placeholder={t("portNotes.capture.pricePlaceholder")}
                         />
+                        <FieldLimitGuidance value={price} fieldKey="common.price" />
                       </label>
                       <label>
                         {t("portNotes.capture.place")}
-                        <input
+                        <textarea
+                          className={styles.captureCompactTextarea}
                           id="note-place"
-                          type="text"
+                          rows={2}
                           value={place}
+                          maxLength={resolveNoteFieldDisplayRule("common.place").hardLimit}
                           onChange={(event) => setPlace(event.currentTarget.value)}
                           placeholder={t("portNotes.capture.placePlaceholder")}
                         />
+                        <FieldLimitGuidance value={place} fieldKey="common.place" />
                       </label>
                     </div>
                     <label>
@@ -585,9 +651,11 @@ export function NoteCaptureDialog({
                         id="note-contact"
                         type="text"
                         value={contact}
+                        maxLength={resolveNoteFieldDisplayRule("common.contact").hardLimit}
                         onChange={(event) => setContact(event.currentTarget.value)}
                         placeholder={t("portNotes.capture.contactPlaceholder")}
                       />
+                      <FieldLimitGuidance value={contact} fieldKey="common.contact" />
                     </label>
                     {contact ? (
                       <label className={styles.captureCheckbox}>
@@ -604,10 +672,12 @@ export function NoteCaptureDialog({
                       <textarea
                         id="note-extra"
                         value={extra}
+                        maxLength={resolveNoteFieldDisplayRule("common.extra").hardLimit}
                         onChange={(event) => setExtra(event.currentTarget.value)}
                         placeholder={t("portNotes.capture.extraPlaceholder")}
                         rows={3}
                       />
+                      <FieldLimitGuidance value={extra} fieldKey="common.extra" />
                     </label>
                   </div>
                 ) : null}

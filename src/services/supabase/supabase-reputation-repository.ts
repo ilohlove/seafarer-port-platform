@@ -2,6 +2,7 @@ import { resolveUserRank } from "../../features/user-rank/user-rank";
 import { DEFAULT_XP_RULES } from "../../features/reputation/xp-rules";
 import type {
   ConfirmationResult,
+  ConfirmationRevocationResult,
   AdminXpLedgerPage,
   CorrectionQueueItem,
   CorrectionReviewAction,
@@ -83,6 +84,7 @@ export class UnavailableReputationRepository implements ReputationRepository {
   async listMyEvents(): Promise<XpHistoryPage> { return { items: [] }; }
   async getMyEvent(): Promise<XpEventReadModel> { throw new ServiceError("auth-required", "Sign-in is required."); }
   async confirmNote(): Promise<ConfirmationResult> { throw new ServiceError("notes-not-configured", "Reputation is not configured."); }
+  async revokeNoteConfirmation(): Promise<ConfirmationRevocationResult> { throw new ServiceError("notes-not-configured", "Reputation is not configured."); }
   async submitCorrection(): Promise<void> { throw new ServiceError("notes-not-configured", "Reputation is not configured."); }
   async listCorrections(): Promise<readonly CorrectionQueueItem[]> { return []; }
   async reviewCorrection(): Promise<void> { throw new ServiceError("notes-not-configured", "Reputation is not configured."); }
@@ -145,11 +147,22 @@ export class SupabaseReputationRepository implements ReputationRepository {
       p_verification_period: submission.verificationPeriod,
       p_comment: submission.comment ?? null,
       p_idempotency_key: submission.idempotencyKey,
-      p_evidence_path: submission.evidencePath ?? null,
     });
     if (error) throw error;
     const row = recordOf(data);
     return { rewardedXp: Number(row.rewarded_xp ?? 0), communityConfirmationCount: Number(row.community_confirmation_count ?? 0) };
+  }
+
+  async revokeNoteConfirmation(noteId: string, idempotencyKey: string): Promise<ConfirmationRevocationResult> {
+    const client = await getSupabaseClient();
+    if (!client) throw new ServiceError("notes-not-configured", "Reputation is not configured.");
+    const { data, error } = await client.rpc("revoke_verified_confirmation", {
+      p_note_id: noteId,
+      p_idempotency_key: idempotencyKey,
+    });
+    if (error) throw error;
+    const row = recordOf(data);
+    return { revokedXp: Number(row.revoked_xp ?? 0), communityConfirmationCount: Number(row.community_confirmation_count ?? 0) };
   }
 
   async submitCorrection(submission: NoteCorrectionSubmission): Promise<void> {
