@@ -24,8 +24,9 @@ describe("confirmation toggle XP lifecycle migration", () => {
     expect(sql).toContain("confirmation-request:");
     expect(sql).toContain("return v_previous_request.response");
     expect(sql).toContain("idempotency_key_reused");
-    expect(sql).toContain("v_assessment.id is not null and v_assessment.is_active");
-    expect(sql).toContain("v_assessment.id is null or not v_assessment.is_active");
+    expect(sql).toContain("v_assessment.note_id is not null and v_assessment.is_active");
+    expect(sql).toContain("v_assessment.note_id is null or not v_assessment.is_active");
+    expect(sql).not.toContain("v_assessment.id");
     expect(sql).toContain("'duplicate', true");
   });
 

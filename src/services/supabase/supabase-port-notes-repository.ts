@@ -26,6 +26,20 @@ function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
 }
 
+export function mapFeedbackWriteError(error: unknown): Error {
+  const message = String(asRecord(error).message ?? "");
+  if (message.includes("feedback_cooldown")) {
+    return new ServiceError("feedback-cooldown", message);
+  }
+  if (message.includes("feedback_rate_limit_10m") || message.includes("feedback_rate_limit_60m")) {
+    return new ServiceError("feedback-rate-limit", message);
+  }
+  if (message.includes("feedback_duplicate")) {
+    return new ServiceError("feedback-duplicate", message);
+  }
+  return error instanceof Error ? error : new ServiceError("feedback-error", message || "Feedback request failed.");
+}
+
 export function mapPortNote(value: unknown): PortNoteRecord {
   const row = asRecord(Array.isArray(value) ? value[0] : value);
   const accuracy = asRecord(row.accuracy);
@@ -336,7 +350,7 @@ export class SupabasePortNotesRepository implements PortNotesRepository {
     const client = await getSupabaseClient();
     if (!client) throw new ServiceError("notes-not-configured", "Port notes are not configured.");
     const { data, error } = await client.rpc("submit_note_feedback", { p_note_id: noteId, p_body: body, p_idempotency_key: idempotencyKey });
-    if (error) throw error;
+    if (error) throw mapFeedbackWriteError(error);
     return mapNoteFeedback(data);
   }
 
@@ -344,7 +358,7 @@ export class SupabasePortNotesRepository implements PortNotesRepository {
     const client = await getSupabaseClient();
     if (!client) throw new ServiceError("notes-not-configured", "Port notes are not configured.");
     const { data, error } = await client.rpc("update_note_feedback", { p_feedback_id: feedbackId, p_body: body });
-    if (error) throw error;
+    if (error) throw mapFeedbackWriteError(error);
     return mapNoteFeedback(data);
   }
 

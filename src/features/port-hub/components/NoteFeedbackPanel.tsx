@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { useServices, useSession } from "../../../app/providers";
-import { useI18n } from "../../../i18n";
+import { useI18n, type TranslationKey } from "../../../i18n";
 import type { NoteFeedbackRecord } from "../../../types";
 import { DEFAULT_USER_RANK, UserRankIdentity } from "../../user-rank";
 import styles from "../port-notes.module.css";
@@ -15,6 +15,20 @@ function idempotencyKey(): string {
 function mergeFeedback(current: readonly NoteFeedbackRecord[], incoming: readonly NoteFeedbackRecord[]) {
   return [...new Map([...current, ...incoming].map((item) => [item.id, item])).values()]
     .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+}
+
+function normalizeFeedbackBody(body: string): string {
+  return body.trim().replace(/\s+/gu, " ").toLocaleLowerCase();
+}
+
+function feedbackErrorKey(error: unknown): TranslationKey {
+  const code = error && typeof error === "object" && "code" in error
+    ? String(error.code)
+    : "";
+  if (code === "feedback-cooldown") return "noteFeedback.cooldownError";
+  if (code === "feedback-rate-limit") return "noteFeedback.rateLimitError";
+  if (code === "feedback-duplicate") return "noteFeedback.duplicateError";
+  return "noteFeedback.error";
 }
 
 interface NoteFeedbackPanelProps {
@@ -47,8 +61,9 @@ export function NoteFeedbackPanel({
   const [editingId, setEditingId] = useState<string>();
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState(false);
+  const [errorKey, setErrorKey] = useState<TranslationKey>();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const pendingSubmissionRef = useRef<{ readonly normalizedBody: string; readonly key: string } | undefined>(undefined);
 
   useEffect(() => {
     setItems([]);
@@ -57,6 +72,8 @@ export function NoteFeedbackPanel({
     setExpandedAll(false);
     setBody("");
     setEditingId(undefined);
+    setErrorKey(undefined);
+    pendingSubmissionRef.current = undefined;
   }, [noteId]);
 
   useEffect(() => {
@@ -67,7 +84,7 @@ export function NoteFeedbackPanel({
     }
     const controller = new AbortController();
     setLoading(true);
-    setError(false);
+    setErrorKey(undefined);
     void services.portNotes.listFeedback(noteId, undefined, 2, { signal: controller.signal })
       .then((page) => {
         if (controller.signal.aborted) return;
@@ -75,7 +92,7 @@ export function NoteFeedbackPanel({
         setNextCursor(page.nextCursor);
         setLoaded(true);
       })
-      .catch(() => { if (!controller.signal.aborted) setError(true); })
+      .catch(() => { if (!controller.signal.aborted) setErrorKey("noteFeedback.error"); })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
   }, [loaded, noteId, open, services]);
@@ -87,7 +104,7 @@ export function NoteFeedbackPanel({
       .then((focused) => {
         if (!controller.signal.aborted) setItems((current) => mergeFeedback(current, [focused]));
       })
-      .catch(() => { if (!controller.signal.aborted) setError(true); });
+      .catch(() => { if (!controller.signal.aborted) setErrorKey("noteFeedback.error"); });
     return () => controller.abort();
   }, [focusFeedbackId, items, open, services]);
 
@@ -104,12 +121,16 @@ export function NoteFeedbackPanel({
     event.preventDefault();
     if (!body.trim() || busy) return;
     setBusy(true);
-    setError(false);
+    setErrorKey(undefined);
     try {
       const previous = editingId ? items.find((item) => item.id === editingId) : undefined;
+      const normalizedBody = normalizeFeedbackBody(body);
+      if (!editingId && pendingSubmissionRef.current?.normalizedBody !== normalizedBody) {
+        pendingSubmissionRef.current = { normalizedBody, key: idempotencyKey() };
+      }
       const saved = editingId
         ? await services.portNotes.updateFeedback(editingId, body.trim())
-        : await services.portNotes.submitFeedback(noteId, body.trim(), idempotencyKey());
+        : await services.portNotes.submitFeedback(noteId, body.trim(), pendingSubmissionRef.current!.key);
       setItems((current) => editingId
         ? current.map((item) => item.id === editingId ? saved : item)
         : mergeFeedback(current, [saved]));
@@ -120,8 +141,9 @@ export function NoteFeedbackPanel({
       }
       setBody("");
       setEditingId(undefined);
-    } catch {
-      setError(true);
+      pendingSubmissionRef.current = undefined;
+    } catch (error) {
+      setErrorKey(feedbackErrorKey(error));
     } finally {
       setBusy(false);
     }
@@ -136,13 +158,13 @@ export function NoteFeedbackPanel({
 
   async function remove(feedback: NoteFeedbackRecord) {
     setBusy(true);
-    setError(false);
+    setErrorKey(undefined);
     try {
       await services.portNotes.deleteFeedback(feedback.id);
       setItems((current) => current.filter((item) => item.id !== feedback.id));
       if (feedback.status === "approved") onApprovedCountChange(Math.max(0, initialCount - 1));
-    } catch {
-      setError(true);
+    } catch (error) {
+      setErrorKey(feedbackErrorKey(error));
     } finally {
       setBusy(false);
     }
@@ -151,14 +173,14 @@ export function NoteFeedbackPanel({
   async function loadMore() {
     if (!nextCursor || loading) return;
     setLoading(true);
-    setError(false);
+    setErrorKey(undefined);
     setExpandedAll(true);
     try {
       const page = await services.portNotes.listFeedback(noteId, nextCursor, 20);
       setItems((current) => mergeFeedback(current, page.items));
       setNextCursor(page.nextCursor);
     } catch {
-      setError(true);
+      setErrorKey("noteFeedback.error");
     } finally {
       setLoading(false);
     }
@@ -211,7 +233,7 @@ export function NoteFeedbackPanel({
           <small>{t("noteFeedback.noXp")}</small>
         </form>
       ) : <p>{t("noteFeedback.signIn")}</p>}
-      {error ? <p role="alert">{t("noteFeedback.error")}</p> : null}
+      {errorKey ? <p role="alert">{t(errorKey)}</p> : null}
     </section>
   );
 }

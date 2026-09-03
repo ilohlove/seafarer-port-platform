@@ -46,3 +46,6 @@
 - [2026-09-03 09:44] Thu gọn chi tiết phụ của Port Note theo nhu cầu, giữ nội dung chính nổi bật và nhẹ mạng.
 - [2026-09-03 10:00] Chuẩn hóa giới hạn Note, cảnh báo nhẹ và mở nội dung dài không cắt dữ liệu.
 - [2026-09-03 14:07] Hoàn thiện vòng đời xác nhận, hoàn/khôi phục XP chống trùng và loại upload ảnh khỏi Confirmation V1.
+- [2026-09-03 14:39] Hoàn thiện Confirmation Trust V1 với form tối giản và trạng thái cộng đồng động theo hiệu lực ba tháng.
+- [2026-09-03 15:02] Công khai Feedback đã xuất bản và bổ sung chống gửi nhanh, quá hạn mức, trùng nội dung cùng retry an toàn.
+- [2026-09-03 15:12] Triển khai Supabase cho giới hạn Note, Confirmation Trust và Feedback chống spam; đồng bộ toàn bộ migration remote.

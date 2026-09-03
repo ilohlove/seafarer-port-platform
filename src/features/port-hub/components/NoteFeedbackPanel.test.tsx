@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import type { NoteFeedbackPage, NoteFeedbackRecord } from "../../../types";
 import type { RequestOptions } from "../../../services/contracts/request-context";
+import { ServiceError } from "../../../services/service-errors";
 import { NoteFeedbackPanel } from "./NoteFeedbackPanel";
 
 const mocks = vi.hoisted(() => {
@@ -51,6 +52,10 @@ const messages: Readonly<Record<string, string>> = {
   "noteFeedback.noXp": "No XP",
   "noteFeedback.more": "View more feedback",
   "noteFeedback.signIn": "Sign in",
+  "noteFeedback.error": "Generic feedback error",
+  "noteFeedback.cooldownError": "Too fast",
+  "noteFeedback.rateLimitError": "Too many",
+  "noteFeedback.duplicateError": "Already sent",
 };
 
 vi.mock("../../../i18n", () => ({
@@ -144,20 +149,55 @@ describe("Note feedback progressive disclosure", () => {
     expect(screen.queryByText("No approved feedback yet.")).toBeNull();
   });
 
-  test("keeps the panel open and inserts newly submitted pending feedback", async () => {
+  test("keeps the panel open and inserts newly published feedback", async () => {
     const user = userEvent.setup();
-    const pending = { ...feedback("pending", "2026-09-03T03:00:00Z"), status: "pending" as const };
+    const published = feedback("published", "2026-09-03T03:00:00Z");
     mocks.listFeedback.mockResolvedValue({ items: [] });
-    mocks.submitFeedback.mockResolvedValue(pending);
+    mocks.submitFeedback.mockResolvedValue(published);
     render(<NoteFeedbackPanel {...baseProps} initialCount={0} open />);
 
     const textarea = await screen.findByRole("textbox", { name: "Add your experience" });
     await user.type(textarea, "Fresh experience");
     await user.click(screen.getByRole("button", { name: "Send feedback" }));
 
-    expect(await screen.findByText("Body pending")).toBeVisible();
+    expect(await screen.findByText("Body published")).toBeVisible();
     expect(screen.getByLabelText("0 feedback")).toBeVisible();
     expect(mocks.submitFeedback).toHaveBeenCalledWith("note-1", "Fresh experience", expect.any(String));
+  });
+
+  test("reuses the client request id when a slow-network retry sends the same body", async () => {
+    const user = userEvent.setup();
+    mocks.listFeedback.mockResolvedValue({ items: [] });
+    mocks.submitFeedback
+      .mockRejectedValueOnce(new Error("timeout"))
+      .mockResolvedValueOnce(feedback("retry", "2026-09-03T03:00:00Z"));
+    render(<NoteFeedbackPanel {...baseProps} initialCount={0} open />);
+
+    const textarea = await screen.findByRole("textbox", { name: "Add your experience" });
+    await user.type(textarea, "  Taxi   still runs  ");
+    await user.click(screen.getByRole("button", { name: "Send feedback" }));
+    expect(await screen.findByText("Generic feedback error")).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Send feedback" }));
+
+    await waitFor(() => expect(mocks.submitFeedback).toHaveBeenCalledTimes(2));
+    expect(mocks.submitFeedback.mock.calls[1]?.[2]).toBe(mocks.submitFeedback.mock.calls[0]?.[2]);
+    expect(await screen.findByText("Body retry")).toBeVisible();
+  });
+
+  test.each([
+    ["feedback-cooldown", "Too fast"],
+    ["feedback-rate-limit", "Too many"],
+    ["feedback-duplicate", "Already sent"],
+  ])("shows the specific %s feedback error", async (code, message) => {
+    const user = userEvent.setup();
+    mocks.listFeedback.mockResolvedValue({ items: [] });
+    mocks.submitFeedback.mockRejectedValue(new ServiceError(code, code));
+    render(<NoteFeedbackPanel {...baseProps} initialCount={0} open />);
+
+    await user.type(await screen.findByRole("textbox", { name: "Add your experience" }), "Feedback body");
+    await user.click(screen.getByRole("button", { name: "Send feedback" }));
+
+    expect(await screen.findByText(message)).toBeVisible();
   });
 
   test("submits with Enter and keeps Shift+Enter for a new line", async () => {

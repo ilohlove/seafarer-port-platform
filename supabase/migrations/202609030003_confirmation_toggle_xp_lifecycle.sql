@@ -6,21 +6,23 @@ alter table public.note_accuracy_assessments
   add column if not exists activation_count integer not null default 1 check (activation_count > 0);
 
 with active_legacy_rewards as (
-  select distinct on (a.id) a.id as assessment_id, greatest(e.amount, 0) as amount
+  select distinct on (a.note_id, a.user_id, a.assessment_revision)
+    a.note_id, a.user_id, a.assessment_revision, greatest(e.amount, 0) as amount
   from public.note_accuracy_assessments a
   join public.xp_ledger_entries e
     on e.user_id = a.user_id and e.source_type = 'note' and e.source_id = a.note_id::text
    and e.event_type = 'verified_confirmation' and e.amount > 0
   where a.rewarded_at is not null
     and not exists (select 1 from public.xp_ledger_entries r where r.reversal_of = e.id)
-  order by a.id, e.created_at desc, e.id desc
+  order by a.note_id, a.user_id, a.assessment_revision, e.created_at desc, e.id desc
 )
 update public.note_accuracy_assessments a
 set reward_entitled = true,
     reward_active = true,
     reward_amount = legacy.amount
 from active_legacy_rewards legacy
-where a.id = legacy.assessment_id and legacy.amount > 0;
+where a.note_id = legacy.note_id and a.user_id = legacy.user_id
+  and a.assessment_revision = legacy.assessment_revision and legacy.amount > 0;
 
 do $$
 begin
@@ -106,7 +108,7 @@ begin
     and a.assessment_revision = v_note.confirmation_epoch
   for update;
 
-  if v_assessment.id is not null and v_assessment.is_active then
+  if v_assessment.note_id is not null and v_assessment.is_active then
     select count(*) into v_count from public.note_accuracy_assessments a
     where a.note_id = p_note_id and a.assessment_revision = v_note.confirmation_epoch
       and a.is_active and a.answer = 'stillCorrect' and a.confirmation_source = 'direct'
@@ -127,7 +129,7 @@ begin
   end;
   v_eligible := p_verification_period <> 'older';
 
-  if v_assessment.id is not null then
+  if v_assessment.note_id is not null then
     update public.note_accuracy_assessments
     set is_active = true,
         activation_count = activation_count + 1,
@@ -138,7 +140,8 @@ begin
         comment = nullif(left(trim(p_comment), 1000), ''),
         idempotency_key = p_idempotency_key,
         updated_at = now()
-    where id = v_assessment.id
+    where note_id = p_note_id and user_id = auth.uid()
+      and assessment_revision = v_note.confirmation_epoch
     returning * into v_assessment;
 
     if public.xp_system_is_live() and v_assessment.reward_entitled
@@ -152,7 +155,8 @@ begin
       );
       v_reward := greatest(v_xp_entry.amount, 0);
       update public.note_accuracy_assessments set reward_active = v_reward > 0
-      where id = v_assessment.id;
+      where note_id = p_note_id and user_id = auth.uid()
+        and assessment_revision = v_note.confirmation_epoch;
     end if;
   else
     insert into public.note_accuracy_assessments (
@@ -184,7 +188,8 @@ begin
         update public.note_accuracy_assessments
         set rewarded_at = now(), reward_entitled = v_reward > 0,
             reward_active = v_reward > 0, reward_amount = v_reward
-        where id = v_assessment.id;
+        where note_id = p_note_id and user_id = auth.uid()
+          and assessment_revision = v_note.confirmation_epoch;
       end if;
     end if;
   end if;
@@ -256,7 +261,7 @@ begin
     and a.assessment_revision = v_note.confirmation_epoch
   for update;
 
-  if v_assessment.id is null or not v_assessment.is_active then
+  if v_assessment.note_id is null or not v_assessment.is_active then
     select count(*) into v_count from public.note_accuracy_assessments a
     where a.note_id = p_note_id and a.assessment_revision = v_note.confirmation_epoch
       and a.is_active and a.answer = 'stillCorrect' and a.confirmation_source = 'direct'
@@ -292,7 +297,8 @@ begin
       reward_active = false,
       reward_amount = case when reward_entitled then v_revoked else 0 end,
       updated_at = now()
-  where id = v_assessment.id;
+  where note_id = p_note_id and user_id = auth.uid()
+    and assessment_revision = v_note.confirmation_epoch;
 
   select count(*) into v_count from public.note_accuracy_assessments a
   where a.note_id = p_note_id and a.assessment_revision = v_note.confirmation_epoch

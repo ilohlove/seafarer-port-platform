@@ -601,12 +601,20 @@ export function TopicNotesPanel({
         open={Boolean(confirmationNote)}
         onClose={() => setConfirmationNote(undefined)}
         onBusyChange={(busy) => setBusyConfirmationNoteId(busy ? confirmationNote?.id : undefined)}
-        onSuccess={(result) => {
+        onSuccess={(result, verificationPeriod) => {
           setActionNotice(result.rewardedXp > 0 ? t("confirmation.successReward", { xp: result.rewardedXp }) : t("confirmation.successNoReward"));
           if (confirmationNote) {
             setNotes((current) => current.map((note) => note.id === confirmationNote.id ? {
               ...note,
-              accuracy: { ...note.accuracy, viewerAnswer: "stillCorrect", stillCorrect: result.communityConfirmationCount },
+              lastVerifiedAt: verificationPeriod === "older" ? note.lastVerifiedAt : new Date().toISOString(),
+              accuracy: {
+                ...note.accuracy,
+                state: note.accuracy.state === "needsReview"
+                  ? "needsReview"
+                  : result.communityConfirmationCount >= 3 ? "communityConfirmed" : "needsConfirmation",
+                viewerAnswer: "stillCorrect",
+                stillCorrect: result.communityConfirmationCount,
+              },
             } : note));
           }
         }}
@@ -623,7 +631,15 @@ export function TopicNotesPanel({
           if (revocationNote) {
             setNotes((current) => current.map((note) => note.id === revocationNote.id ? {
               ...note,
-              accuracy: { ...note.accuracy, viewerAnswer: undefined, stillCorrect: result.communityConfirmationCount },
+              lastVerifiedAt: result.communityConfirmationCount === 0 ? undefined : note.lastVerifiedAt,
+              accuracy: {
+                ...note.accuracy,
+                state: note.accuracy.state === "needsReview"
+                  ? "needsReview"
+                  : result.communityConfirmationCount >= 3 ? "communityConfirmed" : "needsConfirmation",
+                viewerAnswer: undefined,
+                stillCorrect: result.communityConfirmationCount,
+              },
             } : note));
           }
         }}

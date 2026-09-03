@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { mapNoteFeedback, mapPortNote } from "./supabase-port-notes-repository";
+import { mapFeedbackWriteError, mapNoteFeedback, mapPortNote } from "./supabase-port-notes-repository";
 
 const note = {
   id: "note-1",
@@ -61,5 +61,16 @@ describe("Supabase Port Note identity mapping", () => {
       author_id: "user-1", used_for_correction: true,
       created_at: "2026-09-02T00:00:00Z", updated_at: "2026-09-02T00:00:00Z",
     })).toMatchObject({ id: "feedback-1", noteId: "note-1", status: "approved", authorId: "user-1", usedForCorrection: true, authorRank: { level: 3 } });
+  });
+});
+
+describe("Supabase feedback error mapping", () => {
+  test.each([
+    ["feedback_cooldown", "feedback-cooldown"],
+    ["feedback_rate_limit_10m", "feedback-rate-limit"],
+    ["feedback_rate_limit_60m", "feedback-rate-limit"],
+    ["feedback_duplicate", "feedback-duplicate"],
+  ])("maps %s to a presentation-safe service code", (message, code) => {
+    expect(mapFeedbackWriteError({ message })).toMatchObject({ code });
   });
 });
