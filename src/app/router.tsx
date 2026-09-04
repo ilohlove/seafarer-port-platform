@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { BrowserRouter, Route, Routes } from "react-router";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 
 import { EmptyState, Skeleton } from "../components";
 import { FoundationRoute } from "../features/foundation";
@@ -97,7 +97,9 @@ export function AppRouter() {
             <Route path="/community" element={<CommunityRoute />} />
             <Route path="/profile" element={<ProfileRoute />} />
             <Route path="/profile/xp-history" element={<XpHistoryRoute />} />
-            <Route path="/admin/notes" element={<AdminNotesRoute />} />
+            <Route path="/admin/moderation" element={<Navigate to="/admin/moderation/feedback" replace />} />
+            <Route path="/admin/notes" element={<Navigate to="/admin/moderation/notes" replace />} />
+            <Route path="/admin/moderation/notes" element={<AdminNotesRoute />} />
             <Route path="/admin/moderation/corrections" element={<AdminCorrectionsRoute />} />
             <Route path="/admin/moderation/feedback" element={<AdminFeedbackRoute />} />
             <Route path="/admin/reputation/ledger" element={<AdminReputationLedgerRoute />} />

@@ -75,6 +75,85 @@
   gap: var(--space-4);
 }
 
+.correctionTopic {
+  color: var(--color-sea);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.correctionFields {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.correctionField {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-subtle);
+}
+
+.correctionField label {
+  display: grid;
+  gap: var(--space-2);
+  min-inline-size: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.correctionField input,
+.correctionField textarea {
+  inline-size: 100%;
+  min-block-size: var(--tap-target);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+}
+
+.correctionField textarea {
+  resize: vertical;
+}
+
+.correctionField small,
+.correctionHint {
+  color: var(--color-status-warning-text);
+  font-size: var(--font-size-xs);
+}
+
+.correctionField > button {
+  justify-self: start;
+  min-block-size: var(--tap-target);
+  padding-inline: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-link);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--font-size-xs);
+}
+
+.correctionConsent {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.correctionConsent input {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  margin-block-start: 0.1rem;
+  accent-color: var(--color-primary);
+}
+
 .actionForm fieldset {
   display: grid;
   gap: var(--space-2);

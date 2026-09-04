@@ -73,4 +73,25 @@ describe("CancelConfirmationDialog", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("Không thể hủy xác nhận");
     expect(cancel).toBeEnabled();
   });
+
+  test("reuses the operation UUID when the same revocation is retried", async () => {
+    mocks.revokeNoteConfirmation
+      .mockRejectedValueOnce(new Error("satellite timeout"))
+      .mockResolvedValueOnce({ revokedXp: 10, communityConfirmationCount: 0 });
+    render(
+      <I18nProvider initialLocale="en">
+        <CancelConfirmationDialog noteId="note-1" open onClose={() => undefined} onSuccess={() => undefined} />
+      </I18nProvider>,
+    );
+
+    const cancel = screen.getByRole("button", { name: "Hủy xác nhận" });
+    fireEvent.click(cancel);
+    await screen.findByRole("alert");
+    fireEvent.click(cancel);
+    await waitFor(() => expect(mocks.revokeNoteConfirmation).toHaveBeenCalledTimes(2));
+
+    const firstKey = mocks.revokeNoteConfirmation.mock.calls[0]?.[1];
+    expect(firstKey).toMatch(/^[0-9a-f-]{36}$/u);
+    expect(mocks.revokeNoteConfirmation.mock.calls[1]?.[1]).toBe(firstKey);
+  });
 });

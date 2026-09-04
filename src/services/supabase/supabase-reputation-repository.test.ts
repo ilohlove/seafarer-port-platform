@@ -52,4 +52,19 @@ describe("Supabase reputation mapping", () => {
     expect(confirmationMethods).not.toContain("storage");
     expect(confirmationMethods).not.toContain("File");
   });
+
+  test("uses structured correction submit and field-level review RPCs", () => {
+    const source = readFileSync(
+      resolve(process.cwd(), "src/services/supabase/supabase-reputation-repository.ts"),
+      "utf8",
+    );
+    const correctionStart = source.indexOf("async submitCorrection(submission");
+    const correctionMethods = source.slice(correctionStart, source.indexOf("async listAdminLedger(", correctionStart));
+
+    expect(correctionMethods).toContain('client.rpc("submit_structured_note_correction"');
+    expect(correctionMethods).toContain("p_changes:");
+    expect(correctionMethods).toContain('client.rpc("review_structured_note_correction"');
+    expect(correctionMethods).toContain("p_accepted_item_ids:");
+    expect(correctionMethods).not.toContain('client.rpc("review_note_correction"');
+  });
 });

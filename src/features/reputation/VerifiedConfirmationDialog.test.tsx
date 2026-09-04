@@ -76,4 +76,43 @@ describe("VerifiedConfirmationDialog", () => {
       "last7Days",
     ));
   });
+
+  test("reuses the operation UUID when the same confirmation is retried", async () => {
+    mocks.confirmNote
+      .mockRejectedValueOnce(new Error("satellite timeout"))
+      .mockResolvedValueOnce({ rewardedXp: 10, communityConfirmationCount: 1 });
+    render(
+      <I18nProvider initialLocale="en">
+        <VerifiedConfirmationDialog noteId="note-1" open onClose={() => undefined} onSuccess={() => undefined} />
+      </I18nProvider>,
+    );
+
+    const submit = screen.getByRole("button", { name: "Xác nhận vẫn đúng" });
+    fireEvent.click(submit);
+    await screen.findByRole("alert");
+    fireEvent.click(submit);
+    await waitFor(() => expect(mocks.confirmNote).toHaveBeenCalledTimes(2));
+
+    const firstKey = mocks.confirmNote.mock.calls[0]?.[0].idempotencyKey;
+    expect(firstKey).toMatch(/^[0-9a-f-]{36}$/u);
+    expect(mocks.confirmNote.mock.calls[1]?.[0].idempotencyKey).toBe(firstKey);
+  });
+
+  test("starts a new operation UUID when confirmation input changes", async () => {
+    mocks.confirmNote.mockRejectedValue(new Error("offline"));
+    render(
+      <I18nProvider initialLocale="vi">
+        <VerifiedConfirmationDialog noteId="note-1" open onClose={() => undefined} onSuccess={() => undefined} />
+      </I18nProvider>,
+    );
+
+    const submit = screen.getByRole("button", { name: "Xác nhận vẫn đúng" });
+    fireEvent.click(submit);
+    await screen.findByRole("alert");
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "Thông tin bổ sung" } });
+    fireEvent.click(submit);
+    await waitFor(() => expect(mocks.confirmNote).toHaveBeenCalledTimes(2));
+    expect(mocks.confirmNote.mock.calls[1]?.[0].idempotencyKey)
+      .not.toBe(mocks.confirmNote.mock.calls[0]?.[0].idempotencyKey);
+  });
 });

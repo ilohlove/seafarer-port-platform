@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router";
 
 import { EmptyState, Skeleton } from "../../components";
 import { useServices, useSession } from "../../app/providers";
 import { useI18n } from "../../i18n";
+import { createIdempotencyKey } from "../../idempotency";
 import type { PortNoteModerationState, PortNoteRecord } from "../../types";
 import styles from "./admin-notes.module.css";
+import { AdminModerationLayout } from "./AdminModerationLayout";
 
 type QueueFilter = "all" | PortNoteModerationState;
 
@@ -26,12 +27,6 @@ const stateLabels = {
   rejected: "admin.notes.rejected",
   quarantined: "admin.notes.quarantined",
 } as const;
-
-function makeIdempotencyKey(): string {
-  return typeof crypto.randomUUID === "function"
-    ? crypto.randomUUID()
-    : `moderation-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
 
 export function AdminNotesRoute() {
   const services = useServices();
@@ -88,7 +83,7 @@ export function AdminNotesRoute() {
         noteId: note.id,
         nextState,
         reason,
-        idempotencyKey: makeIdempotencyKey(),
+        idempotencyKey: createIdempotencyKey(),
       });
       setNotes((current) => current.filter((candidate) => candidate.id !== note.id));
       setNotice(true);
@@ -112,7 +107,7 @@ export function AdminNotesRoute() {
   }
 
   return (
-    <div className={styles.page}>
+    <AdminModerationLayout><div className={styles.page}>
       <header className={styles.header}>
         <div>
           <p className={styles.eyebrow}>CrewPort</p>
@@ -129,11 +124,6 @@ export function AdminNotesRoute() {
             <option value="quarantined">{t("admin.notes.quarantined")}</option>
           </select>
         </label>
-        <nav className={styles.adminLinks}>
-          <Link to="/admin/moderation/feedback">{t("admin.feedback.heading")}</Link>
-          <Link to="/admin/moderation/corrections">{t("admin.notes.corrections")}</Link>
-          {session.profile?.role === "admin" ? <Link to="/admin/reputation/ledger">{t("admin.notes.reputationLedger")}</Link> : null}
-        </nav>
       </header>
 
       {notice ? <output className={styles.notice}>{t("admin.notes.updated")}</output> : null}
@@ -181,6 +171,6 @@ export function AdminNotesRoute() {
           </article>
         ))}
       </div>
-    </div>
+    </div></AdminModerationLayout>
   );
 }

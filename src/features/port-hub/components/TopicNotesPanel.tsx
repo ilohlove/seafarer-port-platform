@@ -8,6 +8,7 @@ import { DEFAULT_USER_RANK, UserRankIdentity } from "../../user-rank";
 import { CancelConfirmationDialog, CorrectionDialog, VerifiedConfirmationDialog } from "../../reputation";
 import { NoteFeedbackPanel } from "./NoteFeedbackPanel";
 import { resolveNoteFieldDisplayRule, shouldOfferNoteFieldExpansion } from "../note-field-config";
+import { getNoteFieldLabelKey } from "../note-topic-fields";
 import styles from "../port-notes.module.css";
 
 const topicKeys: Readonly<Record<PortNoteTopic, TranslationKey>> = {
@@ -26,6 +27,8 @@ interface TopicNotesPanelProps {
   readonly contextKey?: string;
   readonly fallbackNotes: readonly PortNoteCardModel[];
   readonly onWriteNote: () => void;
+  readonly focusNoteId?: string;
+  readonly focusFeedbackId?: string;
 }
 
 function mapLegacyTopic(note: PortNoteCardModel): PortNoteTopic {
@@ -189,7 +192,7 @@ function ExpandableNoteText({ value, fieldKey, label }: { readonly value: string
   );
 }
 
-export function TopicNoteContent({ summary, details }: { readonly summary: string; readonly details: Readonly<Record<string, string>> }) {
+export function TopicNoteContent({ topic, summary, details }: { readonly topic: PortNoteTopic; readonly summary: string; readonly details: Readonly<Record<string, string>> }) {
   const { t } = useI18n();
   const detailsId = useId();
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -220,7 +223,7 @@ export function TopicNoteContent({ summary, details }: { readonly summary: strin
       {detailsOpen && visibleDetails.length > 0 ? (
         <dl id={detailsId} className={styles.topicNoteDetails}>
           {visibleDetails.map(([key, value]) => {
-            const label = detailLabel(key, t);
+            const label = detailLabel(topic, key, t);
             return (
               <div key={key} data-note-detail-key={key}>
                 <NoteDetailIcon detailKey={key} />
@@ -289,6 +292,8 @@ function NoteCard({
   onChanged,
   confirmationDisabled,
   confirmationBusy,
+  focused,
+  focusedFeedbackId,
 }: {
   readonly note: PortNoteRecord;
   readonly featured: boolean;
@@ -296,12 +301,14 @@ function NoteCard({
   readonly onChanged: () => void;
   readonly confirmationDisabled: boolean;
   readonly confirmationBusy: boolean;
+  readonly focused: boolean;
+  readonly focusedFeedbackId?: string;
 }) {
   const { t, formatDate } = useI18n();
   const feedbackPanelId = useId();
-  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(Boolean(focusedFeedbackId));
   const [feedbackCount, setFeedbackCount] = useState(note.feedbackCount);
-  const [focusFeedbackId, setFocusFeedbackId] = useState<string>();
+  const [focusFeedbackId, setFocusFeedbackId] = useState<string | undefined>(focusedFeedbackId);
 
   useEffect(() => setFeedbackCount(note.feedbackCount), [note.feedbackCount]);
 
@@ -311,7 +318,7 @@ function NoteCard({
   }
 
   return (
-    <article className={styles.topicNoteGroup}>
+    <article className={styles.topicNoteGroup} id={`port-note-${note.id}`} data-deep-link-focused={focused ? "true" : undefined}>
       <div
         className={styles.topicNoteCard}
         data-topic-note-card
@@ -327,7 +334,7 @@ function NoteCard({
           />
         </div>
       </div>
-      <TopicNoteContent summary={note.summary} details={note.details} />
+      <TopicNoteContent topic={note.topic} summary={note.summary} details={note.details} />
       {note.feedbackChangeAlert ? (
         <div className={styles.feedbackChangeAlert}>
           <span>{t("noteFeedback.changeAlert")}</span>
@@ -390,18 +397,9 @@ function NoteCard({
   );
 }
 
-const detailKeys: Readonly<Record<string, TranslationKey>> = {
-  "common.price": "portNotes.capture.price",
-  "common.place": "portNotes.capture.place",
-  "common.extra": "portNotes.capture.extra",
-};
-
-function detailLabel(key: string, t: (key: TranslationKey) => string): string {
-  const direct = detailKeys[key];
-  if (direct) return t(direct);
-  const [topic, field] = key.split(".");
-  const candidate = `portNotes.capture.chip.${topic}.${field}` as TranslationKey;
-  return t(candidate) ?? key;
+function detailLabel(topic: PortNoteTopic, key: string, t: (key: TranslationKey) => string): string {
+  const labelKey = getNoteFieldLabelKey(topic, key);
+  return labelKey ? t(labelKey) : key;
 }
 
 function sortFeaturedNotes(
@@ -422,6 +420,8 @@ export function TopicNotesPanel({
   contextKey,
   fallbackNotes,
   onWriteNote,
+  focusNoteId,
+  focusFeedbackId,
 }: TopicNotesPanelProps) {
   const services = useServices();
   const session = useSession();
@@ -465,7 +465,11 @@ export function TopicNotesPanel({
       })
       .then((page) => {
         if (!controller.signal.aborted) {
-          setNotes(sortFeaturedNotes(page.items));
+          setNotes((current) => {
+            const focused = current.find((note) => note.id === focusNoteId);
+            const sorted = sortFeaturedNotes(page.items);
+            return focused ? [focused, ...sorted.filter((note) => note.id !== focused.id)] : sorted;
+          });
           setNextCursor(page.nextCursor);
         }
       })
@@ -488,7 +492,21 @@ export function TopicNotesPanel({
     }
 
     return () => controller.abort();
-  }, [contextKey, fallbackNotes, portKey, services, session.status, topic]);
+  }, [contextKey, fallbackNotes, focusNoteId, portKey, services, session.status, topic]);
+
+  useEffect(() => {
+    if (!focusNoteId || !services.portNotes.isConfigured()) return;
+    const controller = new AbortController();
+    void services.portNotes.getPortNote(focusNoteId, { signal: controller.signal })
+      .then((note) => {
+        if (!controller.signal.aborted && note.portKey === portKey && note.topic === topic) {
+          setNotes((current) => [note, ...current.filter((item) => item.id !== note.id)]);
+          requestAnimationFrame(() => document.getElementById(`port-note-${note.id}`)?.scrollIntoView({ block: "center" }));
+        }
+      })
+      .catch(() => undefined);
+    return () => controller.abort();
+  }, [focusNoteId, portKey, services, topic]);
 
   const visibleOwnNotes = useMemo(
     () => ownNotes.filter((note) => note.visibility === "private" || note.moderationState !== "approved"),
@@ -567,7 +585,9 @@ export function TopicNotesPanel({
             note={note}
             featured={index === 0}
              confirmationDisabled={session.status === "authenticated" && note.authorId === session.profile?.userId}
-             confirmationBusy={busyConfirmationNoteId === note.id}
+            confirmationBusy={busyConfirmationNoteId === note.id}
+            focused={note.id === focusNoteId}
+            focusedFeedbackId={note.id === focusNoteId ? focusFeedbackId : undefined}
              onConfirm={() => {
                if (session.status === "authenticated") {
                  if (note.accuracy.viewerAnswer === "stillCorrect") setRevocationNote(note);
@@ -637,8 +657,7 @@ export function TopicNotesPanel({
         }}
       />
       <CorrectionDialog
-        noteId={correctionNote?.id}
-        currentInformation={correctionNote?.summary ?? ""}
+        note={correctionNote}
         open={Boolean(correctionNote)}
         onClose={() => setCorrectionNote(undefined)}
         onSuccess={() => setActionNotice(t("correction.success"))}

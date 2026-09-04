@@ -8,6 +8,7 @@ import {
   Skeleton,
 } from "../../components";
 import { useI18n } from "../../i18n";
+import { createIdempotencyKey } from "../../idempotency";
 import type {
   AsyncState,
   PortHeroMediaReadModel,
@@ -48,8 +49,14 @@ export function PortNotesRoute() {
   const [selectedTopic, setSelectedTopic] = useState<PortNoteTopic>();
   const [noteRefreshToken, setNoteRefreshToken] = useState(0);
   const [noteSummary, setNoteSummary] = useState<PortNoteSummary>();
-  const writeNoteRequested =
-    new URLSearchParams(location.search).get("writeNote") === "1";
+  const routeSearch = new URLSearchParams(location.search);
+  const writeNoteRequested = routeSearch.get("writeNote") === "1";
+  const focusedNoteId = routeSearch.get("note") ?? undefined;
+  const focusedFeedbackId = routeSearch.get("feedback") ?? undefined;
+  const requestedTopic = (() => {
+    const value = routeSearch.get("topic");
+    return value === "esim" || value === "physicalSim" || value === "shoreLeave" || value === "food" || value === "shopping" || value === "welfare" || value === "general" ? value : undefined;
+  })();
 
   useEffect(() => {
     if (!portSlug) {
@@ -96,6 +103,10 @@ export function PortNotesRoute() {
       setIsNoteDialogOpen(true);
     }
   }, [session.status, state, writeNoteRequested]);
+
+  useEffect(() => {
+    if (state.status === "success" && requestedTopic) setSelectedTopic(requestedTopic);
+  }, [requestedTopic, state.status]);
 
   const viewModel = useMemo(
     () =>
@@ -286,10 +297,7 @@ export function PortNotesRoute() {
       details,
       contact: preview.contact,
       contactIsPublicBusiness: preview.visibility === "public" && Boolean(preview.contact),
-      idempotencyKey:
-        typeof crypto.randomUUID === "function"
-          ? crypto.randomUUID()
-          : `note-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      idempotencyKey: createIdempotencyKey(),
     });
     setSelectedTopic(preview.topic);
     setNoteRefreshToken((current) => current + 1);
@@ -373,6 +381,8 @@ export function PortNotesRoute() {
                   contextKey={state.data.selectedPortNotesContextId}
                   fallbackNotes={displayViewModel.notes}
                   onWriteNote={requestWriteNote}
+                  focusNoteId={focusedNoteId}
+                  focusFeedbackId={focusedFeedbackId}
                 />
               ) : null}
             </div>

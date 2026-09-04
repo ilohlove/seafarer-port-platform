@@ -1,5 +1,10 @@
 import type {
   AccuracyAnswer,
+  FeedbackModerationContext,
+  FeedbackModerationItem,
+  FeedbackModerationPage,
+  FeedbackModerationPriority,
+  FeedbackModerationQueueQuery,
   ModerationAction,
   ModerationQueueQuery,
   PortNotePage,
@@ -141,6 +146,26 @@ export function mapNoteFeedback(value: unknown): NoteFeedbackRecord {
   };
 }
 
+function mapFeedbackModerationItem(value: unknown): FeedbackModerationItem {
+  const row = asRecord(value);
+  const topic = row.note_topic;
+  const priority = row.priority;
+  const trustState = row.note_trust_state;
+  const riskSignals = Array.isArray(row.risk_signals)
+    ? row.risk_signals.filter((signal): signal is "veryShort" => signal === "veryShort")
+    : [];
+  return {
+    ...mapNoteFeedback(row),
+    noteSummary: typeof row.note_summary === "string" ? row.note_summary : "",
+    portKey: typeof row.port_key === "string" ? row.port_key : "",
+    noteContextKey: typeof row.note_context_key === "string" ? row.note_context_key : undefined,
+    noteTopic: topic === "physicalSim" || topic === "shoreLeave" || topic === "food" || topic === "shopping" || topic === "welfare" || topic === "general" ? topic : "esim",
+    noteTrustState: trustState === "communityConfirmed" || trustState === "needsReview" ? trustState : "needsConfirmation",
+    priority: (priority === "P0" || priority === "P1" ? priority : "P2") as FeedbackModerationPriority,
+    riskSignals,
+  };
+}
+
 export class UnavailablePortNotesRepository implements PortNotesRepository {
   isConfigured(): boolean {
     return false;
@@ -152,6 +177,10 @@ export class UnavailablePortNotesRepository implements PortNotesRepository {
 
   async listTopicNotes(): Promise<PortNotePage> {
     return { items: [] };
+  }
+
+  async getPortNote(): Promise<PortNoteRecord> {
+    throw new ServiceError("notes-not-configured", "Port notes are not configured.");
   }
 
   async listMyNotes(): Promise<readonly PortNoteRecord[]> {
@@ -175,7 +204,8 @@ export class UnavailablePortNotesRepository implements PortNotesRepository {
   async submitFeedback(): Promise<NoteFeedbackRecord> { throw new ServiceError("notes-not-configured", "Port notes are not configured."); }
   async updateFeedback(): Promise<NoteFeedbackRecord> { throw new ServiceError("notes-not-configured", "Port notes are not configured."); }
   async deleteFeedback(): Promise<void> { throw new ServiceError("notes-not-configured", "Port notes are not configured."); }
-  async listFeedbackModerationQueue(): Promise<readonly NoteFeedbackRecord[]> { return []; }
+  async listFeedbackModerationQueue(): Promise<FeedbackModerationPage> { return { items: [] }; }
+  async getFeedbackModerationContext(): Promise<FeedbackModerationContext> { throw new ServiceError("notes-not-configured", "Port notes are not configured."); }
   async moderateFeedback(): Promise<void> { throw new ServiceError("notes-not-configured", "Port notes are not configured."); }
 
   async listModerationQueue(): Promise<readonly PortNoteRecord[]> {
@@ -253,6 +283,15 @@ export class SupabasePortNotesRepository implements PortNotesRepository {
       items: Array.isArray(row.items) ? row.items.map(mapPortNote) : [],
       nextCursor: typeof row.next_cursor === "string" ? row.next_cursor : undefined,
     };
+  }
+
+  async getPortNote(noteId: string, options: RequestOptions = {}): Promise<PortNoteRecord> {
+    if (options.signal?.aborted) throw new DOMException("The request was aborted.", "AbortError");
+    const client = await getSupabaseClient();
+    if (!client) throw new ServiceError("notes-not-configured", "Port notes are not configured.");
+    const { data, error } = await client.rpc("get_port_note", { p_note_id: noteId });
+    if (error) throw error;
+    return mapPortNote(data);
   }
 
   async listMyNotes(
@@ -369,12 +408,38 @@ export class SupabasePortNotesRepository implements PortNotesRepository {
     if (error) throw error;
   }
 
-  async listFeedbackModerationQueue(state: NoteFeedbackState = "pending"): Promise<readonly NoteFeedbackRecord[]> {
+  async listFeedbackModerationQueue(query: FeedbackModerationQueueQuery = {}): Promise<FeedbackModerationPage> {
+    if (query.signal?.aborted) throw new DOMException("The request was aborted.", "AbortError");
     const client = await getSupabaseClient();
-    if (!client) return [];
-    const { data, error } = await client.rpc("list_feedback_moderation_queue", { p_status: state });
+    if (!client) return { items: [] };
+    const { data, error } = await client.rpc("list_feedback_moderation_queue_v2", {
+      p_status: query.state ?? "pending",
+      p_port_key: query.portKey?.trim() || null,
+      p_topic: query.topic ?? null,
+      p_priority: query.priority ?? null,
+      p_sort: query.sort ?? "oldest",
+      p_cursor: query.cursor ?? null,
+      p_limit: Math.min(Math.max(query.limit ?? 25, 1), 50),
+    });
     if (error) throw error;
-    return Array.isArray(data) ? data.map(mapNoteFeedback) : [];
+    const row = asRecord(data);
+    return {
+      items: Array.isArray(row.items) ? row.items.map(mapFeedbackModerationItem) : [],
+      nextCursor: typeof row.next_cursor === "string" ? row.next_cursor : undefined,
+    };
+  }
+
+  async getFeedbackModerationContext(feedbackId: string, options: RequestOptions = {}): Promise<FeedbackModerationContext> {
+    if (options.signal?.aborted) throw new DOMException("The request was aborted.", "AbortError");
+    const client = await getSupabaseClient();
+    if (!client) throw new ServiceError("notes-not-configured", "Port notes are not configured.");
+    const { data, error } = await client.rpc("get_feedback_moderation_context", { p_feedback_id: feedbackId });
+    if (error) throw error;
+    const row = asRecord(data);
+    return {
+      note: mapPortNote(row.note),
+      feedback: Array.isArray(row.feedback) ? row.feedback.map(mapNoteFeedback) : [],
+    };
   }
 
   async moderateFeedback(feedbackId: string, decision: Exclude<NoteFeedbackState, "pending">, reason?: string): Promise<void> {

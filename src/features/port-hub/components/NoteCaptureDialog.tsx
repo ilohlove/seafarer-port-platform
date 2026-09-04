@@ -1,35 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 
 import { useI18n, type TranslationKey } from "../../../i18n";
+import type { PortNoteTopic } from "../../../types";
 import {
   isNoteFieldWithinHardLimit,
   noteFieldCharacterCount,
   resolveNoteFieldDisplayRule,
   shouldShowNoteFieldGuidance,
 } from "../note-field-config";
+import { NOTE_TOPIC_DEFINITIONS } from "../note-topic-fields";
 import styles from "../port-notes.module.css";
 
-type CaptureTopic =
-  | "esim"
-  | "physicalSim"
-  | "shoreLeave"
-  | "food"
-  | "shopping"
-  | "welfare"
-  | "general";
+type CaptureTopic = PortNoteTopic;
 
 type Visibility = "public" | "private";
-
-interface CaptureSuggestion {
-  readonly id: string;
-  readonly label: TranslationKey;
-}
-
-interface CaptureTopicOption {
-  readonly id: CaptureTopic;
-  readonly label: TranslationKey;
-  readonly suggestions: readonly CaptureSuggestion[];
-}
 
 interface PreviewDetail {
   readonly key: string;
@@ -86,87 +70,11 @@ function SuggestedField({ fieldKey, label, value, placeholder, onChange }: { rea
   );
 }
 
-const topicOptions: readonly CaptureTopicOption[] = [
-  {
-    id: "esim",
-    label: "portNotes.capture.topic.esim",
-    suggestions: [
-      { id: "price", label: "portNotes.capture.chip.esim.price" },
-      { id: "data", label: "portNotes.capture.chip.esim.data" },
-      { id: "days", label: "portNotes.capture.chip.esim.days" },
-      { id: "hotspot", label: "portNotes.capture.chip.esim.hotspot" },
-      { id: "signal", label: "portNotes.capture.chip.esim.signal" },
-      { id: "website", label: "portNotes.capture.chip.esim.website" },
-    ],
-  },
-  {
-    id: "physicalSim",
-    label: "portNotes.capture.topic.physicalSim",
-    suggestions: [
-      { id: "seller", label: "portNotes.capture.chip.physicalSim.seller" },
-      { id: "fairPrice", label: "portNotes.capture.chip.physicalSim.fairPrice" },
-      { id: "passport", label: "portNotes.capture.chip.physicalSim.passport" },
-      { id: "delivery", label: "portNotes.capture.chip.physicalSim.delivery" },
-      { id: "contact", label: "portNotes.capture.chip.physicalSim.contact" },
-    ],
-  },
-  {
-    id: "shoreLeave",
-    label: "portNotes.capture.topic.shoreLeave",
-    suggestions: [
-      { id: "pickup", label: "portNotes.capture.chip.shoreLeave.pickup" },
-      { id: "rideApp", label: "portNotes.capture.chip.shoreLeave.rideApp" },
-      { id: "price", label: "portNotes.capture.chip.shoreLeave.price" },
-      { id: "agreeFare", label: "portNotes.capture.chip.shoreLeave.agreeFare" },
-      { id: "avoid", label: "portNotes.capture.chip.shoreLeave.avoid" },
-    ],
-  },
-  {
-    id: "food",
-    label: "portNotes.capture.topic.food",
-    suggestions: [
-      { id: "seller", label: "portNotes.capture.chip.food.seller" },
-      { id: "where", label: "portNotes.capture.chip.food.where" },
-      { id: "price", label: "portNotes.capture.chip.food.price" },
-      { id: "shipDelivery", label: "portNotes.capture.chip.food.shipDelivery" },
-      { id: "recommendation", label: "portNotes.capture.chip.food.recommendation" },
-    ],
-  },
-  {
-    id: "shopping",
-    label: "portNotes.capture.topic.shopping",
-    suggestions: [
-      { id: "supermarket", label: "portNotes.capture.chip.shopping.supermarket" },
-      { id: "cosmetics", label: "portNotes.capture.chip.shopping.cosmetics" },
-      { id: "supplements", label: "portNotes.capture.chip.shopping.supplements" },
-      { id: "gift", label: "portNotes.capture.chip.shopping.gift" },
-      { id: "goodPrice", label: "portNotes.capture.chip.shopping.goodPrice" },
-    ],
-  },
-  {
-    id: "welfare",
-    label: "portNotes.capture.topic.welfare",
-    suggestions: [
-      { id: "wifi", label: "portNotes.capture.chip.welfare.wifi" },
-      { id: "shuttle", label: "portNotes.capture.chip.welfare.shuttle" },
-      { id: "sim", label: "portNotes.capture.chip.welfare.sim" },
-      { id: "currency", label: "portNotes.capture.chip.welfare.currency" },
-      { id: "contact", label: "portNotes.capture.chip.welfare.contact" },
-      { id: "hours", label: "portNotes.capture.chip.welfare.hours" },
-    ],
-  },
-  {
-    id: "general",
-    label: "portNotes.capture.topic.general",
-    suggestions: [
-      { id: "try", label: "portNotes.capture.chip.general.try" },
-      { id: "avoid", label: "portNotes.capture.chip.general.avoid" },
-      { id: "cost", label: "portNotes.capture.chip.general.cost" },
-      { id: "location", label: "portNotes.capture.chip.general.location" },
-      { id: "contact", label: "portNotes.capture.chip.general.contact" },
-    ],
-  },
-];
+const topicOptions = NOTE_TOPIC_DEFINITIONS.map((definition) => ({
+  id: definition.id,
+  label: definition.label,
+  suggestions: definition.fields.map(({ id, label }) => ({ id, label })),
+}));
 
 export interface NoteCaptureDialogProps {
   readonly open: boolean;

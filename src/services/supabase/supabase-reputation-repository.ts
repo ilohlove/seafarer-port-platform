@@ -23,6 +23,7 @@ import type {
 import type { ReputationRepository } from "../contracts/reputation-repository";
 import type { RequestOptions } from "../contracts/request-context";
 import { ServiceError } from "../service-errors";
+import { createIdempotencyKey } from "../../idempotency";
 import { getSupabaseClient, hasSupabaseConfig } from "./supabase-client";
 
 function recordOf(value: unknown): Record<string, unknown> {
@@ -168,18 +169,17 @@ export class SupabaseReputationRepository implements ReputationRepository {
   async submitCorrection(submission: NoteCorrectionSubmission): Promise<void> {
     const client = await getSupabaseClient();
     if (!client) throw new ServiceError("notes-not-configured", "Reputation is not configured.");
-    const rpcName = submission.sourceFeedbackId ? "submit_note_correction_from_feedback" : "submit_note_correction";
-    const { error } = await client.rpc(rpcName, {
-      ...(submission.sourceFeedbackId
-        ? { p_feedback_id: submission.sourceFeedbackId }
-        : { p_note_id: submission.noteId }),
-      p_action: submission.action,
-      p_field_type: submission.fieldType,
-      p_current_information: submission.currentInformation,
-      p_proposed_information: submission.proposedInformation,
+    const { error } = await client.rpc("submit_structured_note_correction", {
+      p_note_id: submission.noteId,
+      p_changes: submission.changes.map((change) => ({
+        field_key: change.fieldKey,
+        current_value: change.currentValue ?? null,
+        proposed_value: change.proposedValue ?? null,
+      })),
       p_verification_period: submission.verificationPeriod,
       p_note: submission.note ?? null,
       p_evidence_path: submission.evidencePath ?? null,
+      p_contact_permission_confirmed: submission.contactPermissionConfirmed ?? false,
       p_idempotency_key: submission.idempotencyKey,
     });
     if (error) throw error;
@@ -192,10 +192,24 @@ export class SupabaseReputationRepository implements ReputationRepository {
     if (error) throw error;
     return Array.isArray(data) ? data.map((value) => {
       const row = recordOf(value);
+      const changes = Array.isArray(row.changes) ? row.changes.map((change) => {
+        const raw = recordOf(change);
+        return {
+          id: String(raw.id ?? ""),
+          fieldKey: String(raw.field_key ?? "summary"),
+          currentValue: typeof raw.current_value === "string" ? raw.current_value : undefined,
+          proposedValue: typeof raw.proposed_value === "string" ? raw.proposed_value : undefined,
+          status: (raw.status === "accepted" || raw.status === "rejected" ? raw.status : "pending") as "pending" | "accepted" | "rejected",
+        };
+      }) : [];
       return {
         id: String(row.id ?? ""), noteId: String(row.note_id ?? ""),
-        action: row.action as CorrectionQueueItem["action"], fieldType: row.field_type as CorrectionQueueItem["fieldType"],
-        currentInformation: String(row.current_information ?? ""), proposedInformation: String(row.proposed_information ?? ""),
+        topic: (typeof row.topic === "string" ? row.topic : "general") as CorrectionQueueItem["topic"],
+        action: row.action as CorrectionQueueItem["action"],
+        fieldType: typeof row.field_type === "string" ? row.field_type as CorrectionQueueItem["fieldType"] : undefined,
+        currentInformation: typeof row.current_information === "string" ? row.current_information : undefined,
+        proposedInformation: typeof row.proposed_information === "string" ? row.proposed_information : undefined,
+        changes,
         verificationPeriod: row.verification_period as CorrectionQueueItem["verificationPeriod"],
         note: typeof row.note === "string" ? row.note : undefined,
         evidencePath: typeof row.evidence_path === "string" ? row.evidence_path : undefined,
@@ -209,8 +223,9 @@ export class SupabaseReputationRepository implements ReputationRepository {
   async reviewCorrection(action: CorrectionReviewAction): Promise<void> {
     const client = await getSupabaseClient();
     if (!client) throw new ServiceError("notes-not-configured", "Reputation is not configured.");
-    const { error } = await client.rpc("review_note_correction", {
+    const { error } = await client.rpc("review_structured_note_correction", {
       p_correction_id: action.correctionId, p_decision: action.decision,
+      p_accepted_item_ids: action.acceptedChangeIds ?? [],
       p_impact: action.impact ?? null, p_reason: action.reason ?? null,
       p_idempotency_key: action.idempotencyKey,
     });
@@ -273,7 +288,7 @@ export class SupabaseReputationRepository implements ReputationRepository {
     const { data: userData, error: userError } = await client.auth.getUser();
     if (userError || !userData.user) throw userError ?? new ServiceError("auth-required", "Sign-in is required.");
     const extension = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
-    const id = typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const id = createIdempotencyKey();
     const path = `${userData.user.id}/${purpose}/${id}.${extension}`;
     const { error } = await client.storage.from("note-evidence").upload(path, file, { contentType: file.type, upsert: false });
     if (error) throw error;

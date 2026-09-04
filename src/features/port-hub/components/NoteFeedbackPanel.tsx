@@ -2,15 +2,10 @@ import { useEffect, useRef, useState } from "react";
 
 import { useServices, useSession } from "../../../app/providers";
 import { useI18n, type TranslationKey } from "../../../i18n";
+import { createIdempotencyKey } from "../../../idempotency";
 import type { NoteFeedbackRecord } from "../../../types";
 import { DEFAULT_USER_RANK, UserRankIdentity } from "../../user-rank";
 import styles from "../port-notes.module.css";
-
-function idempotencyKey(): string {
-  return typeof crypto.randomUUID === "function"
-    ? crypto.randomUUID()
-    : `feedback-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
 
 function mergeFeedback(current: readonly NoteFeedbackRecord[], incoming: readonly NoteFeedbackRecord[]) {
   return [...new Map([...current, ...incoming].map((item) => [item.id, item])).values()]
@@ -124,7 +119,7 @@ export function NoteFeedbackPanel({
       const previous = editingId ? items.find((item) => item.id === editingId) : undefined;
       const normalizedBody = normalizeFeedbackBody(body);
       if (!editingId && pendingSubmissionRef.current?.normalizedBody !== normalizedBody) {
-        pendingSubmissionRef.current = { normalizedBody, key: idempotencyKey() };
+        pendingSubmissionRef.current = { normalizedBody, key: createIdempotencyKey() };
       }
       const saved = editingId
         ? await services.portNotes.updateFeedback(editingId, body.trim())
@@ -197,7 +192,10 @@ export function NoteFeedbackPanel({
       <div className={styles.feedbackList}>
         {items.map((item) => {
           const own = item.authorId === session.profile?.userId;
-          const canManage = own || (session.status === "authenticated" && session.profile?.role === "admin");
+          const canEdit = session.status === "authenticated" && own;
+          const canDelete = session.status === "authenticated" && (
+            own || session.profile?.role === "admin" || session.profile?.role === "moderator"
+          );
           const focused = item.id === focusFeedbackId;
           return (
             <article className={styles.feedbackItem} data-focused={focused ? "true" : undefined} id={`note-feedback-${item.id}`} key={item.id} tabIndex={focused ? -1 : undefined}>
@@ -209,8 +207,8 @@ export function NoteFeedbackPanel({
                 {item.usedForCorrection ? <span>{t("noteFeedback.used")}</span> : null}
               </div>
               <div className={styles.feedbackActions}>
-                {canManage ? <button type="button" onClick={() => { setEditingId(item.id); setBody(item.body); textareaRef.current?.focus(); }}>{t("noteFeedback.edit")}</button> : null}
-                {canManage ? <button type="button" disabled={busy} onClick={() => void remove(item)}>{t("noteFeedback.delete")}</button> : null}
+                {canEdit ? <button type="button" onClick={() => { setEditingId(item.id); setBody(item.body); textareaRef.current?.focus(); }}>{t("noteFeedback.edit")}</button> : null}
+                {canDelete ? <button type="button" disabled={busy} onClick={() => void remove(item)}>{t("noteFeedback.delete")}</button> : null}
               </div>
             </article>
           );

@@ -1,3 +1,4 @@
+import type { PortNoteTopic } from "./community";
 import type { UserRankReadModel } from "./user-rank";
 
 export type XpEventType =
@@ -66,18 +67,27 @@ export interface ConfirmationRevocationResult {
 
 export type CorrectionAction = "UPDATE" | "ADD" | "INVALIDATE";
 export type CorrectionFieldType = "price" | "location" | "hours" | "contact" | "service" | "operatingStatus" | "transport" | "other";
+export type CorrectionStatus = "pending" | "accepted" | "partiallyAccepted" | "rejected";
+
+export interface NoteCorrectionChangeSubmission {
+  readonly fieldKey: string;
+  readonly currentValue?: string;
+  readonly proposedValue?: string;
+}
+
+export interface NoteCorrectionChangeReadModel extends NoteCorrectionChangeSubmission {
+  readonly id: string;
+  readonly status: "pending" | "accepted" | "rejected";
+}
 
 export interface NoteCorrectionSubmission {
   readonly noteId: string;
-  readonly action: CorrectionAction;
-  readonly fieldType: CorrectionFieldType;
-  readonly currentInformation: string;
-  readonly proposedInformation: string;
+  readonly changes: readonly NoteCorrectionChangeSubmission[];
   readonly verificationPeriod: VerificationPeriod;
   readonly note?: string;
   readonly evidencePath?: string;
+  readonly contactPermissionConfirmed?: boolean;
   readonly idempotencyKey: string;
-  readonly sourceFeedbackId?: string;
 }
 
 export type EvidencePurpose = "correction";
@@ -90,14 +100,16 @@ export interface UserAchievementReadModel {
 export interface CorrectionQueueItem {
   readonly id: string;
   readonly noteId: string;
+  readonly topic: PortNoteTopic;
   readonly action: CorrectionAction;
-  readonly fieldType: CorrectionFieldType;
-  readonly currentInformation: string;
-  readonly proposedInformation: string;
+  readonly fieldType?: CorrectionFieldType;
+  readonly currentInformation?: string;
+  readonly proposedInformation?: string;
+  readonly changes: readonly NoteCorrectionChangeReadModel[];
   readonly verificationPeriod: VerificationPeriod;
   readonly note?: string;
   readonly evidencePath?: string;
-  readonly status: "pending" | "accepted" | "rejected";
+  readonly status: CorrectionStatus;
   readonly impact?: "minor" | "material";
   readonly createdAt: string;
   readonly noteSummary: string;
@@ -108,6 +120,7 @@ export interface CorrectionQueueItem {
 export interface CorrectionReviewAction {
   readonly correctionId: string;
   readonly decision: "accepted" | "rejected";
+  readonly acceptedChangeIds?: readonly string[];
   readonly impact?: "minor" | "material";
   readonly reason?: string;
   readonly idempotencyKey: string;

@@ -2241,6 +2241,12 @@
   gap: 0.75rem;
 }
 
+.topicNoteGroup[data-deep-link-focused="true"] > .topicNoteCard {
+  border-color: var(--color-primary);
+  outline: 0.18rem solid color-mix(in srgb, var(--color-primary) 28%, transparent);
+  outline-offset: 0.15rem;
+}
+
 .topicNoteCard {
   display: grid;
   min-inline-size: 0;

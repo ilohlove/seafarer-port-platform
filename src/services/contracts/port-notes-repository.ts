@@ -1,5 +1,8 @@
 import type {
   AccuracyAnswer,
+  FeedbackModerationContext,
+  FeedbackModerationPage,
+  FeedbackModerationQueueQuery,
   ModerationAction,
   ModerationQueueQuery,
   PortNotePage,
@@ -22,6 +25,7 @@ export interface PortNotesRepository {
     options?: RequestOptions,
   ): Promise<PortNoteSummary>;
   listTopicNotes(query: PortNoteQuery): Promise<PortNotePage>;
+  getPortNote(noteId: string, options?: RequestOptions): Promise<PortNoteRecord>;
   listMyNotes(
     portKey: string,
     contextKey?: string,
@@ -35,7 +39,8 @@ export interface PortNotesRepository {
   submitFeedback(noteId: string, body: string, idempotencyKey: string): Promise<NoteFeedbackRecord>;
   updateFeedback(feedbackId: string, body: string): Promise<NoteFeedbackRecord>;
   deleteFeedback(feedbackId: string): Promise<void>;
-  listFeedbackModerationQueue(state?: NoteFeedbackState): Promise<readonly NoteFeedbackRecord[]>;
+  listFeedbackModerationQueue(query?: FeedbackModerationQueueQuery): Promise<FeedbackModerationPage>;
+  getFeedbackModerationContext(feedbackId: string, options?: RequestOptions): Promise<FeedbackModerationContext>;
   moderateFeedback(feedbackId: string, decision: Exclude<NoteFeedbackState, "pending">, reason?: string): Promise<void>;
   listModerationQueue(
     query: ModerationQueueQuery,

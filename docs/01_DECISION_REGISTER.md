@@ -64,7 +64,8 @@
 | D-311 | Community Confirmed cần 3 xác nhận trực tiếp độc lập trong 3 tháng; bonus tác giả tối đa một lần mỗi note | LOCKED |
 | D-312 | Founding Contributor là Legacy Achievement không XP cho contribution hợp lệ trước ngày Reputation launch | LOCKED |
 | D-313 | Note Trust V1 chỉ có xác nhận trực tiếp, feedback một tầng và correction; Helpful được lưu lịch sử nhưng không hiển thị, xếp hạng hoặc cấp XP | LOCKED |
-| D-314 | Feedback public qua moderation, không nested và 0 XP; Top Notes ưu tiên confirmation hiện hành, freshness và topic relevance | LOCKED |
+| D-314 | Feedback một tầng, 0 XP, không Helpful/Like; nội dung thường đăng ngay, nội dung rủi ro có thể chờ moderation | LOCKED |
+| D-315 | XP xác nhận là entitlement cố định theo user + note; material revision chỉ reset trust hiện hành, không tạo entitlement mới | LOCKED |
 
 ## Knowledge Dictionary
 | ID | Quyết định | Trạng thái |

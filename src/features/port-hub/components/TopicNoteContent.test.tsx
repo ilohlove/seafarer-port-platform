@@ -63,7 +63,7 @@ describe("Topic Note content presentation", () => {
 
     expect(component).toContain("visibleDetails.map");
     expect(component).toContain("<dl id={detailsId} className={styles.topicNoteDetails}>");
-    expect(component).toContain("const label = detailLabel(key, t)");
+    expect(component).toContain("const label = detailLabel(topic, key, t)");
     expect(component).toContain("<dt>{label}</dt>");
     expect(component).toContain("<dd><ExpandableNoteText value={value} fieldKey={key} label={label} /></dd>");
     expect(component).toContain("<NoteDetailIcon detailKey={key} />");
@@ -73,7 +73,7 @@ describe("Topic Note content presentation", () => {
   test("does not offer disclosure when a note has no public details", () => {
     render(
       <I18nProvider initialLocale="vi">
-        <TopicNoteContent summary="Nội dung chính" details={{ context: "internal-context", "shoreLeave.price": "   " }} />
+      <TopicNoteContent topic="shoreLeave" summary="Nội dung chính" details={{ context: "internal-context", "shoreLeave.price": "   " }} />
       </I18nProvider>,
     );
 
@@ -86,8 +86,8 @@ describe("Topic Note content presentation", () => {
     const user = userEvent.setup();
     render(
       <I18nProvider initialLocale="en">
-        <TopicNoteContent summary="First note" details={{ "shoreLeave.price": "12 kW" }} />
-        <TopicNoteContent summary="Second note" details={{ "shoreLeave.pickup": "Terminal 1", "shoreLeave.rideApp": "Local taxi" }} />
+        <TopicNoteContent topic="shoreLeave" summary="First note" details={{ "shoreLeave.price": "12 kW" }} />
+        <TopicNoteContent topic="shoreLeave" summary="Second note" details={{ "shoreLeave.pickup": "Terminal 1", "shoreLeave.rideApp": "Local taxi" }} />
       </I18nProvider>,
     );
 
@@ -119,7 +119,7 @@ describe("Topic Note content presentation", () => {
     const legacyLongPrice = "P".repeat(120);
     render(
       <I18nProvider initialLocale="vi">
-        <TopicNoteContent summary={longSummary} details={{ "shoreLeave.price": legacyLongPrice }} />
+        <TopicNoteContent topic="shoreLeave" summary={longSummary} details={{ "shoreLeave.price": legacyLongPrice }} />
       </I18nProvider>,
     );
 

@@ -50,3 +50,6 @@
 - [2026-09-03 15:02] Công khai Feedback đã xuất bản và bổ sung chống gửi nhanh, quá hạn mức, trùng nội dung cùng retry an toàn.
 - [2026-09-03 15:12] Triển khai Supabase cho giới hạn Note, Confirmation Trust và Feedback chống spam; đồng bộ toàn bộ migration remote.
 - [2026-09-03 15:26] Giới hạn hành động quản lý Feedback cho tác giả và Admin, đồng bộ quyền hiển thị với backend.
+- [2026-09-04 14:37] Hoàn thiện báo thay đổi đa trường theo từng topic, hỗ trợ duyệt một phần và revision an toàn.
+- [2026-09-04 15:05] Tách entitlement XP xác nhận khỏi revision, khóa quyền sửa Feedback và chuẩn hóa idempotency UUID cho mutation.
+- [2026-09-04 15:48] Hoàn thiện Moderation Center với hàng chờ Feedback phân trang, duyệt an toàn, ngữ cảnh lazy-load và deep-link bài gốc.

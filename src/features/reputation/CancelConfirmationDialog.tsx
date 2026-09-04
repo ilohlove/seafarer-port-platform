@@ -2,14 +2,9 @@ import { useEffect, useRef, useState } from "react";
 
 import { useServices } from "../../app/providers";
 import { useI18n } from "../../i18n";
+import { createIdempotencyKey } from "../../idempotency";
 import type { ConfirmationRevocationResult } from "../../types";
 import styles from "./reputation.module.css";
-
-function idempotencyKey(): string {
-  return typeof crypto.randomUUID === "function"
-    ? crypto.randomUUID()
-    : `unconfirm-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
 
 export function CancelConfirmationDialog({
   noteId,
@@ -28,6 +23,7 @@ export function CancelConfirmationDialog({
   const { t } = useI18n();
   const ref = useRef<HTMLDialogElement>(null);
   const busyRef = useRef(false);
+  const operationKeyRef = useRef<string | undefined>(undefined);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
 
@@ -35,10 +31,12 @@ export function CancelConfirmationDialog({
     const dialog = ref.current;
     if (!dialog) return;
     if (open && !dialog.open) {
+      operationKeyRef.current = createIdempotencyKey();
       setError(false);
       dialog.showModal?.();
     }
     if (!open && dialog.open) dialog.close();
+    if (!open) operationKeyRef.current = undefined;
   }, [open]);
 
   async function revoke() {
@@ -48,7 +46,8 @@ export function CancelConfirmationDialog({
     setError(false);
     onBusyChange?.(true);
     try {
-      const result = await services.reputation.revokeNoteConfirmation(noteId, idempotencyKey());
+      const result = await services.reputation.revokeNoteConfirmation(noteId, operationKeyRef.current ??= createIdempotencyKey());
+      operationKeyRef.current = undefined;
       onSuccess(result);
       ref.current?.close();
     } catch {

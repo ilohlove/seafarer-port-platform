@@ -101,6 +101,41 @@ export interface NoteFeedbackPage {
   readonly nextCursor?: string;
 }
 
+export type FeedbackModerationPriority = "P0" | "P1" | "P2";
+export type FeedbackModerationSort = "oldest" | "newest";
+export type FeedbackModerationRiskSignal = "veryShort";
+
+export interface FeedbackModerationQueueQuery {
+  readonly state?: NoteFeedbackState;
+  readonly portKey?: string;
+  readonly topic?: PortNoteTopic;
+  readonly priority?: FeedbackModerationPriority;
+  readonly sort?: FeedbackModerationSort;
+  readonly cursor?: string;
+  readonly limit?: number;
+  readonly signal?: AbortSignal;
+}
+
+export interface FeedbackModerationItem extends NoteFeedbackRecord {
+  readonly noteSummary: string;
+  readonly portKey: string;
+  readonly noteContextKey?: string;
+  readonly noteTopic: PortNoteTopic;
+  readonly noteTrustState: PortNoteAccuracyState;
+  readonly priority: FeedbackModerationPriority;
+  readonly riskSignals: readonly FeedbackModerationRiskSignal[];
+}
+
+export interface FeedbackModerationPage {
+  readonly items: readonly FeedbackModerationItem[];
+  readonly nextCursor?: string;
+}
+
+export interface FeedbackModerationContext {
+  readonly note: PortNoteRecord;
+  readonly feedback: readonly NoteFeedbackRecord[];
+}
+
 export interface PortNotePage {
   readonly items: readonly PortNoteRecord[];
   readonly nextCursor?: string;

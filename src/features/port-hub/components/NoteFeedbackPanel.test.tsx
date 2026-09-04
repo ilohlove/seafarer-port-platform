@@ -184,6 +184,7 @@ describe("Note feedback progressive disclosure", () => {
 
     await waitFor(() => expect(mocks.submitFeedback).toHaveBeenCalledTimes(2));
     expect(mocks.submitFeedback.mock.calls[1]?.[2]).toBe(mocks.submitFeedback.mock.calls[0]?.[2]);
+    expect(mocks.submitFeedback.mock.calls[0]?.[2]).toMatch(/^[0-9a-f-]{36}$/u);
     expect(await screen.findByText("Body retry")).toBeVisible();
   });
 
@@ -237,11 +238,13 @@ describe("Note feedback progressive disclosure", () => {
   });
 
   test.each([
-    ["member", "other-user", false],
-    ["moderator", "other-user", false],
-    ["member", "viewer-1", true],
-    ["admin", "other-user", true],
-  ] as const)("shows management actions for role %s and author %s: %s", async (role, authorId, visible) => {
+    ["anonymous", "member", "viewer-1", false, false],
+    ["authenticated", "member", "other-user", false, false],
+    ["authenticated", "moderator", "other-user", false, true],
+    ["authenticated", "member", "viewer-1", true, true],
+    ["authenticated", "admin", "other-user", false, true],
+  ] as const)("shows actions for status %s, role %s and author %s", async (status, role, authorId, canEdit, canDelete) => {
+    mocks.session.status = status;
     mocks.session.profile.role = role;
     mocks.listFeedback.mockResolvedValue({
       items: [{ ...feedback("permissions", "2026-09-03T05:00:00Z"), authorId }],
@@ -249,9 +252,8 @@ describe("Note feedback progressive disclosure", () => {
     render(<NoteFeedbackPanel {...baseProps} open />);
 
     await screen.findByText("Body permissions");
-    const actions = ["Edit", "Delete"]
-      .map((name) => screen.queryByRole("button", { name }));
-    expect(actions.every(Boolean)).toBe(visible);
+    expect(Boolean(screen.queryByRole("button", { name: "Edit" }))).toBe(canEdit);
+    expect(Boolean(screen.queryByRole("button", { name: "Delete" }))).toBe(canDelete);
     expect(screen.queryByText("noteFeedback.proposeCorrection")).toBeNull();
     expect(screen.queryByText("noteFeedback.noXp")).toBeNull();
   });
